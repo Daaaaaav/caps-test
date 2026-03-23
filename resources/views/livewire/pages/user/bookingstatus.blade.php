@@ -1,4 +1,3 @@
-{{-- A simple comment like an actual programmer's simple documentation --}}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     {{-- Header --}}
     <div class="bg-white rounded-xl shadow-sm border-2 border-black p-4 md:p-6 mb-4 md:mb-6">

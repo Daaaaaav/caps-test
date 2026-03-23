@@ -1,22 +1,22 @@
 <div class="min-h-screen bg-gray-50">
-    <main class="px-4 sm:px-6 py-6 space-y-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {{-- HEADER --}}
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-2xl text-gray-500 font-semibold">Delivery Statistics</h1>
+                <h1 class="text-2xl font-semibold text-gray-900">Delivery Statistics</h1>
                 <p class="text-sm text-gray-500">Track package delivery trends</p>
             </div>
             <div class="flex gap-2">
                 <button wire:click="setTimeRange('7days')" 
-                    class="px-4 py-2 rounded-lg text-sm transition {{ $timeRange === '7days' ? 'bg-blue-600 text-gray-500' : 'bg-white text-black' }}">
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '7days' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
                     7 Days
                 </button>
                 <button wire:click="setTimeRange('30days')" 
-                    class="px-4 py-2 rounded-lg text-sm transition {{ $timeRange === '30days' ? 'bg-blue-600 text-gray-500' : 'bg-white text-black' }}">
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '30days' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
                     30 Days
                 </button>
                 <button wire:click="setTimeRange('90days')" 
-                    class="px-4 py-2 rounded-lg text-sm transition {{ $timeRange === '90days' ? 'bg-blue-600 text-gray-500' : 'bg-white text-black' }}">
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '90days' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
                     90 Days
                 </button>
             </div>
@@ -27,25 +27,25 @@
             @foreach($stats as $stat)
                 @php
                     $colors = [
-                        'blue' => 'bg-blue-50 text-blue-600',
-                        'yellow' => 'bg-yellow-50 text-yellow-600',
-                        'green' => 'bg-green-50 text-green-600',
-                        'purple' => 'bg-purple-50 text-purple-600',
+                        'blue' => 'text-blue-600',
+                        'yellow' => 'text-yellow-600',
+                        'green' => 'text-green-600',
+                        'purple' => 'text-purple-600',
                     ];
                 @endphp
-                <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
-                    <p class="text-sm text-gray-500">{{ $stat['label'] }}</p>
-                    <h2 class="text-3xl text-gray-500 font-bold mt-2 {{ $colors[$stat['color']] }}">{{ $stat['value'] }}</h2>
+                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
+                    <p class="text-sm font-medium text-gray-500">{{ $stat['label'] }}</p>
+                    <h2 class="text-3xl font-bold mt-2 {{ $colors[$stat['color']] }}">{{ $stat['value'] }}</h2>
                 </div>
             @endforeach
         </section>
 
         {{-- CHART --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Daily Delivery Trend</h3>
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Daily Delivery Trend</h3>
                 <button wire:click="toggleList" 
-                    class="px-4 py-2 bg-blue-100 text-gray-700 rounded-lg hover:bg-blue-200 text-sm">
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition">
                     {{ $showList ? 'Hide List' : 'Show List' }}
                 </button>
             </div>
@@ -54,30 +54,30 @@
 
         {{-- DELIVERY LIST --}}
         @if($showList)
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b bg-gray-50">
-                    <h3 class="font-semibold">Recent Deliveries</h3>
+                    <h3 class="font-semibold text-gray-900">Recent Deliveries</h3>
                 </div>
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs border-b">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left font-medium">ID</th>
+                            <th class="px-6 py-3 text-left font-medium">Recipient</th>
+                            <th class="px-6 py-3 text-left font-medium">Status</th>
+                            <th class="px-6 py-3 text-left font-medium">Date</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
+                    <tbody class="divide-y divide-gray-200">
                         @forelse($deliveries as $delivery)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-500">#{{ $delivery->delivery_id }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $delivery->recipient_name ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 text-gray-900">#{{ $delivery->delivery_id }}</td>
+                                <td class="px-6 py-4 text-gray-900 font-medium">{{ $delivery->recipient_name ?? 'N/A' }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="px-3 py-1 rounded-full text-xs text-gray-500 font-medium {{ $delivery->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $delivery->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
                                         {{ ucfirst($delivery->status ?? 'pending') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>
+                                <td class="px-6 py-4 text-gray-600">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>
                             </tr>
                         @empty
                             <tr>

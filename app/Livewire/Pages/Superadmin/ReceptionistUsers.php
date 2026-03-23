@@ -98,7 +98,7 @@ class ReceptionistUsers extends Component
             $user = User::where('user_id', $this->userId)->firstOrFail();
 
             // ✅ Explicit assignment (more reliable than update array)
-            $user->name = $this->name;
+            $user->full_name = $this->name;
             $user->email = $this->email;
             $user->status = $this->status;
 
@@ -114,7 +114,7 @@ class ReceptionistUsers extends Component
             $role = Role::where('name', 'Receptionist')->first();
 
             User::create([
-                'name' => $this->name,
+                'full_name' => $this->name,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'status' => $this->status,
@@ -151,13 +151,13 @@ class ReceptionistUsers extends Component
 
         $query = User::query()
             ->where('company_id', $companyId)
-            ->whereHas('role', fn($q) => $q->where('name', 'Receptionist'));
+            ->whereHas('role', fn($q) => $q->where('roles.name', 'Receptionist'));
 
         // SEARCH
         if (!empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%');
+                $q->where('users.full_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('users.email', 'like', '%' . $this->search . '%');
             });
         }
 
