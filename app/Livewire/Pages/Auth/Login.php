@@ -135,7 +135,7 @@ class Login extends Component
         }
 
         throw ValidationException::withMessages([
-            'otpCode' => 'Authentication failed. Please try again.',
+            'otpCode' => 'OTP authentication failed. Please try again.',
         ]);
     }
 
