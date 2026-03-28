@@ -44,6 +44,11 @@
                 :current="request()->routeIs('superadmin.delivery')">
                 Deliveries
             </flux:sidebar.item>
+
+            <flux:sidebar.item icon="book-open" href="{{ route('superadmin.guestbook') }}"
+                :current="request()->routeIs('superadmin.guestbook')">
+                Guestbook
+            </flux:sidebar.item>
         </flux:sidebar.group>
 
         {{-- ===== AI SYSTEM ===== --}}

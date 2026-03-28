@@ -14,6 +14,7 @@ use App\Livewire\Pages\Superadmin\ReceptionistUsers as ReceptionistUsers;
 use App\Livewire\Pages\Superadmin\RoomBookingStatistics as RoomBookingStatistics;
 use App\Livewire\Pages\Superadmin\VehicleBookingStatistics as VehicleBookingStatistics;
 use App\Livewire\Pages\Superadmin\DeliveryStatistics as DeliveryStatistics;
+use App\Livewire\Pages\Superadmin\GuestbookStatistics as GuestbookStatistics;
 use App\Livewire\Pages\Superadmin\AISecurityReports as AISecurityReports;
 use App\Livewire\Pages\Superadmin\Announcement;
 use App\Livewire\Pages\Superadmin\Information;
@@ -167,6 +168,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/room-bookings', RoomBookingStatistics::class)->name('superadmin.room');
         Route::get('/vehicle-bookings', VehicleBookingStatistics::class)->name('superadmin.vehicle');
         Route::get('/deliveries', DeliveryStatistics::class)->name('superadmin.delivery');
+        Route::get('/guestbook', GuestbookStatistics::class)->name('superadmin.guestbook');
         Route::get('/ai-security', AISecurityReports::class)->name('superadmin.ai-security');
     });
 
