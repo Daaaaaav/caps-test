@@ -108,13 +108,6 @@
         <flux:menu>
             <flux:menu.radio.group>
                 <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
-                <flux:sidebar.item
-                    icon="user"
-                    href="{{ route('user.home') }}"
-                    class="cursor-pointer"
-                >
-                    User Page
-                </flux:sidebar.item>
             </flux:menu.radio.group>
 
             <flux:menu.separator />

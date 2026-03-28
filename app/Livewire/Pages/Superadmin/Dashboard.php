@@ -62,12 +62,12 @@ class Dashboard extends Component
             ],
         ];
 
-        // ===== CHART DATA (dummy monthly aggregation for now) =====
+        // ===== CHART DATA =====
         $labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        $room = array_fill(0, 12, 0);
-        $vehicle = array_fill(0, 12, 0);
-
-        // 👉 Replace with real monthly queries later if needed
+        
+        // TO DO: Change dummy retrieval data after done with AI
+        $room = [8, 12, 10, 15, 9, 14, 11, 13, 16, 12, 10, 14];
+        $vehicle = [5, 8, 6, 10, 7, 9, 8, 11, 9, 7, 6, 10];
 
         // ===== FILTER LOGIC =====
         if ($this->activeFilter === 'room') {

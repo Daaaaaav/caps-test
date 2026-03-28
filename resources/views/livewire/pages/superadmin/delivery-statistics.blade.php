@@ -49,7 +49,9 @@
                     {{ $showList ? 'Hide List' : 'Show List' }}
                 </button>
             </div>
-            <canvas id="deliveryChart"></canvas>
+            <div style="position: relative; height: 400px;">
+                <canvas id="deliveryChart"></canvas>
+            </div>
         </div>
 
         {{-- DELIVERY LIST --}}
@@ -89,42 +91,61 @@
             </div>
         @endif
     </main>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @script
-    <script>
-        function buildDeliveryChart() {
-            const ctx = document.getElementById('deliveryChart')?.getContext('2d');
-            if (!ctx) return;
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    function buildDeliveryChart() {
+        const ctx = document.getElementById('deliveryChart');
+        if (!ctx) return;
 
-            const labels = @json($labels);
-            const data = @json($data);
+        const labels = @json($labels);
+        const data = @json($data);
 
-            if (window.deliveryChart) window.deliveryChart.destroy();
-
-            window.deliveryChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Deliveries',
-                        data: data,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: { duration: 600 },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
+        if (window.deliveryChart && typeof window.deliveryChart.destroy === 'function') {
+            window.deliveryChart.destroy();
         }
 
-        document.addEventListener('DOMContentLoaded', buildDeliveryChart);
-        document.addEventListener('livewire:updated', buildDeliveryChart);
-    </script>
-    @endscript
-</div>
+        window.deliveryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Deliveries',
+                    data: data,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600 },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(buildDeliveryChart, 100);
+    });
+    
+    document.addEventListener('livewire:navigated', function() {
+        setTimeout(buildDeliveryChart, 100);
+    });
+
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+            succeed(({ snapshot, effect }) => {
+                setTimeout(buildDeliveryChart, 100);
+            });
+        });
+    }
+</script>

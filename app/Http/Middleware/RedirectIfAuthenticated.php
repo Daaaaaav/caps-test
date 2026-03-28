@@ -19,9 +19,7 @@ class RedirectIfAuthenticated
 
                 $routeName = match ($role) {
                     'Superadmin'   => 'superadmin.dashboard',
-                    'Admin'        => 'admin.dashboard',
-                    'Receptionist' => 'receptionist.dashboard',
-                    default        => 'user.home',
+                    'Receptionist' => 'receptionist.dashboard'
                 };
 
                 // Abaikan intended, biar bener-bener ke role page

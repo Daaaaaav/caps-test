@@ -36,6 +36,14 @@ class VehicleBookingStatistics extends Component
         $approvedBookings = VehicleBooking::where('company_id', $companyId)->where('status', 'approved')->count();
         $completedBookings = VehicleBooking::where('company_id', $companyId)->where('status', 'completed')->count();
 
+        // Use dummy data if no real data
+        if ($totalBookings == 0) {
+            $totalBookings = 38;
+            $pendingBookings = 6;
+            $approvedBookings = 25;
+            $completedBookings = 7;
+        }
+
         // Monthly chart data
         $monthlyStats = VehicleBooking::where('company_id', $companyId)
             ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
@@ -44,8 +52,14 @@ class VehicleBookingStatistics extends Component
             ->orderBy('month')
             ->get();
 
-        $labels = $monthlyStats->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
-        $data = $monthlyStats->pluck('count')->toArray();
+        if ($monthlyStats->isEmpty()) {
+            // TO DO: Change dummy retrieval data after done with AI
+            $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            $data = [2, 4, 3, 5, 2, 6, 4, 5, 7, 4, 3, 5];
+        } else {
+            $labels = $monthlyStats->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+            $data = $monthlyStats->pluck('count')->toArray();
+        }
 
         $kpis = [
             ['label' => 'Total Bookings', 'value' => $totalBookings, 'color' => 'blue', 'icon' => 'truck'],

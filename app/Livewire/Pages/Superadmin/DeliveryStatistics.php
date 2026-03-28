@@ -53,6 +53,18 @@ class DeliveryStatistics extends Component
             ->where('status', 'completed')
             ->count();
 
+        // TO DO: Change dummy retrieval data after done with AI
+        if ($totalDeliveries == 0) {
+            $totalDeliveries = match($this->timeRange) {
+                '7days' => 28,
+                '30days' => 120,
+                '90days' => 360,
+                default => 28,
+            };
+            $pendingDeliveries = round($totalDeliveries * 0.2);
+            $completedDeliveries = $totalDeliveries - $pendingDeliveries;
+        }
+
         // Get delivery items list
         $deliveries = Delivery::where('company_id', $companyId)
             ->where('created_at', '>=', now()->subDays($days))
@@ -67,8 +79,29 @@ class DeliveryStatistics extends Component
             ->orderBy('date')
             ->get();
 
-        $labels = $dailyStats->pluck('date')->map(fn($d) => date('M d', strtotime($d)))->toArray();
-        $data = $dailyStats->pluck('count')->toArray();
+        if ($dailyStats->isEmpty()) {
+            // Generate dummy data based on time range
+            $labels = [];
+            $data = [];
+            
+            if ($this->timeRange === '7days') {
+                $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                $data = [3, 5, 4, 6, 3, 4, 3];
+            } elseif ($this->timeRange === '30days') {
+                for ($i = 29; $i >= 0; $i--) {
+                    $labels[] = now()->subDays($i)->format('M d');
+                    $data[] = rand(2, 6);
+                }
+            } else {
+                for ($i = 89; $i >= 0; $i -= 3) {
+                    $labels[] = now()->subDays($i)->format('M d');
+                    $data[] = rand(8, 15);
+                }
+            }
+        } else {
+            $labels = $dailyStats->pluck('date')->map(fn($d) => date('M d', strtotime($d)))->toArray();
+            $data = $dailyStats->pluck('count')->toArray();
+        }
 
         $stats = [
             ['label' => 'Total Deliveries', 'value' => $totalDeliveries, 'color' => 'blue'],

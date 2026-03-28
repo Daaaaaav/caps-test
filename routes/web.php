@@ -8,29 +8,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\VehicleAttachmentController;
 
-// ========== Livewire Pages (User) ==========
-use App\Livewire\Pages\User\Home as UserHome;
-use App\Livewire\Pages\User\CreateTicket;
-use App\Livewire\Pages\User\Bookroom;
-use App\Livewire\Pages\User\Profile;
-use App\Livewire\Pages\User\Package as UserPackage;
-use App\Livewire\Pages\User\Ticketstatus;
-use App\Livewire\Pages\User\BookingStatus;
-use App\Livewire\Pages\User\Bookvehicle;
-use App\Livewire\Pages\User\Meetonline;
-use App\Livewire\Pages\User\Ticketqueue as Ticketqueue;
-use App\Livewire\Pages\User\Vehiclestatus as Vehiclestatus;
-use App\Livewire\Pages\User\Ticketshow as UserTicketshow;
-
-// ========== Livewire Pages (Admin) ==========
-use App\Livewire\Pages\Admin\Dashboard as AdminDashboard;
-use App\Livewire\Pages\Admin\Ticket as AdminTicket;
-use App\Livewire\Pages\Admin\Ticketshow as AdminTicketshow;
-use App\Livewire\Pages\Admin\RoomMonitoring as RoomMonitoringPage;
-use App\Livewire\Pages\Admin\Information as InformationPage;
-use App\Livewire\Pages\Admin\Agentreport as AgentreportPage;
-use App\Livewire\Pages\Admin\WifiManagement;
-
 // ========== Livewire Pages (Superadmin) ==========
 use App\Livewire\Pages\Superadmin\Dashboard as SuperadminDashboard;
 use App\Livewire\Pages\Superadmin\ReceptionistUsers as ReceptionistUsers;
@@ -106,9 +83,7 @@ Route::get('/home', function () {
 
     return match ($roleName) {
         'Superadmin'    => redirect()->route('superadmin.dashboard'),
-        'Admin'         => redirect()->route('admin.dashboard'),
         'Receptionist'  => redirect()->route('receptionist.dashboard'),
-        default         => redirect()->route('user.home'),
     };
 })->name('home');
 
@@ -182,37 +157,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/finalize', [AttachmentController::class, 'finalizeTemp'])
             ->name('attachments.finalize');
     });
-
-
-    // ---------- Agent Routes ----------
-    Route::middleware(['auth', 'is_agent'])->group(function () {
-    Route::get('/ticket-queue', Ticketqueue::class)->name('user.ticket.queue');
-});
-
-    // ---------- User routes ----------
-    Route::get('/dashboard', UserHome::class)->name('user.home');
-    Route::get('/create-ticket', CreateTicket::class)->name('create-ticket');
-    Route::get('/book-room', Bookroom::class)->name('book-room');
-    Route::get('/bookingstatus', BookingStatus::class)->name('bookingstatus');
-    Route::get('/book-online', Meetonline::class)->name('user.meetonline');
-    Route::get('/book-vehicle', Bookvehicle::class)->name('book-vehicle');
-    Route::get('/profile', Profile::class)->name('profile');
-    Route::get('/package', UserPackage::class)->name('package');
-    Route::get('/ticketstatus', Ticketstatus::class)->name('ticketstatus');
-    Route::get('/vehiclestatus', Vehiclestatus::class)->name('vehiclestatus');
-    Route::get('/tickets/{ticket:ulid}', UserTicketshow::class)->name('user.ticket.show');
     
-
-    // ---------- Admin routes ----------
-    Route::middleware('is.admin')->group(function () {
-        Route::get('/admin-dashboard', AdminDashboard::class)->name('admin.dashboard');
-        Route::get('/admin-ticket', AdminTicket::class)->name('admin.ticket');
-        Route::get('/admin-roommonitoring', RoomMonitoringPage::class)->name('admin.room.monitoring');
-        Route::get('/admin/tickets/{ticket:ulid}', AdminTicketshow::class)->name('admin.ticket.show'); // <— Pindah prefix admin
-        Route::get('/admin-usermanagement', \App\Livewire\Pages\Admin\Usermanagement::class)->name('admin.usermanagement');
-        Route::get('/admin/information', InformationPage::class)->name('admin.information');
-        Route::get('/admin/agentreport', AgentreportPage::class)->name('admin.agentreport');
-        Route::get('/admin/wifimanagement', WifiManagement::class)->name('admin.wifimanagement');
     });
 
     // ---------- Superadmin routes ----------
@@ -223,25 +168,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/vehicle-bookings', VehicleBookingStatistics::class)->name('superadmin.vehicle');
         Route::get('/deliveries', DeliveryStatistics::class)->name('superadmin.delivery');
         Route::get('/ai-security', AISecurityReports::class)->name('superadmin.ai-security');
-        
-        // TODO: Create these components and uncomment the routes:
-        // Route::get('/superadmin-user', UserManagement::class)->name('superadmin.user');
-        // Route::get('/superadmin-department', DepartmentPage::class)->name('superadmin.department');
-        // Route::get('/superadmin-adminmanagement', AdminmanagementPage::class)->name('superadmin.adminmanagement');
-        // Route::get('/superadmin-announcement', Announcement::class)->name('superadmin.announcement');
-        // Route::get('/superadmin-information', Information::class)->name('superadmin.information');
-        // Route::get('/superadmin-bookingroom', SuperadminBookingroom::class)->name('superadmin.bookingroom');
-        // Route::get('/superadmin-ticketsupport', SuperadminTicketsupport::class)->name('superadmin.ticketsupport');
-        // Route::get('/superadmin-manageroom', Manageroom::class)->name('superadmin.manageroom');
-        // Route::get('/superadmin-managerequirements', Managerequirements::class)->name('superadmin.managerequirements');
-        // Route::get('/superadmin-storage', StoragePage::class)->name('superadmin.storage');
-        // Route::get('/superadmin-vehicle', VehiclePage::class)->name('superadmin.vehicle');
-        // Route::get('/superadmin/reports', Report::class)->name('superadmin.reports');
-        // Route::get('/superadmin-bookingvehicle', SuperadminBookingvehicle::class)->name('superadmin.bookingvehicle');
-        // Route::get('/superadmin-packagemanagement', Packagemanagement::class)->name('superadmin.packagemanagement');
-        // Route::get('/superadmin-documentsmanagement', Documentsmanagement::class)->name('superadmin.documentsmanagement');
-        // Route::get('/superadmin-guestbookmanagement', Guestbookmanagement::class)->name('superadmin.guestbookmanagement');
-        // Route::get('/superadmin-wifimanagement', SuperadminWifiManagement::class)->name('superadmin.wifimanagement');
     });
 
     // ---------- Receptionist routes ----------
@@ -272,7 +198,6 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->regenerateToken();
         return redirect()->route('login');
     })->name('logout');
-});
 
 /*
 |--------------------------------------------------------------------------

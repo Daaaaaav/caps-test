@@ -45,7 +45,9 @@
                     </button>
                 </div>
             </div>
-            <canvas id="roomChart"></canvas>
+            <div style="position: relative; height: 400px;">
+                <canvas id="roomChart"></canvas>
+            </div>
         </div>
 
         {{-- BOOKING LIST --}}
@@ -102,44 +104,63 @@
             </div>
         @endif
     </main>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @script
-    <script>
-        function buildRoomChart() {
-            const ctx = document.getElementById('roomChart')?.getContext('2d');
-            if (!ctx) return;
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    function buildRoomChart() {
+        const ctx = document.getElementById('roomChart');
+        if (!ctx) return;
 
-            const labels = @json($labels);
-            const data = @json($data);
+        const labels = @json($labels);
+        const data = @json($data);
 
-            if (window.roomChart) window.roomChart.destroy();
-
-            window.roomChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Room Bookings',
-                        data: data,
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: { duration: 600 },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
+        if (window.roomChart && typeof window.roomChart.destroy === 'function') {
+            window.roomChart.destroy();
         }
 
-        document.addEventListener('DOMContentLoaded', buildRoomChart);
-        document.addEventListener('livewire:updated', buildRoomChart);
-    </script>
-    @endscript
-</div>
+        window.roomChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Room Bookings',
+                    data: data,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600 },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(buildRoomChart, 100);
+    });
+    
+    document.addEventListener('livewire:navigated', function() {
+        setTimeout(buildRoomChart, 100);
+    });
+
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+            succeed(({ snapshot, effect }) => {
+                setTimeout(buildRoomChart, 100);
+            });
+        });
+    }
+</script>

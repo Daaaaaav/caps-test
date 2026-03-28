@@ -36,6 +36,14 @@ class RoomBookingStatistics extends Component
         $approvedBookings = BookingRoom::where('company_id', $companyId)->where('status', 'approved')->count();
         $rejectedBookings = BookingRoom::where('company_id', $companyId)->where('status', 'rejected')->count();
 
+        // Use dummy data if no real data
+        if ($totalBookings == 0) {
+            $totalBookings = 45;
+            $pendingBookings = 8;
+            $approvedBookings = 32;
+            $rejectedBookings = 5;
+        }
+
         // Chart data based on view type
         if ($this->viewType === 'monthly') {
             $stats = BookingRoom::where('company_id', $companyId)
@@ -45,7 +53,14 @@ class RoomBookingStatistics extends Component
                 ->orderBy('period')
                 ->get();
 
-            $labels = $stats->pluck('period')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+            if ($stats->isEmpty()) {
+                // Dummy monthly data
+                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                $data = [3, 5, 4, 6, 3, 7, 5, 6, 8, 5, 4, 6];
+            } else {
+                $labels = $stats->pluck('period')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+                $data = $stats->pluck('count')->toArray();
+            }
         } else {
             $stats = BookingRoom::where('company_id', $companyId)
                 ->selectRaw('DATE(created_at) as period, COUNT(*) as count')
@@ -54,10 +69,15 @@ class RoomBookingStatistics extends Component
                 ->orderBy('period')
                 ->get();
 
-            $labels = $stats->pluck('period')->map(fn($d) => date('M d', strtotime($d)))->toArray();
+            if ($stats->isEmpty()) {
+                // TO DO: Change dummy retrieval data after done with AI
+                $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                $data = [2, 3, 1, 4, 2, 3, 2];
+            } else {
+                $labels = $stats->pluck('period')->map(fn($d) => date('M d', strtotime($d)))->toArray();
+                $data = $stats->pluck('count')->toArray();
+            }
         }
-
-        $data = $stats->pluck('count')->toArray();
 
         $kpis = [
             ['label' => 'Total Bookings', 'value' => $totalBookings, 'color' => 'blue'],

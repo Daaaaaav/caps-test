@@ -48,24 +48,6 @@
                     </a>
                 </div>
 
-                {{-- Desktop Navigation --}}
-                <div class="hidden md:flex items-center gap-1">
-                    <a href="{{ route('user.home') }}" class="px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('home') ? 'bg-gray-800 text-white' : '' }}">Home</a>
-                    <a href="{{ route('create-ticket') }}" class="px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('create-ticket') ? 'bg-gray-800 text-white' : '' }}">Create Ticket</a>
-                    <a href="{{ route('book-room') }}" class="px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('book-room') ? 'bg-gray-800 text-white' : '' }}">Book Room</a>
-                    <a href="{{ route('book-vehicle') }}" class="px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('book-vehicle') ? 'bg-gray-800 text-white' : '' }}">Book Vehicle</a>
-
-                    @if(auth()->user() && auth()->user()->is_agent == 'yes')
-                    <a href="{{ route('user.ticket.queue') }}" class="px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('user.ticket.queue') ? 'bg-gray-800 text-white' : '' }} flex items-center gap-1">
-                        <x-heroicon-o-queue-list class="w-4 h-4" /> 
-                        Queue
-                        {{-- COUNT FOR UNCLAIMED TICKETS --}}
-                        @if ($unclaimedTicketCount > 0)
-                            <span class="ml-1 px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full leading-none">{{ $unclaimedTicketCount }}</span>
-                        @endif
-                    </a>
-                    @endif
-
                     {{-- Status Dropdown (with Unread Comment Count) --}}
                     @if(Auth::check())
                     
@@ -131,14 +113,7 @@
                             </a>
                             @endif
 
-                            {{-- 2. Admin Dashboard (Admin OR Superadmin) --}}
-                            @if(in_array($role, ['Superadmin', 'Admin']))
-                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors">
-                                <x-heroicon-o-computer-desktop class="w-5 h-5" /> Admin DB
-                            </a>
-                            @endif
-
-                            {{-- 3. Receptionist Dashboard (Receptionist OR Superadmin) --}}
+                            {{-- 2. Receptionist Dashboard (Receptionist) --}}
                             @if(in_array($role, ['Superadmin', 'Receptionist']))
                             <a href="{{ route('receptionist.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors">
                                 <x-heroicon-o-clipboard-document-list class="w-5 h-5" /> Receptionist DB
@@ -194,21 +169,9 @@
                 @endauth
 
                 {{-- Mobile Nav Links --}}
-                <a href="{{ route('user.home') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('home') ? 'bg-gray-800 text-white' : '' }}"><x-heroicon-o-home class="w-5 h-5" /> Home</a>
                 <a href="{{ route('create-ticket') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('create-ticket') ? 'bg-gray-800 text-white' : '' }}"><x-heroicon-o-ticket class="w-5 h-5" /> Create Ticket</a>
                 <a href="{{ route('book-room') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('book-room') ? 'bg-gray-800 text-white' : '' }}"><x-heroicon-o-building-office class="w-5 h-5" /> Book Room</a>
                 <a href="{{ route('book-vehicle') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('book-vehicle') ? 'bg-gray-800 text-white' : '' }}"><x-heroicon-o-truck class="w-5 h-5" /> Book Vehicle</a>
-
-                @if(auth()->user() && auth()->user()->is_agent == 'yes')
-                <a href="{{ route('user.ticket.queue') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/50 {{ request()->routeIs('user.ticket.queue') ? 'bg-gray-800 text-white' : '' }}">
-                    <x-heroicon-o-queue-list class="w-5 h-5" /> 
-                    Ticket Queue
-                    {{-- COUNT FOR UNCLAIMED TICKETS (Mobile) --}}
-                    @if ($unclaimedTicketCount > 0)
-                        <span class="ml-auto px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full leading-none ">{{ $unclaimedTicketCount }}</span>
-                    @endif
-                </a>
-                @endif
 
                 {{-- Mobile Status Dropdown (with Unread Count) --}}
                 @if(Auth::check())

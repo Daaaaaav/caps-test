@@ -45,7 +45,9 @@
                     </button>
                 </div>
             </div>
-            <canvas id="vehicleChart"></canvas>
+            <div style="position: relative; height: 400px;">
+                <canvas id="vehicleChart"></canvas>
+            </div>
         </div>
 
         {{-- BOOKING LIST --}}
@@ -102,46 +104,65 @@
             </div>
         @endif
     </main>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @script
-    <script>
-        function buildVehicleChart() {
-            const ctx = document.getElementById('vehicleChart')?.getContext('2d');
-            if (!ctx) return;
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    function buildVehicleChart() {
+        const ctx = document.getElementById('vehicleChart');
+        if (!ctx) return;
 
-            const labels = @json($labels);
-            const data = @json($data);
-            const chartType = @json($chartType);
+        const labels = @json($labels);
+        const data = @json($data);
+        const chartType = @json($chartType);
 
-            if (window.vehicleChart) window.vehicleChart.destroy();
-
-            window.vehicleChart = new Chart(ctx, {
-                type: chartType,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Vehicle Bookings',
-                        data: data,
-                        borderColor: '#059669',
-                        backgroundColor: chartType === 'bar' ? '#059669' : 'rgba(5, 150, 105, 0.1)',
-                        fill: chartType === 'line',
-                        tension: 0.4,
-                        borderRadius: chartType === 'bar' ? 8 : 0,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: { duration: 600 },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
+        if (window.vehicleChart && typeof window.vehicleChart.destroy === 'function') {
+            window.vehicleChart.destroy();
         }
 
-        document.addEventListener('DOMContentLoaded', buildVehicleChart);
-        document.addEventListener('livewire:updated', buildVehicleChart);
-    </script>
-    @endscript
-</div>
+        window.vehicleChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Vehicle Bookings',
+                    data: data,
+                    borderColor: '#059669',
+                    backgroundColor: chartType === 'bar' ? '#059669' : 'rgba(5, 150, 105, 0.1)',
+                    fill: chartType === 'line',
+                    tension: 0.4,
+                    borderRadius: chartType === 'bar' ? 8 : 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600 },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(buildVehicleChart, 100);
+    });
+    
+    document.addEventListener('livewire:navigated', function() {
+        setTimeout(buildVehicleChart, 100);
+    });
+
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+            succeed(({ snapshot, effect }) => {
+                setTimeout(buildVehicleChart, 100);
+            });
+        });
+    }
+</script>

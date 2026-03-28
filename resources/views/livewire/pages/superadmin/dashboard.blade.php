@@ -39,32 +39,80 @@
         {{-- CHART --}}
         <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Booking Trends</h3>
-            <canvas id="chart"></canvas>
+            <div style="position: relative; height: 400px;">
+                <canvas id="chart"></canvas>
+            </div>
         </div>
     </main>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @script
-    <script>
-        function buildChart() {
-            const ctx = document.getElementById('chart').getContext('2d');
-            const labels = @json($labels);
-            const datasets = @json($datasets);
-
-            if (window.chart) window.chart.destroy();
-
-            window.chart = new Chart(ctx, {
-                type: 'line',
-                data: { labels, datasets },
-                options: {
-                    responsive: true,
-                    animation: { duration: 500 }
-                }
-            });
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    function buildChart() {
+        const ctx = document.getElementById('chart');
+        if (!ctx) {
+            console.error('Chart canvas not found');
+            return;
         }
 
-        document.addEventListener('DOMContentLoaded', buildChart);
-        document.addEventListener('livewire:updated', buildChart);
-    </script>
-    @endscript
-</div>
+        const labels = @json($labels);
+        const datasets = @json($datasets);
+
+        console.log('Building chart with labels:', labels);
+        console.log('Building chart with datasets:', datasets);
+
+        if (window.chart && typeof window.chart.destroy === 'function') {
+            window.chart.destroy();
+        }
+
+        window.chart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                labels: labels, 
+                datasets: datasets 
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { 
+                    duration: 500 
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log('Chart built successfully');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, building chart');
+        setTimeout(buildChart, 100);
+    });
+    
+    document.addEventListener('livewire:navigated', function() {
+        console.log('Livewire navigated, rebuilding chart');
+        setTimeout(buildChart, 100);
+    });
+
+    // Also rebuild on Livewire updates
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+            succeed(({ snapshot, effect }) => {
+                setTimeout(buildChart, 100);
+            });
+        });
+    }
+</script>
