@@ -40,14 +40,17 @@
                     </div>
 
                     <div class="hidden md:inline-flex rounded-lg overflow-hidden bg-white/10 border border-white/20 backdrop-blur-sm">
-                        <a href="{{ route('bookingstatus') }}"
+                        <a href="{{ route('receptionist.roomapproval') }}"
                            class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-white/80 hover:text-white border-r border-white/20 inline-flex items-center gap-2">
                             <x-heroicon-o-calendar-days class="w-4 h-4"/>
                             Room Booking
                         </a>
-                        <a href="{{ route('receptionist.vehiclestatus') ?? '#' }}"
+                        <a href="{{ route('receptionist.vehiclestatus') }}"
                            class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium bg-white text-gray-900 inline-flex items-center gap-2">
                             <x-heroicon-o-truck class="w-4 h-4"/>
+                            Vehicle Status
+                        </a>
+                    </div>
                             Vehicle Status
                         </a>
                     </div>
