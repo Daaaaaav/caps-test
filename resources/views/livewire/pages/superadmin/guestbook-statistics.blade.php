@@ -49,7 +49,7 @@
                     {{ $showList ? 'Hide List' : 'Show List' }}
                 </button>
             </div>
-            <div style="position: relative; height: 400px;">
+            <div wire:ignore style="position: relative; height: 400px;">
                 <canvas id="guestbookChart"></canvas>
             </div>
         </div>

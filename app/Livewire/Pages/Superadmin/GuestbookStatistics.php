@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Guestbook;
 
 #[Layout('layouts.superadmin')]
@@ -71,11 +72,58 @@ class GuestbookStatistics extends Component
             ->orderBy('created_at', 'desc')
             ->get();
 
+      // TO DO: Change dummy retrieval data after done with AI
+        if ($guestbooks->isEmpty()) {
+            $dummyData = collect([
+                (object)[
+                    'guestbook_id' => 1,
+                    'name' => 'John Doe',
+                    'instansi' => 'ABC Corporation',
+                    'keperluan' => 'Business meeting with management team',
+                    'jam_in' => '09:00',
+                    'jam_out' => '11:30',
+                ],
+                (object)[
+                    'guestbook_id' => 2,
+                    'name' => 'Jane Smith',
+                    'instansi' => 'XYZ Industries',
+                    'keperluan' => 'Product demonstration and consultation',
+                    'jam_in' => '10:15',
+                    'jam_out' => null,
+                ],
+                (object)[
+                    'guestbook_id' => 3,
+                    'name' => 'Michael Johnson',
+                    'instansi' => 'Tech Solutions Ltd',
+                    'keperluan' => 'Technical support and system maintenance',
+                    'jam_in' => '13:00',
+                    'jam_out' => '15:45',
+                ],
+                (object)[
+                    'guestbook_id' => 4,
+                    'name' => 'Sarah Williams',
+                    'instansi' => 'Global Partners Inc',
+                    'keperluan' => 'Contract negotiation meeting',
+                    'jam_in' => '14:30',
+                    'jam_out' => null,
+                ],
+                (object)[
+                    'guestbook_id' => 5,
+                    'name' => 'David Brown',
+                    'instansi' => 'Innovation Hub',
+                    'keperluan' => 'Project collaboration discussion',
+                    'jam_in' => null,
+                    'jam_out' => null,
+                ],
+            ]);
+            $guestbooks = $dummyData;
+        }
+
         // Chart data - daily visitors
         $dailyStats = Guestbook::where('company_id', $companyId)
             ->where('created_at', '>=', now()->subDays($days))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->groupBy('date')
+            ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date')
             ->get();
 
