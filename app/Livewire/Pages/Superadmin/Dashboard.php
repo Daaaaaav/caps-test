@@ -24,88 +24,110 @@ class Dashboard extends Component
 
     public function render()
     {
-        $companyId = Auth::user()->company_id;
+        try {
+            $companyId = Auth::user()->company_id;
 
-        // ===== KPI STATS =====
-        $stats = [
-            [
-                'key' => 'all',
-                'label' => 'All Activity',
-                'value' => 
-                    BookingRoom::where('company_id', $companyId)->count() +
-                    VehicleBooking::where('company_id', $companyId)->count(),
-                'trend' => 12,
-                'direction' => 'up'
-            ],
-            [
-                'key' => 'room',
-                'label' => 'Room Bookings',
-                'value' => BookingRoom::where('company_id', $companyId)->count(),
-                'trend' => 5,
-                'direction' => 'up'
-            ],
-            [
-                'key' => 'vehicle',
-                'label' => 'Vehicle Bookings',
-                'value' => VehicleBooking::where('company_id', $companyId)->count(),
-                'trend' => -3,
-                'direction' => 'down'
-            ],
-            [
-                'key' => 'users',
-                'label' => 'Receptionists',
-                'value' => User::where('company_id', $companyId)
-                    ->whereHas('role', fn($q) => $q->where('name', 'Receptionist'))
-                    ->count(),
-                'trend' => 2,
-                'direction' => 'up'
-            ],
-        ];
-
-        // ===== CHART DATA =====
-        $labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        
-        // TO DO: Change dummy retrieval data after done with AI
-        $room = [8, 12, 10, 15, 9, 14, 11, 13, 16, 12, 10, 14];
-        $vehicle = [5, 8, 6, 10, 7, 9, 8, 11, 9, 7, 6, 10];
-
-        // ===== FILTER LOGIC =====
-        if ($this->activeFilter === 'room') {
-            $datasets = [
+            // ===== KPI STATS =====
+            $stats = [
                 [
-                    'label' => 'Room Bookings',
-                    'data' => $room,
-                    'borderColor' => '#2563eb',
-                ]
-            ];
-        } elseif ($this->activeFilter === 'vehicle') {
-            $datasets = [
-                [
-                    'label' => 'Vehicle Bookings',
-                    'data' => $vehicle,
-                    'borderColor' => '#059669',
-                ]
-            ];
-        } else {
-            $datasets = [
-                [
-                    'label' => 'Room Bookings',
-                    'data' => $room,
-                    'borderColor' => '#2563eb',
+                    'key' => 'all',
+                    'label' => 'All Activity',
+                    'value' => 
+                        BookingRoom::where('company_id', $companyId)->count() +
+                        VehicleBooking::where('company_id', $companyId)->count(),
+                    'trend' => 12,
+                    'direction' => 'up'
                 ],
                 [
+                    'key' => 'room',
+                    'label' => 'Room Bookings',
+                    'value' => BookingRoom::where('company_id', $companyId)->count(),
+                    'trend' => 5,
+                    'direction' => 'up'
+                ],
+                [
+                    'key' => 'vehicle',
                     'label' => 'Vehicle Bookings',
-                    'data' => $vehicle,
-                    'borderColor' => '#059669',
-                ]
+                    'value' => VehicleBooking::where('company_id', $companyId)->count(),
+                    'trend' => -3,
+                    'direction' => 'down'
+                ],
+                [
+                    'key' => 'users',
+                    'label' => 'Receptionists',
+                    'value' => User::where('company_id', $companyId)
+                        ->whereHas('role', fn($q) => $q->where('name', 'Receptionist'))
+                        ->count(),
+                    'trend' => 2,
+                    'direction' => 'up'
+                ],
             ];
-        }
 
-        return view('livewire.pages.superadmin.dashboard', [
-            'stats' => $stats,
-            'labels' => $labels,
-            'datasets' => $datasets,
-            'activeFilter' => $this->activeFilter,
-        ]);
+            // ===== CHART DATA =====
+            $labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            
+            // TO DO: Change dummy retrieval data after done with AI
+            $room = [8, 12, 10, 15, 9, 14, 11, 13, 16, 12, 10, 14];
+            $vehicle = [5, 8, 6, 10, 7, 9, 8, 11, 9, 7, 6, 10];
+
+            // ===== FILTER LOGIC =====
+            if ($this->activeFilter === 'room') {
+                $datasets = [
+                    [
+                        'label' => 'Room Bookings',
+                        'data' => $room,
+                        'borderColor' => '#2563eb',
+                    ]
+                ];
+            } elseif ($this->activeFilter === 'vehicle') {
+                $datasets = [
+                    [
+                        'label' => 'Vehicle Bookings',
+                        'data' => $vehicle,
+                        'borderColor' => '#059669',
+                    ]
+                ];
+            } else {
+                $datasets = [
+                    [
+                        'label' => 'Room Bookings',
+                        'data' => $room,
+                        'borderColor' => '#2563eb',
+                    ],
+                    [
+                        'label' => 'Vehicle Bookings',
+                        'data' => $vehicle,
+                        'borderColor' => '#059669',
+                    ]
+                ];
+            }
+
+            return view('livewire.pages.superadmin.dashboard', [
+                'stats' => $stats,
+                'labels' => $labels,
+                'datasets' => $datasets,
+                'activeFilter' => $this->activeFilter,
+            ]);
+        } catch (\Exception $e) {
+            $this->dispatch('toast', 
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to retrieve dashboard data: ' . $e->getMessage(),
+                duration: 4000
+            );
+
+            // Return fallback data
+            return view('livewire.pages.superadmin.dashboard', [
+                'stats' => [
+                    ['key' => 'all', 'label' => 'All Activity', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
+                    ['key' => 'room', 'label' => 'Room Bookings', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
+                    ['key' => 'vehicle', 'label' => 'Vehicle Bookings', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
+                    ['key' => 'users', 'label' => 'Receptionists', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
+                ],
+                'labels' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                'datasets' => [],
+                'activeFilter' => $this->activeFilter,
+            ]);
+        }
     }
 }

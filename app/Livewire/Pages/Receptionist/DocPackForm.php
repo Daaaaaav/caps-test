@@ -125,15 +125,10 @@ class DocPackForm extends Component
             $ext = strtolower($this->photo->getClientOriginalExtension() ?: 'png');
             $filename = 'delivery_' . $now->format('Ymd_His') . '_' . uniqid() . '.' . $ext;
 
-            $publicDir = public_path('images/deliveries');
-
-            if (!is_dir($publicDir)) {
-                mkdir($publicDir, 0755, true);
-            }
-
-            $this->photo->move($publicDir, $filename);
-
-            $imagePath = 'images/deliveries/' . $filename;
+            // Store in public disk under images/deliveries
+            $path = $this->photo->storeAs('images/deliveries', $filename, 'public');
+            
+            $imagePath = $path;
         }
 
         Delivery::create([

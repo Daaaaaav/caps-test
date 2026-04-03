@@ -51,16 +51,25 @@ class ReceptionistUsers extends Component
 
     public function openEditModal($id)
     {
-        $user = User::where('user_id', $id)->firstOrFail();
+        try {
+            $user = User::where('user_id', $id)->firstOrFail();
 
-        $this->userId = $user->user_id;
-        $this->name = $user->fullname;
-        $this->email = $user->email;
-        $this->status = $user->status ?? 'active';
-        $this->password = '';
+            $this->userId = $user->user_id;
+            $this->name = $user->fullname;
+            $this->email = $user->email;
+            $this->status = $user->status ?? 'active';
+            $this->password = '';
 
-        $this->editMode = true;
-        $this->showModal = true;
+            $this->editMode = true;
+            $this->showModal = true;
+        } catch (\Exception $e) {
+            $this->dispatch('toast', 
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to load user data: ' . $e->getMessage(),
+                duration: 4000
+            );
+        }
     }
 
     public function closeModal()
@@ -85,47 +94,73 @@ class ReceptionistUsers extends Component
     */
     public function save()
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . ($this->userId ?? 'NULL') . ',user_id',
-            'password' => $this->editMode ? 'nullable|min:6' : 'required|min:6',
-            'status' => 'required|in:active,inactive',
-        ]);
-
-        $companyId = Auth::user()->company_id;
-
-        if ($this->editMode) {
-            $user = User::where('user_id', $this->userId)->firstOrFail();
-
-            // ✅ Explicit assignment (more reliable than update array)
-            $user->full_name = $this->name;
-            $user->email = $this->email;
-            $user->status = $this->status;
-
-            // Only update password if provided
-            if (!empty($this->password)) {
-                $user->password = Hash::make($this->password);
-            }
-
-            $user->save();
-
-            session()->flash('message', 'Receptionist updated successfully!');
-        } else {
-            $role = Role::where('name', 'Receptionist')->first();
-
-            User::create([
-                'full_name' => $this->name,
-                'email' => $this->email,
-                'password' => Hash::make($this->password),
-                'status' => $this->status,
-                'company_id' => $companyId,
-                'role_id' => $role?->role_id,
+        try {
+            $this->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . ($this->userId ?? 'NULL') . ',user_id',
+                'password' => $this->editMode ? 'nullable|min:6' : 'required|min:6',
+                'status' => 'required|in:active,inactive',
             ]);
 
-            session()->flash('message', 'Receptionist created successfully!');
-        }
+            $companyId = Auth::user()->company_id;
 
-        $this->closeModal();
+            if ($this->editMode) {
+                $user = User::where('user_id', $this->userId)->firstOrFail();
+
+                // ✅ Explicit assignment (more reliable than update array)
+                $user->full_name = $this->name;
+                $user->email = $this->email;
+                $user->status = $this->status;
+
+                // Only update password if provided
+                if (!empty($this->password)) {
+                    $user->password = Hash::make($this->password);
+                }
+
+                $user->save();
+
+                $this->dispatch('toast', 
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Receptionist updated successfully!',
+                    duration: 3000
+                );
+            } else {
+                $role = Role::where('name', 'Receptionist')->first();
+
+                if (!$role) {
+                    throw new \Exception('Receptionist role not found in database');
+                }
+
+                User::create([
+                    'full_name' => $this->name,
+                    'email' => $this->email,
+                    'password' => Hash::make($this->password),
+                    'status' => $this->status,
+                    'company_id' => $companyId,
+                    'role_id' => $role->role_id,
+                ]);
+
+                $this->dispatch('toast', 
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Receptionist created successfully!',
+                    duration: 3000
+                );
+            }
+
+            $this->closeModal();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions to show field errors
+            throw $e;
+        } catch (\Exception $e) {
+            $this->dispatch('toast', 
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to save receptionist: ' . $e->getMessage(),
+                duration: 4000
+            );
+        }
     }
 
     /*
@@ -135,9 +170,24 @@ class ReceptionistUsers extends Component
     */
     public function delete($id)
     {
-        User::where('user_id', $id)->delete();
+        try {
+            $user = User::where('user_id', $id)->firstOrFail();
+            $user->delete();
 
-        session()->flash('message', 'Receptionist deleted successfully!');
+            $this->dispatch('toast', 
+                type: 'success',
+                title: 'Success',
+                message: 'Receptionist deleted successfully!',
+                duration: 3000
+            );
+        } catch (\Exception $e) {
+            $this->dispatch('toast', 
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to delete receptionist: ' . $e->getMessage(),
+                duration: 4000
+            );
+        }
     }
 
     /*
@@ -147,49 +197,67 @@ class ReceptionistUsers extends Component
     */
     public function render()
     {
-        $companyId = Auth::user()->company_id;
+        try {
+            $companyId = Auth::user()->company_id;
 
-        $query = User::query()
-            ->where('company_id', $companyId)
-            ->whereHas('role', fn($q) => $q->where('roles.name', 'Receptionist'));
+            $query = User::query()
+                ->where('company_id', $companyId)
+                ->whereHas('role', fn($q) => $q->where('roles.name', 'Receptionist'));
 
-        // SEARCH
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('users.full_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('users.email', 'like', '%' . $this->search . '%');
-            });
+            // SEARCH
+            if (!empty($this->search)) {
+                $query->where(function ($q) {
+                    $q->where('users.full_name', 'like', '%' . $this->search . '%')
+                      ->orWhere('users.email', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            // STATUS FILTER (apply BEFORE get() → better performance)
+            if ($this->statusFilter !== 'all') {
+                $query->where('status', $this->statusFilter);
+            }
+
+            $receptionists = $query->get();
+
+            // STATS (separate clean calculation)
+            $stats = [
+                [
+                    'label' => 'Total Receptionists',
+                    'value' => $receptionists->count(),
+                    'key' => 'all'
+                ],
+                [
+                    'label' => 'Active',
+                    'value' => $receptionists->where('status', 'active')->count(),
+                    'key' => 'active'
+                ],
+                [
+                    'label' => 'Inactive',
+                    'value' => $receptionists->where('status', 'inactive')->count(),
+                    'key' => 'inactive'
+                ],
+            ];
+
+            return view('livewire.pages.superadmin.receptionist-users', [
+                'receptionists' => $receptionists,
+                'stats' => $stats,
+            ]);
+        } catch (\Exception $e) {
+            $this->dispatch('toast', 
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to retrieve data: ' . $e->getMessage(),
+                duration: 4000
+            );
+
+            return view('livewire.pages.superadmin.receptionist-users', [
+                'receptionists' => collect([]),
+                'stats' => [
+                    ['label' => 'Total Receptionists', 'value' => 0, 'key' => 'all'],
+                    ['label' => 'Active', 'value' => 0, 'key' => 'active'],
+                    ['label' => 'Inactive', 'value' => 0, 'key' => 'inactive'],
+                ],
+            ]);
         }
-
-        // STATUS FILTER (apply BEFORE get() → better performance)
-        if ($this->statusFilter !== 'all') {
-            $query->where('status', $this->statusFilter);
-        }
-
-        $receptionists = $query->get();
-
-        // STATS (separate clean calculation)
-        $stats = [
-            [
-                'label' => 'Total Receptionists',
-                'value' => $receptionists->count(),
-                'key' => 'all'
-            ],
-            [
-                'label' => 'Active',
-                'value' => $receptionists->where('status', 'active')->count(),
-                'key' => 'active'
-            ],
-            [
-                'label' => 'Inactive',
-                'value' => $receptionists->where('status', 'inactive')->count(),
-                'key' => 'inactive'
-            ],
-        ];
-
-        return view('livewire.pages.superadmin.receptionist-users', [
-            'receptionists' => $receptionists,
-            'stats' => $stats,
-        ]);
     }
 }
