@@ -7,7 +7,7 @@
                 <p class="text-sm text-gray-500">Interactive system insights</p>
             </div>
             <button wire:click="setFilter('all')" 
-                class="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition">
+                class="px-5 py-2.5 bg-gray-900 text-white rounded-xl shadow-sm hover:bg-gray-800 transition">
                 Reset View
             </button>
         </div>
@@ -23,7 +23,7 @@
                 <div wire:click="setFilter('{{ $s['key'] }}')"
                     class="cursor-pointer bg-white border border-gray-200 rounded-2xl p-5 shadow-sm transition-all duration-300
                            hover:shadow-lg hover:-translate-y-1
-                           {{ $isActive ? 'ring-2 ring-blue-500' : '' }}">
+                           {{ $isActive ? 'ring-2 ring-gray-900' : '' }}">
                     <div class="flex justify-between items-start">
                         <p class="text-sm font-medium text-gray-500">{{ $s['label'] }}</p>
                         <span class="text-xs px-2 py-1 rounded-full font-medium {{ $color }}">

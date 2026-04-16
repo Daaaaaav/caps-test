@@ -169,6 +169,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/vehicle-bookings', VehicleBookingStatistics::class)->name('superadmin.vehicle');
         Route::get('/deliveries', DeliveryStatistics::class)->name('superadmin.delivery');
         Route::get('/guestbook', GuestbookStatistics::class)->name('superadmin.guestbook');
+        Route::get('/lstm-predictions', \App\Livewire\Pages\Superadmin\LSTMPredictions::class)->name('superadmin.lstm-predictions');
         Route::get('/ai-security', AISecurityReports::class)->name('superadmin.ai-security');
     });
 

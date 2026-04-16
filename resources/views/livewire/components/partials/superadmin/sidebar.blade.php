@@ -51,8 +51,13 @@
             </flux:sidebar.item>
         </flux:sidebar.group>
 
-        {{-- ===== AI SYSTEM ===== --}}
-        <flux:sidebar.group expandable heading="AI System">
+        {{-- ===== AI & SECURITY SYSTEM ===== --}}
+        <flux:sidebar.group expandable heading="AI & Security System">
+            <flux:sidebar.item icon="cpu-chip" href="{{ route('superadmin.lstm-predictions') }}"
+                :current="request()->routeIs('superadmin.lstm-predictions')">
+                LSTM Predictions
+            </flux:sidebar.item>
+
             <flux:sidebar.item icon="shield-check" href="{{ route('superadmin.ai-security') }}"
                 :current="request()->routeIs('superadmin.ai-security')">
                 Security Reports

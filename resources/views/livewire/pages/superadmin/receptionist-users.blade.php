@@ -13,7 +13,7 @@
             </div>
 
             <button wire:click="openCreateModal"
-                class="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition">
+                class="px-5 py-2.5 bg-gray-900 text-white rounded-xl shadow-sm hover:bg-gray-800 transition">
                 + Add Receptionist
             </button>
         </div>
@@ -38,7 +38,7 @@
                     placeholder="Search receptionist by name or email..."
                     class="w-full pl-10 pr-20 py-2 rounded-lg border border-gray-300
                         text-gray-900 placeholder-gray-400
-                        focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                        focus:ring-2 focus:ring-gray-500 focus:outline-none transition">
 
                 {{-- CLEAR BUTTON --}}
                 @if($search)
@@ -51,7 +51,7 @@
                 {{-- ⏳ LOADING SPINNER --}}
                 <div wire:loading wire:target="search"
                     class="absolute right-3">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -62,7 +62,7 @@
             {{-- LOADING BAR --}}
             <div wire:loading wire:target="search" class="mt-2">
                 <div class="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
-                    <div class="bg-blue-600 h-1 rounded-full animate-loading-bar"></div>
+                    <div class="bg-gray-600 h-1 rounded-full animate-loading-bar"></div>
                 </div>
             </div>
 
@@ -93,7 +93,7 @@
                             {{-- NAME --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold">
                                         {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
                                     </div>
                                     <span class="font-medium text-gray-900">
@@ -127,7 +127,7 @@
                                 <div class="flex gap-2">
 
                                     <button wire:click="openEditModal({{ $user->user_id }})"
-                                        class="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm">
+                                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">
                                         Edit
                                     </button>
 
@@ -172,7 +172,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input type="text" wire:model="name"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-blue-500">
+                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
                         @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
@@ -181,7 +181,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email" wire:model="email"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-blue-500">
+                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
                         @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
@@ -192,7 +192,7 @@
                         </label>
                         <input type="password" wire:model="password"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-blue-500">
+                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
                         @error('password') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
@@ -200,7 +200,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select wire:model="status"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-gray-500">
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
@@ -209,7 +209,7 @@
                     {{-- ACTIONS --}}
                     <div class="flex gap-3 pt-4">
                         <button type="submit"
-                            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            class="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
                             {{ $editMode ? 'Update' : 'Create' }}
                         </button>
 

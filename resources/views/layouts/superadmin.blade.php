@@ -78,6 +78,7 @@ $invertStyle = 'filter: brightness(0) invert(1);';
     @livewireScripts
     @vite('resources/js/app.js')
     @fluxScripts
+    @stack('scripts')
 </body>
 
 </html>
