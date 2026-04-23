@@ -1,5 +1,5 @@
-<div>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{{-- CAPTCHA SCRIPT - COMMENTED OUT FOR DEVELOPMENT --}}
+{{-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> --}}
 
 <div class="min-h-screen flex">
     <div class="relative hidden md:block flex-1">
@@ -84,7 +84,8 @@
                         </a>
                     </div>
 
-                    <div wire:ignore class="mt-6" id="recaptcha-container">
+                    {{-- CAPTCHA - COMMENTED OUT FOR DEVELOPMENT --}}
+                    {{-- <div wire:ignore class="mt-6" id="recaptcha-container">
                         <div class="g-recaptcha"
                             data-sitekey="{{ config('services.recaptcha.site_key') }}"
                             data-callback="onCaptchaSuccess"
@@ -93,7 +94,7 @@
                         @error('captcha')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>
+                    </div> --}}
 
                     <button type="button" wire:click="login"
                         class="w-full rounded-3xl mt-6 bg-black text-white py-4 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -156,21 +157,22 @@
     </div>
 </div>
 
+{{-- CAPTCHA CALLBACKS - COMMENTED OUT FOR DEVELOPMENT --}}
 @script
 <script>
-    window.onCaptchaSuccess = function(token) {
-        $wire.set('captcha', token);
-    };
+    // window.onCaptchaSuccess = function(token) {
+    //     $wire.set('captcha', token);
+    // };
 
-    window.onCaptchaExpired = function() {
-        $wire.set('captcha', '');
-    };
+    // window.onCaptchaExpired = function() {
+    //     $wire.set('captcha', '');
+    // };
 
-    Livewire.on('captcha-error', () => {
-        if (typeof grecaptcha !== 'undefined') {
-            grecaptcha.reset();
-        }
-    });
+    // Livewire.on('captcha-error', () => {
+    //     if (typeof grecaptcha !== 'undefined') {
+    //         grecaptcha.reset();
+    //     }
+    // });
 </script>
 @endscript
 </div>

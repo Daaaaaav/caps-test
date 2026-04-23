@@ -46,7 +46,7 @@ class Login extends Component
         return [
             'email'    => ['required', 'email'],
             'password' => ['required', 'string', 'min:6'],
-            'captcha'  => ['required'],
+            // 'captcha'  => ['required'], // COMMENTED OUT FOR DEVELOPMENT
         ];
     }
 
@@ -66,15 +66,15 @@ class Login extends Component
             ]);
         }
 
-        // Verify captcha
-        if (!CaptchaService::verify($this->captcha, request()->ip())) {
-            \Log::warning('LOGIN: Captcha failed', ['email' => $this->email]);
-            $this->dispatch('captcha-error');
-            $this->captcha = '';
-            throw ValidationException::withMessages([
-                'captcha' => 'Captcha verification failed. Please try again.',
-            ]);
-        }
+        // Verify captcha - COMMENTED OUT FOR DEVELOPMENT
+        // if (!CaptchaService::verify($this->captcha, request()->ip())) {
+        //     \Log::warning('LOGIN: Captcha failed', ['email' => $this->email]);
+        //     $this->dispatch('captcha-error');
+        //     $this->captcha = '';
+        //     throw ValidationException::withMessages([
+        //         'captcha' => 'Captcha verification failed. Please try again.',
+        //     ]);
+        // }
 
         // Check credentials (but don't log in yet)
         $user = User::where('email', Str::lower($this->email))->first();
