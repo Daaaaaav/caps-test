@@ -28,6 +28,16 @@ class Login extends Component
     public bool $showOtpInput = false;
     public int $otpExpiresIn = 0;
 
+    protected function isOtpEnabled(): bool
+    {
+        return (bool) config('services.system.otp_enabled', false);
+    }
+
+    protected function isCaptchaEnabled(): bool
+    {
+        return (bool) config('services.system.captcha_enabled', false);
+    }
+
     public function mount()
     {
         if (Auth::check()) {
@@ -43,16 +53,32 @@ class Login extends Component
             ];
         }
 
-        return [
+        $rules = [
             'email'    => ['required', 'email'],
             'password' => ['required', 'string', 'min:6'],
-            // 'captcha'  => ['required'], // COMMENTED OUT FOR DEVELOPMENT
+        ];
+
+        if ($this->isCaptchaEnabled()) {
+            $rules['captcha'] = ['required'];
+        }
+
+        return $rules;
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'captcha.required' => 'Please complete the captcha verification.',
         ];
     }
 
     public function login()
     {
         \Log::info('LOGIN: Attempt started', ['email' => $this->email]);
+
+        if ($this->isCaptchaEnabled() && empty($this->captcha)) {
+            $this->captcha = (string) request()->input('g-recaptcha-response', '');
+        }
 
         // Validate input
         $this->validate();
@@ -66,26 +92,42 @@ class Login extends Component
             ]);
         }
 
-        // Verify captcha - COMMENTED OUT FOR DEVELOPMENT
-        // if (!CaptchaService::verify($this->captcha, request()->ip())) {
-        //     \Log::warning('LOGIN: Captcha failed', ['email' => $this->email]);
-        //     $this->dispatch('captcha-error');
-        //     $this->captcha = '';
-        //     throw ValidationException::withMessages([
-        //         'captcha' => 'Captcha verification failed. Please try again.',
-        //     ]);
-        // }
+        if ($this->isCaptchaEnabled() && !CaptchaService::verify($this->captcha, request()->ip())) {
+            \Log::warning('LOGIN: Captcha failed', ['email' => $this->email]);
+            $this->dispatch('captcha-error');
+            $this->captcha = '';
+            throw ValidationException::withMessages([
+                'captcha' => 'Captcha verification failed. Please try again.',
+            ]);
+        }
 
         // Check credentials (but don't log in yet)
         $user = User::where('email', Str::lower($this->email))->first();
         
         if (!$user || !\Hash::check($this->password, $user->password)) {
             RateLimiter::hit($key, 60);
-            $this->dispatch('captcha-error');
+            if ($this->isCaptchaEnabled()) {
+                $this->dispatch('captcha-error');
+            }
             $this->captcha = '';
             \Log::warning('LOGIN: Invalid credentials', ['email' => $this->email]);
             throw ValidationException::withMessages([
                 'email' => 'These credentials do not match our records.',
+            ]);
+        }
+
+        if (!$this->isOtpEnabled()) {
+            if (Auth::attempt(['email' => Str::lower($this->email), 'password' => $this->password], $this->remember)) {
+                RateLimiter::clear($key);
+                request()->session()->regenerate();
+
+                \Log::info('LOGIN: Success without OTP', ['email' => $this->email, 'user_id' => Auth::id()]);
+
+                return redirect()->intended(route('home'));
+            }
+
+            throw ValidationException::withMessages([
+                'email' => 'Authentication failed. Please try again.',
             ]);
         }
 
@@ -111,6 +153,10 @@ class Login extends Component
 
     public function verifyOtp()
     {
+        if (!$this->isOtpEnabled()) {
+            return;
+        }
+
         $this->validate();
 
         $otpService = new OtpService();
@@ -141,6 +187,10 @@ class Login extends Component
 
     public function resendOtp()
     {
+        if (!$this->isOtpEnabled()) {
+            return;
+        }
+
         $otpService = new OtpService();
         $result = $otpService->generateAndSend($this->email);
 
@@ -155,7 +205,9 @@ class Login extends Component
     public function cancelOtp()
     {
         $this->reset(['showOtpInput', 'otpSent', 'otpCode', 'otpExpiresIn', 'captcha']);
-        $this->dispatch('captcha-error'); // Reset captcha
+        if ($this->isCaptchaEnabled()) {
+            $this->dispatch('captcha-error');
+        }
     }
 
     public function render()

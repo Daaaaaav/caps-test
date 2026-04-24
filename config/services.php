@@ -1,5 +1,8 @@
 <?php
 
+$systemMode = strtolower(trim((string) env('SYSTEM_MODE', 'development')));
+$isSecureMode = in_array($systemMode, ['deployment', 'production', 'prod'], true);
+
 return [
 
     /*
@@ -38,6 +41,12 @@ return [
     'recaptcha' => [
         'site_key' => env('RECAPTCHA_SITE_KEY'),
         'secret' => env('RECAPTCHA_SECRET'),
+    ],
+
+    'system' => [
+        'mode' => $systemMode,
+        'otp_enabled' => $isSecureMode,
+        'captcha_enabled' => $isSecureMode,
     ],
 
 ];

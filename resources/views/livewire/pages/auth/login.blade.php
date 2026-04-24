@@ -1,7 +1,8 @@
-{{-- CAPTCHA SCRIPT - COMMENTED OUT FOR DEVELOPMENT --}}
-{{-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> --}}
-
 <div class="min-h-screen flex">
+    @if(config('services.system.captcha_enabled'))
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @endif
+
     <div class="relative hidden md:block flex-1">
         <img src="{{ asset('images/login.jpg') }}" alt="Background"
             class="absolute inset-0 w-full h-full object-cover object-center select-none" draggable="false" />
@@ -35,7 +36,17 @@
 
             @if (!$showOtpInput)
                 {{-- LOGIN FORM --}}
-                <div x-data="{ showPassword: false }" class="space-y-8">
+                <form x-data="{
+                    showPassword: false,
+                    submitLogin() {
+                        if (@js(config('services.system.captcha_enabled'))) {
+                            const token = (typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
+                            this.$wire.set('captcha', token);
+                        }
+
+                        this.$wire.login();
+                    }
+                }" x-on:submit.prevent="submitLogin()" class="space-y-8">
                     <div class="group">
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-3">Email Address</label>
                         <input type="email" id="email" wire:model.defer="email" autocomplete="email"
@@ -84,28 +95,31 @@
                         </a>
                     </div>
 
-                    {{-- CAPTCHA - COMMENTED OUT FOR DEVELOPMENT --}}
-                    {{-- <div wire:ignore class="mt-6" id="recaptcha-container">
-                        <div class="g-recaptcha"
-                            data-sitekey="{{ config('services.recaptcha.site_key') }}"
-                            data-callback="onCaptchaSuccess"
-                            data-expired-callback="onCaptchaExpired">
+                    @if(config('services.system.captcha_enabled'))
+                    <div class="mt-6" id="recaptcha-container">
+                        <div wire:ignore>
+                            <div class="g-recaptcha"
+                                data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                                data-callback="onCaptchaSuccess"
+                                data-expired-callback="onCaptchaExpired">
+                            </div>
                         </div>
                         @error('captcha')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div> --}}
+                    </div>
+                    @endif
 
-                    <button type="button" wire:click="login"
+                    <button type="submit"
                         class="w-full rounded-3xl mt-6 bg-black text-white py-4 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="login"> SIGN IN </span>
                         <span wire:loading wire:target="login"> Processing... </span>
                     </button>
-                </div>
+                </form>
             @else
                 {{-- OTP VERIFICATION FORM --}}
-                <div class="space-y-8">
+                <form wire:submit.prevent="verifyOtp" class="space-y-8">
                     <div class="text-center mb-6">
                         <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                             <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +146,7 @@
                         Code expires in <span class="font-semibold text-gray-900">{{ floor($otpExpiresIn / 60) }}:{{ str_pad($otpExpiresIn % 60, 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
 
-                    <button type="button" wire:click="verifyOtp"
+                    <button type="submit"
                         class="w-full rounded-3xl bg-black text-white py-4 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="verifyOtp"> VERIFY OTP </span>
@@ -151,28 +165,28 @@
                             Back to Login
                         </button>
                     </div>
-                </div>
+                </form>
             @endif
         </div>
     </div>
 </div>
 
-{{-- CAPTCHA CALLBACKS - COMMENTED OUT FOR DEVELOPMENT --}}
 @script
 <script>
-    // window.onCaptchaSuccess = function(token) {
-    //     $wire.set('captcha', token);
-    // };
+    @if(config('services.system.captcha_enabled'))
+    window.onCaptchaSuccess = function(token) {
+        $wire.set('captcha', token);
+    };
 
-    // window.onCaptchaExpired = function() {
-    //     $wire.set('captcha', '');
-    // };
+    window.onCaptchaExpired = function() {
+        $wire.set('captcha', '');
+    };
 
-    // Livewire.on('captcha-error', () => {
-    //     if (typeof grecaptcha !== 'undefined') {
-    //         grecaptcha.reset();
-    //     }
-    // });
+    Livewire.on('captcha-error', () => {
+        if (typeof grecaptcha !== 'undefined') {
+            grecaptcha.reset();
+        }
+    });
+    @endif
 </script>
 @endscript
-</div>
