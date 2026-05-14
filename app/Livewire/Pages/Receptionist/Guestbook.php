@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\Guestbook as GuestbookModel;
 use App\Models\Department; 
 use App\Models\User;
+use App\Services\SecurityMonitoringService;
 
 #[Layout('layouts.receptionist')]
 #[Title('GuestBook')]
@@ -113,6 +114,8 @@ class Guestbook extends Component
         $this->user_id       = $this->user_id === '' ? null : $this->user_id;
 
         $validatedData = $this->validate();
+
+        SecurityMonitoringService::logFormSubmit('guestbook', $validatedData);
 
         // Prepare data including auto-filled fields
         $entryData = array_merge($validatedData, [

@@ -5,77 +5,57 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Occupancy Forecasting</h1>
-                <p class="text-sm text-gray-500 mt-1">
-                    AI-powered booking occupancy predictions 
-                </p>
+                <p class="text-sm text-gray-500 mt-1">AI-powered booking occupancy predictions</p>
             </div>
-            <div class="flex items-center gap-2">
-                @if($isLSTMAvailable)
-                    <span class="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        LSTM Active
-                    </span>
-                @else
-                    <span class="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        Fallback Mode
-                    </span>
-                @endif
-            </div>
+            <span class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                {{ $isLSTMAvailable ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                {{ $isLSTMAvailable ? 'LSTM Neural Network' : 'Statistical Model' }}
+            </span>
         </div>
 
         {{-- CONTROLS --}}
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 {{-- Forecast Type --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Forecast Type</label>
                     <div class="flex gap-2">
-                        <button wire:click="setForecastType('room')" 
+                        <button wire:click="setForecastType('room')"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastType === 'room' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             Rooms
                         </button>
-                        <button wire:click="setForecastType('vehicle')" 
+                        <button wire:click="setForecastType('vehicle')"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastType === 'vehicle' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             Vehicles
                         </button>
-                        <button wire:click="setForecastType('combined')" 
+                        <button wire:click="setForecastType('combined')"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastType === 'combined' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             Both
                         </button>
                     </div>
                 </div>
 
-                {{-- Forecast Days --}}
+                {{-- Forecast Period --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Forecast Period</label>
                     <div class="flex gap-2">
-                        <button wire:click="setForecastDays(7)" 
+                        <button wire:click="setForecastDays(7)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 7 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             7 Days
                         </button>
-                        <button wire:click="setForecastDays(14)" 
+                        <button wire:click="setForecastDays(14)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 14 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             14 Days
                         </button>
-                        <button wire:click="setForecastDays(21)" 
+                        <button wire:click="setForecastDays(21)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 21 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                             21 Days
                         </button>
                     </div>
-                </div>
-
-                {{-- Weather Toggle --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Weather Integration</label>
-                    <button wire:click="$toggle('withWeather')" 
-                        class="w-full px-4 py-2 rounded-lg text-sm font-medium transition {{ $withWeather ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                        {{ $withWeather ? 'Weather Enabled' : 'Weather Disabled' }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -86,7 +66,7 @@
                 <p class="text-sm font-medium text-gray-500 mb-2">Avg Room Occupancy</p>
                 <h2 class="text-3xl font-bold text-gray-900">{{ $stats['avg_room_fc'] }}</h2>
                 <p class="text-xs text-gray-400 mt-1">
-                    Historical: {{ $stats['avg_room_hist'] }} 
+                    Historical: {{ $stats['avg_room_hist'] }}
                     @if($stats['room_trend'] != 0)
                         <span class="{{ $stats['room_trend'] > 0 ? 'text-green-600' : 'text-red-600' }}">
                             ({{ $stats['room_trend'] > 0 ? '+' : '' }}{{ $stats['room_trend'] }}%)
@@ -121,8 +101,8 @@
             </div>
         </section>
 
-        {{-- WEATHER INSIGHTS --}}
-        @if($weatherInsight && count($weatherInsight) > 0)
+        {{-- WEATHER INSIGHTS (only shown when weather data is available) --}}
+        @if(!empty($weatherInsight))
             <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,11 +130,7 @@
                     <h3 class="text-lg font-semibold text-gray-900">Occupancy Forecast</h3>
                     <p class="text-sm text-gray-500 mt-1">
                         {{ $forecastDays }}-day prediction based on historical patterns
-                        @if($isLSTMAvailable)
-                            using LSTM neural network
-                        @else
-                            using moving average
-                        @endif
+                        ({{ $isLSTMAvailable ? 'LSTM neural network' : 'statistical model' }})
                     </p>
                 </div>
                 <div wire:ignore style="position: relative; height: 400px;">
@@ -163,8 +139,8 @@
             </div>
         @endif
 
-        {{-- WEATHER MINI CARDS (if enabled) --}}
-        @if($weather && $withWeather)
+        {{-- WEATHER MINI CARDS (only shown when weather data is available) --}}
+        @if(!empty($weather['forecast']))
             <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">3-Day Weather Outlook</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -175,7 +151,7 @@
                                 <p class="text-sm font-semibold text-gray-900">{{ $day['date_label'] }}</p>
                                 <p class="text-xs text-gray-500">{{ $day['summary']['weather_desc'] ?? '—' }}</p>
                                 <p class="text-lg font-bold text-gray-900 mt-1">{{ $day['max_temp'] }}°C</p>
-                                <p class="text-xs text-gray-400"> {{ $day['rain_chance'] }}% rain</p>
+                                <p class="text-xs text-gray-400">🌧️ {{ $day['rain_chance'] }}% rain</p>
                             </div>
                         </div>
                     @endforeach
@@ -193,9 +169,7 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initChart();
-    });
+    document.addEventListener('DOMContentLoaded', function() { initChart(); });
 
     document.addEventListener('livewire:init', () => {
         Livewire.hook('morph.updated', ({ el, component }) => {
@@ -207,15 +181,13 @@
         const ctx = document.getElementById('occupancyChart');
         if (!ctx) return;
 
-        const labels = @json($chartData['labels']);
-        const roomData = @json($chartData['roomData']);
-        const vehicleData = @json($chartData['vehicleData']);
-
         if (window.occupancyChart && typeof window.occupancyChart.destroy === 'function') {
             window.occupancyChart.destroy();
         }
 
         const datasets = [];
+        const roomData = @json($chartData['roomData']);
+        const vehicleData = @json($chartData['vehicleData']);
 
         if (roomData && roomData.some(v => v !== null)) {
             datasets.push({
@@ -245,41 +217,22 @@
 
         window.occupancyChart = new Chart(ctx, {
             type: 'line',
-            data: { labels, datasets },
+            data: { labels: @json($chartData['labels']), datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
+                    legend: { display: true, position: 'top' },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y.toFixed(1);
-                            }
+                            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1)
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Bookings'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    }
+                    y: { beginAtZero: true, title: { display: true, text: 'Bookings' } },
+                    x: { title: { display: true, text: 'Date' } }
                 }
             }
         });

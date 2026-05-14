@@ -124,6 +124,9 @@ Route::get('/google/oauth/callback', fn() => redirect('/google/oauth/init'));
 */
 Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('login');
+    Route::post('/login', function () {
+        return redirect()->route('login');
+    })->middleware('throttle:5,1');
     Route::get('/register', RegisterPage::class)->name('register');
 });
 
@@ -171,7 +174,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/guestbook', GuestbookStatistics::class)->name('superadmin.guestbook');
         Route::get('/lstm-predictions', \App\Livewire\Pages\Superadmin\LSTMPredictions::class)->name('superadmin.lstm-predictions');
         Route::get('/ai-security', AISecurityReports::class)->name('superadmin.ai-security');
-        Route::get('/weather', \App\Livewire\Pages\Superadmin\WeatherDashboard::class)->name('superadmin.weather');
+        // Route::get('/weather', \App\Livewire\Pages\Superadmin\WeatherDashboard::class)->name('superadmin.weather');
         Route::get('/occupancy-forecasting', \App\Livewire\Pages\Superadmin\OccupancyForecasting::class)->name('superadmin.occupancy');
     });
 

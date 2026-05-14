@@ -14,183 +14,155 @@ use App\Services\AI\DataPreprocessor;
 class LSTMPredictions extends Component
 {
     public $predictionType = 'room_booking';
-    public $useDummyData = false;
-    public $forecastDays = 21;
-    public $isLoading = false;
+    public $useDummyData   = false;
+    public $forecastDays   = 21;
 
-    public function setPredictionType($type)
+    public function setPredictionType($type): void
     {
         $this->predictionType = $type;
     }
 
-    public function toggleDummyData()
+    public function toggleDummyData(): void
     {
         $this->useDummyData = !$this->useDummyData;
     }
 
-    public function setForecastDays($days)
+    public function setForecastDays($days): void
     {
-        $this->forecastDays = $days;
+        $this->forecastDays = (int) $days;
     }
 
     public function render()
     {
         try {
-            $companyId = Auth::user()->company_id;
+            $companyId  = Auth::user()->company_id;
             $lstmClient = new LSTMClient();
-
-            // Check if LSTM service is available
             $isLSTMAvailable = $lstmClient->isAvailable();
 
-            if (!$isLSTMAvailable) {
-                return view('livewire.pages.superadmin.lstm-predictions', [
-                    'isLSTMAvailable' => false,
-                    'predictions' => null,
-                    'weeklyData' => null,
-                    'dailyLabels' => [],
-                    'dailyPredicted' => [],
-                    'dailyLowerBound' => [],
-                    'dailyUpperBound' => [],
-                    'stats' => $this->getEmptyStats(),
-                    'rmse' => 0,
-                    'dataSource' => 'unknown',
-                    'title' => 'LSTM Model Predictions',
-                    'description' => null,
-                ]);
-            }
+            // Always get a time series from the database
+            $preprocessor = new DataPreprocessor();
+            $timeSeries   = $preprocessor->createTimeSeriesDataset(
+                $this->predictionType, $companyId, 90
+            );
 
-            // Get predictions
-            if ($this->forecastDays == 21) {
-                // Use 3-week specialized endpoint
-                if ($this->useDummyData) {
-                    $result = $lstmClient->getDemo();
+            // ── Get predictions ───────────────────────────────────────────────
+            $result = null;
+
+            if ($isLSTMAvailable) {
+                if ($this->forecastDays == 21) {
+                    $result = $this->useDummyData
+                        ? $lstmClient->getDemo()
+                        : $lstmClient->predict3Weeks($timeSeries, false);
                 } else {
-                    $preprocessor = new DataPreprocessor();
-                    $timeSeries = $preprocessor->createTimeSeriesDataset($this->predictionType, $companyId, 90);
-                    $result = $lstmClient->predict3Weeks($timeSeries, false);
+                    $result = $lstmClient->predict(
+                        $timeSeries, $this->forecastDays, $this->useDummyData
+                    );
                 }
-            } else {
-                // Use standard prediction
-                $preprocessor = new DataPreprocessor();
-                $timeSeries = $preprocessor->createTimeSeriesDataset($this->predictionType, $companyId, 90);
-                $result = $lstmClient->predict($timeSeries, $this->forecastDays, $this->useDummyData);
             }
 
+            // ── Fallback when LSTM is offline or returned nothing ─────────────
             if (!$result || empty($result['predictions'])) {
-                return view('livewire.pages.superadmin.lstm-predictions', [
-                    'isLSTMAvailable' => true,
-                    'predictions' => null,
-                    'weeklyData' => null,
-                    'dailyLabels' => [],
-                    'dailyPredicted' => [],
-                    'dailyLowerBound' => [],
-                    'dailyUpperBound' => [],
-                    'stats' => $this->getEmptyStats(),
-                    'rmse' => 0,
-                    'dataSource' => 'unknown',
-                    'title' => 'LSTM Model Predictions',
-                    'description' => null,
+                $fallback = $lstmClient->predictWithFallback($timeSeries, $this->forecastDays);
+                $result   = array_merge($fallback, [
+                    'data_source'    => $isLSTMAvailable ? 'real' : 'statistical',
+                    'title'          => 'Booking Predictions',
+                    'description'    => null,
+                    'weekly_summary' => $this->buildWeeklySummary($fallback['predictions'] ?? []),
                 ]);
             }
 
-            // Prepare chart data
-            $predictions = $result['predictions'];
-            $dailyLabels = array_map(fn($p) => date('M d', strtotime($p['date'])), $predictions);
-            $dailyPredicted = array_map(fn($p) => round($p['predicted'], 1), $predictions);
+            // ── Build chart arrays ────────────────────────────────────────────
+            $predictions     = $result['predictions'];
+            $dailyLabels     = array_map(fn($p) => date('M d', strtotime($p['date'])), $predictions);
+            $dailyPredicted  = array_map(fn($p) => round($p['predicted'], 1), $predictions);
             $dailyLowerBound = array_map(fn($p) => round($p['lower_bound'], 1), $predictions);
             $dailyUpperBound = array_map(fn($p) => round($p['upper_bound'], 1), $predictions);
 
-            // Prepare weekly data if available
+            // ── Weekly summary ────────────────────────────────────────────────
             $weeklyData = null;
-            if (isset($result['weekly_summary'])) {
+            if (!empty($result['weekly_summary'])) {
                 $weeklyData = [
-                    'labels' => array_map(fn($w) => 'Week ' . $w['week'], $result['weekly_summary']),
-                    'totals' => array_map(fn($w) => round($w['total_predicted'], 0), $result['weekly_summary']),
+                    'labels'   => array_map(fn($w) => 'Week ' . $w['week'], $result['weekly_summary']),
+                    'totals'   => array_map(fn($w) => round($w['total_predicted'], 0), $result['weekly_summary']),
                     'averages' => array_map(fn($w) => round($w['avg_predicted'], 1), $result['weekly_summary']),
                 ];
             }
 
-            // Calculate statistics
+            // ── Stats cards ───────────────────────────────────────────────────
             $totalPredicted = array_sum($dailyPredicted);
-            $avgDaily = $totalPredicted / count($dailyPredicted);
-            $avgConfidence = array_sum(array_column($predictions, 'confidence')) / count($predictions);
-            $maxDay = max($dailyPredicted);
-            $minDay = min($dailyPredicted);
+            $avgDaily       = $totalPredicted / max(1, count($dailyPredicted));
+            $avgConfidence  = array_sum(array_column($predictions, 'confidence')) / max(1, count($predictions));
+            $maxDay         = !empty($dailyPredicted) ? max($dailyPredicted) : 0;
 
             $stats = [
-                [
-                    'label' => 'Total Predicted',
-                    'value' => number_format($totalPredicted, 0),
-                    'color' => 'blue',
-                    'icon' => 'chart-bar'
-                ],
-                [
-                    'label' => 'Avg per Day',
-                    'value' => number_format($avgDaily, 1),
-                    'color' => 'green',
-                    'icon' => 'calculator'
-                ],
-                [
-                    'label' => 'Peak Day',
-                    'value' => number_format($maxDay, 0),
-                    'color' => 'yellow',
-                    'icon' => 'arrow-trending-up'
-                ],
-                [
-                    'label' => 'Confidence',
-                    'value' => number_format($avgConfidence * 100, 1) . '%',
-                    'color' => 'purple',
-                    'icon' => 'check-badge'
-                ],
+                ['label' => 'Total Predicted', 'value' => number_format($totalPredicted, 0), 'color' => 'blue',   'icon' => 'chart-bar'],
+                ['label' => 'Avg per Day',      'value' => number_format($avgDaily, 1),        'color' => 'green',  'icon' => 'calculator'],
+                ['label' => 'Peak Day',         'value' => number_format($maxDay, 0),           'color' => 'yellow', 'icon' => 'arrow-trending-up'],
+                ['label' => 'Confidence',       'value' => number_format($avgConfidence * 100, 1) . '%', 'color' => 'purple', 'icon' => 'check-badge'],
             ];
 
             return view('livewire.pages.superadmin.lstm-predictions', [
-                'isLSTMAvailable' => true,
-                'predictions' => $predictions,
-                'weeklyData' => $weeklyData,
-                'dailyLabels' => $dailyLabels,
-                'dailyPredicted' => $dailyPredicted,
+                'isLSTMAvailable' => $isLSTMAvailable,
+                'predictions'     => $predictions,
+                'weeklyData'      => $weeklyData,
+                'dailyLabels'     => $dailyLabels,
+                'dailyPredicted'  => $dailyPredicted,
                 'dailyLowerBound' => $dailyLowerBound,
                 'dailyUpperBound' => $dailyUpperBound,
-                'stats' => $stats,
-                'rmse' => $result['rmse'] ?? 0,
-                'dataSource' => $result['data_source'] ?? 'unknown',
-                'title' => $result['title'] ?? 'LSTM Model Predictions',
-                'description' => $result['description'] ?? null,
+                'stats'           => $stats,
+                'rmse'            => $result['rmse'] ?? ($result['metrics']['rmse'] ?? 0),
+                'dataSource'      => $result['data_source'] ?? 'statistical',
+                'title'           => $result['title'] ?? 'Booking Predictions',
+                'description'     => $result['description'] ?? null,
             ]);
 
         } catch (\Exception $e) {
-            $this->dispatch('toast', 
-                type: 'error',
-                title: 'Error',
-                message: 'Failed to generate predictions: ' . $e->getMessage(),
-                duration: 4000
-            );
+            \Log::error('LSTMPredictions render failed', ['error' => $e->getMessage()]);
 
             return view('livewire.pages.superadmin.lstm-predictions', [
                 'isLSTMAvailable' => false,
-                'predictions' => null,
-                'weeklyData' => null,
-                'dailyLabels' => [],
-                'dailyPredicted' => [],
+                'predictions'     => [],
+                'weeklyData'      => null,
+                'dailyLabels'     => [],
+                'dailyPredicted'  => [],
                 'dailyLowerBound' => [],
                 'dailyUpperBound' => [],
-                'stats' => $this->getEmptyStats(),
-                'rmse' => 0,
-                'dataSource' => 'unknown',
-                'title' => 'LSTM Model Predictions',
-                'description' => null,
+                'stats'           => $this->getEmptyStats(),
+                'rmse'            => 0,
+                'dataSource'      => 'error',
+                'title'           => 'Booking Predictions',
+                'description'     => null,
             ]);
         }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function buildWeeklySummary(array $predictions): array
+    {
+        if (count($predictions) < 7) return [];
+
+        $summary = [];
+        foreach (array_chunk($predictions, 7) as $i => $week) {
+            $total = array_sum(array_column($week, 'predicted'));
+            $summary[] = [
+                'week'            => $i + 1,
+                'start_date'      => $week[0]['date'],
+                'end_date'        => end($week)['date'],
+                'total_predicted' => round($total, 2),
+                'avg_predicted'   => round($total / count($week), 2),
+            ];
+        }
+        return $summary;
     }
 
     private function getEmptyStats(): array
     {
         return [
-            ['label' => 'Total Predicted', 'value' => '0', 'color' => 'blue', 'icon' => 'chart-bar'],
-            ['label' => 'Avg per Day', 'value' => '0', 'color' => 'green', 'icon' => 'calculator'],
-            ['label' => 'Peak Day', 'value' => '0', 'color' => 'yellow', 'icon' => 'arrow-trending-up'],
-            ['label' => 'Confidence', 'value' => '0%', 'color' => 'purple', 'icon' => 'check-badge'],
+            ['label' => 'Total Predicted', 'value' => '0',  'color' => 'blue',   'icon' => 'chart-bar'],
+            ['label' => 'Avg per Day',      'value' => '0',  'color' => 'green',  'icon' => 'calculator'],
+            ['label' => 'Peak Day',         'value' => '0',  'color' => 'yellow', 'icon' => 'arrow-trending-up'],
+            ['label' => 'Confidence',       'value' => '0%', 'color' => 'purple', 'icon' => 'check-badge'],
         ];
     }
 }

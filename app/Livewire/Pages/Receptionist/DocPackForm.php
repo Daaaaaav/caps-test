@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Storage;
 use App\Models\Delivery;
+use App\Services\SecurityMonitoringService;
 use Carbon\Carbon;
 
 #[Layout('layouts.receptionist')]
@@ -107,6 +108,16 @@ class DocPackForm extends Component
     public function save(): void
     {
         $this->validate();
+
+        SecurityMonitoringService::logFormSubmit('docpack_form', [
+            'direction' => $this->direction,
+            'itemType' => $this->itemType,
+            'departmentId' => $this->departmentId,
+            'userId' => $this->userId,
+            'senderText' => $this->senderText,
+            'receiverText' => $this->receiverText,
+            'itemName' => $this->itemName,
+        ]);
 
         $now = Carbon::now('Asia/Jakarta');
 

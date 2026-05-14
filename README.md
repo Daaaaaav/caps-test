@@ -1,61 +1,343 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# KRB System - Run Guide
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project supports multiple deployment methods:
 
-## About Laravel
+- **Docker Production Deployment** (recommended for production)
+- **Docker Development** (for local development)
+- **Native Local Setup** (Fedora/Linux focused)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The system includes:
+- Laravel 12 application with Livewire 3
+- Python LSTM AI service for predictive analytics
+- MySQL database
+- Optional Wazuh integration for security monitoring
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 1. Clone Project
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+git clone <your-repo-url>
+cd KRB-System
+```
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 2. Docker Production Deployment (Recommended)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**For production deployment with auto-starting AI services.**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Quick Deploy
 
-## Laravel Sponsors
+**Windows:**
+```bash
+.\deploy.bat
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Linux/macOS:**
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
 
-### Premium Partners
+The deployment script will:
+1. Build Docker images (Laravel + Python LSTM service)
+2. Start all services (App, MySQL, LSTM, Nginx)
+3. Run database migrations
+4. Optimize the application
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Access Points
 
-## Contributing
+- **Application**: http://localhost
+- **LSTM API**: http://localhost:8001
+- **LSTM Docs**: http://localhost:8001/docs
+- **MySQL**: localhost:3307
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Default Login
 
-## Code of Conduct
+- **Superadmin**: `superadmin@krbogor.id` / `superpassword`
+- **Receptionist**: `receptionist@krbogor.id` / `receppassword`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Documentation
 
-## Security Vulnerabilities
+- **Quick Start**: [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md) - 5-minute guide
+- **Full Guide**: [DEPLOYMENT.md](DEPLOYMENT.md) - Complete deployment documentation
+- **Setup Summary**: [DOCKER_SETUP_COMPLETE.md](DOCKER_SETUP_COMPLETE.md) - What was configured
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Common Commands
 
-## License
+```bash
+# View logs
+docker-compose logs -f
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Stop services
+docker-compose down
+
+# Restart services
+docker-compose restart
+
+# Run artisan commands
+docker-compose exec app php artisan [command]
+```
+
+---
+
+## 3. Docker Development Setup
+
+Use Docker if your team needs the same setup across Windows and Linux.
+
+Note for Fedora/RHEL users: bind mounts use SELinux relabel (`:z`) in compose so containers can read project files.
+
+### Linux/macOS (helper script)
+
+```bash
+chmod +x scripts/docker-dev.sh
+./scripts/docker-dev.sh init
+./scripts/docker-dev.sh start
+```
+
+### Windows PowerShell (helper script)
+
+```powershell
+.\scripts\docker-dev.ps1 -Action init
+.\scripts\docker-dev.ps1 -Action start
+```
+
+Open:
+
+- App: http://localhost:8000
+- Vite: http://localhost:5173
+- MySQL (host): localhost:3307
+
+If `3307` is busy too, set a different value in `.env` before start:
+
+```env
+MYSQL_HOST_PORT=3310
+```
+
+### Start with Wazuh (optional)
+
+Linux/macOS:
+
+```bash
+./scripts/docker-dev.sh start --wazuh
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\docker-dev.ps1 -Action start -Wazuh
+```
+
+### Common Docker helper commands
+
+Linux/macOS:
+
+```bash
+./scripts/docker-dev.sh logs
+./scripts/docker-dev.sh logs --wazuh
+./scripts/docker-dev.sh test
+./scripts/docker-dev.sh stop
+./scripts/docker-dev.sh stop --volumes
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\docker-dev.ps1 -Action logs
+.\scripts\docker-dev.ps1 -Action logs -Wazuh
+.\scripts\docker-dev.ps1 -Action test
+.\scripts\docker-dev.ps1 -Action stop
+.\scripts\docker-dev.ps1 -Action stop -Volumes
+```
+
+Manual Docker commands are documented in docs/DOCKER_SETUP.md.
+
+## 4. Local Development Setup
+
+**For local development without Docker (Laragon, XAMPP, or native).**
+
+📖 **See complete guide**: [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)
+
+### Quick Start (Laragon/Windows)
+
+1. Place project in `C:\laragon\www\KRB-System\`
+2. Copy `.env.example` to `.env`
+3. Create database: `krbs`
+4. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
+5. Setup application:
+   ```bash
+   php artisan key:generate
+   php artisan migrate
+   php artisan db:seed
+   npm run build
+   ```
+6. Access: http://krb-system.test
+
+### Quick Start (Native Linux/macOS)
+
+1. Install prerequisites:
+   ```bash
+   # Ubuntu/Debian
+   sudo apt install -y php8.3 php8.3-mysql composer nodejs npm mysql-server
+   
+   # macOS
+   brew install php@8.3 composer node mysql
+   ```
+
+2. Clone and setup:
+   ```bash
+   git clone <repo-url>
+   cd KRB-System
+   cp .env.example .env
+   ```
+
+3. Create database:
+   ```bash
+   mysql -u root -p
+   CREATE DATABASE krbs;
+   EXIT;
+   ```
+
+4. Install and run:
+   ```bash
+   composer install
+   npm install
+   php artisan key:generate
+   php artisan migrate
+   php artisan db:seed
+   npm run build
+   php artisan serve
+   ```
+
+5. Access: http://localhost:8000
+
+**For detailed instructions, troubleshooting, and platform-specific guides, see [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)**
+
+## 5. AI Services (Optional)
+
+### LSTM Prediction Service
+
+The system includes a Python-based LSTM service for predictive analytics.
+
+**Local Development:**
+
+1. Install Python dependencies:
+   ```bash
+   pip install --user fastapi uvicorn tensorflow pandas scikit-learn holidays
+   ```
+
+2. Start service:
+   ```bash
+   # Windows
+   .\start_lstm_service.bat
+   
+   # Linux/macOS
+   python3 -m uvicorn app.Services.AI.LSTM_Service:app --host 127.0.0.1 --port 8001
+   ```
+
+3. Verify:
+   ```bash
+   curl http://127.0.0.1:8001/
+   ```
+
+**Docker Deployment:**
+
+LSTM service automatically starts with the application (no manual setup needed).
+
+**Features:**
+- 3-week booking predictions
+- Holiday-aware forecasting
+- Weather integration (BMKG API)
+- Occupancy forecasting
+- Anomaly detection
+
+**Note:** The application works without LSTM service using fallback predictions.
+
+---
+
+## 6. Wazuh (Optional)
+
+If Wazuh is not available, the security report page can still run by reading Laravel logs.
+
+Fedora install script:
+
+```bash
+chmod +x scripts/wazuh_install_manager_fedora.sh
+./scripts/wazuh_install_manager_fedora.sh
+```
+
+Test simulation:
+
+```bash
+chmod +x scripts/wazuh_test_simulation.sh
+./scripts/wazuh_test_simulation.sh
+```
+
+Check alerts:
+
+```bash
+sudo tail -f /var/ossec/logs/alerts/alerts.log
+```
+
+One-command web test:
+
+```bash
+chmod +x scripts/run_wazuh_web_test.sh scripts/wazuh_test_simulation.sh
+./scripts/run_wazuh_web_test.sh
+```
+
+## 7. Useful Commands
+
+```bash
+php artisan test
+php artisan optimize:clear
+tail -f storage/logs/laravel.log
+```
+
+## 8. Notes
+
+- **Production**: Use Docker deployment (section 2) for production environments
+- **Development**: Use Docker development (section 3) or native setup (section 4)
+- **AI Services**: LSTM service auto-starts in Docker deployment, manual start for local dev
+- **Security**: Keep secrets and real credentials out of git
+- **Wazuh**: Optional security monitoring, update PROJECT_PATH in scripts if needed
+
+## 9. Project Structure
+
+```
+KRB-System/
+├── app/
+│   ├── Livewire/          # Livewire components
+│   ├── Models/            # Eloquent models
+│   ├── Services/
+│   │   └── AI/            # AI services (LSTM, DataPreprocessor, etc.)
+│   └── Http/              # Controllers and middleware
+├── docker/                # Docker configuration files
+│   ├── nginx/             # Nginx configuration
+│   ├── php/               # PHP-FPM configuration
+│   └── supervisor/        # Process manager configuration
+├── resources/
+│   └── views/             # Blade templates
+├── routes/                # Application routes
+├── Dockerfile             # Multi-stage Docker build
+├── docker-compose.yml     # Docker orchestration
+├── deploy.bat             # Windows deployment script
+├── deploy.sh              # Linux/macOS deployment script
+└── DEPLOYMENT.md          # Full deployment documentation
+```
+
+## 10. Support
+
+For issues or questions:
+
+1. **Docker Deployment**: See [DEPLOYMENT.md](DEPLOYMENT.md)
+2. **Quick Start**: See [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)
+3. **Check Logs**: `docker-compose logs -f` or `tail -f storage/logs/laravel.log`
+4. **Verify Services**: `docker-compose ps`
+
+## 11. License
+
+This project is part of the KRB System.

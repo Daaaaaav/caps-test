@@ -63,11 +63,6 @@
                 Occupancy Forecast
             </flux:sidebar.item>
 
-            <flux:sidebar.item icon="cloud" href="{{ route('superadmin.weather') }}"
-                :current="request()->routeIs('superadmin.weather')">
-                Weather Forecast
-            </flux:sidebar.item>
-
             <flux:sidebar.item icon="shield-check" href="{{ route('superadmin.ai-security') }}"
                 :current="request()->routeIs('superadmin.ai-security')">
                 Security Reports

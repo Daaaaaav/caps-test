@@ -9,6 +9,7 @@ use Livewire\WithPagination;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use App\Services\SecurityMonitoringService;
 
 #[Layout('layouts.receptionist')]
 #[Title('Package')]
@@ -88,6 +89,8 @@ class Package extends Component
     public function save(): void
     {
         $this->validate();
+
+        SecurityMonitoringService::logFormSubmit('package', $this->form);
 
         $pengambilan = $this->form['pengambilan']
             ? Carbon::createFromFormat('Y-m-d\TH:i', $this->form['pengambilan'], config('app.timezone', 'Asia/Jakarta'))

@@ -19,7 +19,7 @@ class OccupancyForecasting extends Component
 {
     public string $forecastType  = 'room';   // choice of room | vehicle | combined
     public int    $forecastDays  = 14;
-    public bool   $withWeather   = true;
+    // public bool   $withWeather   = true;
 
     public function setForecastType(string $type): void
     {
@@ -65,12 +65,12 @@ class OccupancyForecasting extends Component
             }
         }
 
-        // ── Weather (next 3 days from BMKG) ──────────────────────────────────
-        $weather = null;
-        if ($this->withWeather) {
-            $weatherService = new WeatherService();
-            $weather = $weatherService->getForecast();
-        }
+        // ── Weather (next 3 days from BMKG) 
+        // $weather = null;
+        // if ($this->withWeather) {
+        //     $weatherService = new WeatherService();
+        //     $weather = $weatherService->getForecast();
+        // }
 
         // ── Chart data ────────────────────────────────────────────────────────
         $chartData = $this->buildChartData($roomForecast, $vehicleForecast);
@@ -78,19 +78,16 @@ class OccupancyForecasting extends Component
         // ── Occupancy stats ───────────────────────────────────────────────────
         $stats = $this->buildStats($roomHistory, $vehicleHistory, $roomForecast, $vehicleForecast);
 
-        // ── Weather impact insight ────────────────────────────────────────────
-        $weatherInsight = $this->buildWeatherInsight($weather, $roomForecast);
-
         return view('livewire.pages.superadmin.occupancy-forecasting', [
             'isLSTMAvailable' => $isAvailable,
             'roomForecast'    => $roomForecast,
             'vehicleForecast' => $vehicleForecast,
             'roomHistory'     => $roomHistory,
             'vehicleHistory'  => $vehicleHistory,
-            'weather'         => $weather,
             'chartData'       => $chartData,
             'stats'           => $stats,
-            'weatherInsight'  => $weatherInsight,
+            'weather'         => null,
+            'weatherInsight'  => null,
         ]);
     }
 
