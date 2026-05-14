@@ -5,24 +5,20 @@ namespace App\Services\AI;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-/**
- * LSTM Client Service
- * 
- * Communicates with the Python LSTM microservice for advanced predictions
- */
 class LSTMClient
 {
     private string $baseUrl;
     private int $timeout;
+    private int $minimumDataPoints = 45;
 
     public function __construct()
     {
-        $this->baseUrl = env('LSTM_SERVICE_URL', 'http://127.0.0.1:8001');
-        $this->timeout = env('LSTM_SERVICE_TIMEOUT', 30);
+        $this->baseUrl  = env('LSTM_SERVICE_URL', 'http://127.0.0.1:8001');
+        $this->timeout  = env('LSTM_SERVICE_TIMEOUT', 30);
     }
 
     /**
-     * Check if LSTM service is available
+     * Check if the LSTM service is reachable.
      */
     public function isAvailable(): bool
     {
@@ -30,91 +26,106 @@ class LSTMClient
             $response = Http::timeout(2)->get($this->baseUrl . '/');
             return $response->successful();
         } catch (\Exception $e) {
+            Log::warning('LSTM service unavailable', ['error' => $e->getMessage()]);
             return false;
         }
     }
 
     /**
-     * Get LSTM predictions from Python service
-     * 
-     * @param array $timeSeries Array of ['date' => 'Y-m-d', 'count' => int]
-     * @param int $forecastDays Number of days to forecast
-     * @param bool $useDummyData Use dummy data for demonstration
-     * @return array|null Predictions or null if service unavailable
+     * Generate AI forecast predictions.
+     *
+     * @param array $timeSeries  Array of ['date' => 'Y-m-d', 'count' => int]
+     * @param int   $forecastDays
+     * @param bool  $useDummyData
+     * @return array|null
      */
     public function predict(array $timeSeries, int $forecastDays = 7, bool $useDummyData = false): ?array
     {
         try {
-            // Format data for LSTM service
-            $data = array_map(function($point) {
-                return [
-                    'date' => $point['date'],
-                    'count' => (float) $point['count'],
-                ];
-            }, $timeSeries);
+            if (!$useDummyData && count($timeSeries) < $this->minimumDataPoints) {
+                Log::warning('Insufficient historical data for LSTM forecast', [
+                    'required' => $this->minimumDataPoints,
+                    'received' => count($timeSeries),
+                ]);
+                return null;
+            }
+
+            $data = array_map(fn($p) => [
+                'date'  => $p['date'],
+                'count' => (float) $p['count'],
+            ], $timeSeries);
 
             $payload = [
-                'data' => $data,
-                'forecast_days' => $forecastDays,
+                'data'           => $data,
+                'forecast_days'  => $forecastDays,
                 'use_dummy_data' => $useDummyData,
             ];
 
-            // Call Python LSTM service
             $response = Http::timeout($this->timeout)
                 ->post($this->baseUrl . '/predict', $payload);
 
             if (!$response->successful()) {
-                Log::warning('LSTM service returned error', [
+                Log::warning('LSTM service returned unsuccessful response', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
+                    'body'   => $response->body(),
                 ]);
                 return null;
             }
 
             $result = $response->json();
 
+            Log::info('LSTM prediction generated', [
+                'model'            => $result['model'] ?? 'unknown',
+                'rmse'             => $result['metrics']['rmse'] ?? null,
+                'training_samples' => $result['training_samples'] ?? null,
+            ]);
+
             return [
-                'rmse' => $result['rmse'] ?? 0,
-                'predictions' => $result['predictions'] ?? [],
-                'data_source' => $result['data_source'] ?? 'unknown',
-                'weekly_summary' => $result['weekly_summary'] ?? null,
+                'method'           => 'lstm',
+                'model'            => $result['model'] ?? 'Improved LSTM Forecast Model',
+                'rmse'             => $result['metrics']['rmse'] ?? $result['rmse'] ?? 0,
+                'metrics'          => $result['metrics'] ?? ['rmse' => 0, 'mae' => 0, 'mape' => 0],
+                'features_used'    => $result['features_used'] ?? [],
+                'predictions'      => $result['predictions'] ?? [],
+                'data_source'      => $result['data_source'] ?? 'unknown',
+                'weekly_summary'   => $result['weekly_summary'] ?? null,
+                'training_samples' => $result['training_samples'] ?? 0,
+                'test_samples'     => $result['test_samples'] ?? 0,
             ];
 
         } catch (\Exception $e) {
-            Log::error('LSTM service communication failed', [
-                'error' => $e->getMessage(),
-                'url' => $this->baseUrl,
+            Log::error('LSTM prediction failed', [
+                'error'        => $e->getMessage(),
+                'url'          => $this->baseUrl,
+                'forecast_days'=> $forecastDays,
             ]);
             return null;
         }
     }
 
     /**
-     * Get 3-week predictions with dummy data demonstration
-     * 
+     * Generate a 21-day (3-week) forecast.
+     *
      * @param array $timeSeries
-     * @param bool $useDummyData Force use of dummy data
+     * @param bool  $useDummyData
      * @return array|null
      */
     public function predict3Weeks(array $timeSeries = [], bool $useDummyData = false): ?array
     {
         try {
-            // If no data provided or insufficient, use dummy data
-            if (empty($timeSeries) || count($timeSeries) < 30) {
+            if (empty($timeSeries) || count($timeSeries) < $this->minimumDataPoints) {
                 $useDummyData = true;
-                $timeSeries = [['date' => date('Y-m-d'), 'count' => 0]]; // Placeholder
+                $timeSeries   = [['date' => date('Y-m-d'), 'count' => 0]];
             }
 
-            $data = array_map(function($point) {
-                return [
-                    'date' => $point['date'],
-                    'count' => (float) $point['count'],
-                ];
-            }, $timeSeries);
+            $data = array_map(fn($p) => [
+                'date'  => $p['date'],
+                'count' => (float) $p['count'],
+            ], $timeSeries);
 
             $payload = [
-                'data' => $data,
-                'forecast_days' => 21,
+                'data'           => $data,
+                'forecast_days'  => 21,
                 'use_dummy_data' => $useDummyData,
             ];
 
@@ -122,104 +133,112 @@ class LSTMClient
                 ->post($this->baseUrl . '/predict-3weeks', $payload);
 
             if (!$response->successful()) {
+                Log::warning('3-week forecast request failed', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
                 return null;
             }
 
             return $response->json();
 
         } catch (\Exception $e) {
-            Log::error('LSTM 3-week prediction failed', [
-                'error' => $e->getMessage(),
-            ]);
+            Log::error('LSTM 3-week prediction failed', ['error' => $e->getMessage()]);
             return null;
         }
     }
 
     /**
-     * Get demo prediction (always uses dummy data)
-     * 
-     * @return array|null
+     * Call the demo endpoint (always uses dummy data).
      */
     public function getDemo(): ?array
     {
         try {
-            $response = Http::timeout($this->timeout)
-                ->get($this->baseUrl . '/demo');
+            $response = Http::timeout($this->timeout)->get($this->baseUrl . '/demo');
 
             if (!$response->successful()) {
+                Log::warning('LSTM demo endpoint failed', ['status' => $response->status()]);
                 return null;
             }
 
             return $response->json();
 
         } catch (\Exception $e) {
-            Log::error('LSTM demo failed', [
-                'error' => $e->getMessage(),
-            ]);
+            Log::error('LSTM demo failed', ['error' => $e->getMessage()]);
             return null;
         }
     }
 
     /**
-     * Get predictions with fallback to simple moving average
-     * 
-     * @param array $timeSeries
-     * @param int $forecastDays
-     * @return array Always returns predictions (uses fallback if LSTM unavailable)
+     * Try LSTM first; fall back to simple moving average if unavailable.
      */
     public function predictWithFallback(array $timeSeries, int $forecastDays = 7): array
     {
-        // Try LSTM first
         $lstmResult = $this->predict($timeSeries, $forecastDays);
 
         if ($lstmResult !== null) {
-            return [
-                'method' => 'lstm',
-                'rmse' => $lstmResult['rmse'],
-                'predictions' => $lstmResult['predictions'],
-            ];
+            return $lstmResult;
         }
 
-        // Fallback to simple moving average
+        Log::info('Using fallback moving average forecast');
         return $this->simpleMovingAverage($timeSeries, $forecastDays);
     }
 
     /**
-     * Simple moving average fallback
+     * Simple moving-average fallback when LSTM is unavailable.
      */
     private function simpleMovingAverage(array $timeSeries, int $forecastDays): array
     {
         if (empty($timeSeries)) {
             return [
-                'method' => 'fallback',
-                'rmse' => 0,
+                'method'      => 'fallback',
+                'model'       => 'Simple Moving Average',
+                'metrics'     => ['rmse' => 0, 'mae' => 0, 'mape' => 0],
                 'predictions' => [],
             ];
         }
 
         $windowSize = min(7, count($timeSeries));
         $recentData = array_slice($timeSeries, -$windowSize);
-        $avgCount = array_sum(array_column($recentData, 'count')) / $windowSize;
+        $avgCount   = array_sum(array_column($recentData, 'count')) / $windowSize;
+
+        // Simple trend: slope over the window
+        $trend = 0;
+        if (count($recentData) >= 2) {
+            $first = $recentData[0]['count'];
+            $last  = end($recentData)['count'];
+            $trend = ($last - $first) / count($recentData);
+        }
 
         $predictions = [];
-        $lastDate = end($timeSeries)['date'];
+        $lastDate    = end($timeSeries)['date'];
 
         for ($i = 1; $i <= $forecastDays; $i++) {
-            $nextDate = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
-            
+            $nextDate   = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
+            $prediction = $avgCount + ($trend * $i);
+
+            // Weekend adjustment
+            if (date('N', strtotime($nextDate)) >= 6) {
+                $prediction *= 0.9;
+            }
+
+            $prediction = max(0, round($prediction, 1));
+
             $predictions[] = [
-                'date' => $nextDate,
-                'predicted' => max(0, round($avgCount)),
-                'lower_bound' => max(0, round($avgCount * 0.8)),
-                'upper_bound' => round($avgCount * 1.2),
-                'confidence' => 0.6,
+                'date'        => $nextDate,
+                'predicted'   => $prediction,
+                'lower_bound' => max(0, round($prediction * 0.8, 1)),
+                'upper_bound' => round($prediction * 1.2, 1),
+                'confidence'  => 0.60,
             ];
         }
 
         return [
-            'method' => 'fallback',
-            'rmse' => 0,
-            'predictions' => $predictions,
+            'method'       => 'fallback',
+            'model'        => 'Simple Moving Average',
+            'metrics'      => ['rmse' => 0, 'mae' => 0, 'mape' => 0],
+            'predictions'  => $predictions,
+            'features_used'=> ['moving_average', 'trend_estimation', 'weekend_adjustment'],
         ];
     }
 }

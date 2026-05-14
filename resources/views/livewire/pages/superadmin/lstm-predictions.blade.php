@@ -9,7 +9,7 @@
                 @if($description)
                     <p class="text-sm text-gray-500 mt-1">{{ $description }}</p>
                 @else
-                    <p class="text-sm text-gray-500 mt-1">Advanced AI predictions using deep learning</p>
+                    <p class="text-sm text-gray-500 mt-1">AI visitor predictions using deep learning</p>
                 @endif
             </div>
             
