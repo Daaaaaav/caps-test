@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\SecurityMonitoringService;
 
 #[Layout('layouts.receptionist')]
 #[Title('Deliveries')]
@@ -108,6 +109,8 @@ class Documents extends Component
     public function save(): void
     {
         $data = $this->validate();
+
+        SecurityMonitoringService::logFormSubmit('documents', $data);
 
         $pengambilan = $this->combineDateTime($data['pengambilan_date'] ?? null, $data['pengambilan_time'] ?? null);
         $statusInput = $data['status'] ?? 'pending';

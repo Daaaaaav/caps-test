@@ -1,0 +1,103 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+      - wazuh-alerts:/var/ossec/logs/alerts:ro
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan queue:listen --tries=1
+
+  vite:
+    image: node:20-bookworm-slim
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+    ports:
+      - "5173:5173"
+    command: sh -lc "npm run dev -- --host 0.0.0.0 --port 5173"
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${MYSQL_HOST_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  composer:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+    entrypoint: ["composer"]
+    profiles: ["tools"]
+
+  artisan:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    entrypoint: ["php", "artisan"]
+    profiles: ["tools"]
+
+  npm:
+    image: node:20-bookworm-slim
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:z
+    entrypoint: ["npm"]
+    profiles: ["tools"]
+
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.9.0
+    profiles: ["wazuh"]
+    ports:
+      - "${WAZUH_AGENT_HOST_PORT:-1514}:1514/udp"
+      - "${WAZUH_MANAGER_HOST_PORT:-1516}:1515"
+    volumes:
+      - wazuh-alerts:/var/ossec/logs/alerts
+      - wazuh-data:/var/ossec/data
+
+volumes:
+  mysql-data:
+  wazuh-alerts:
+  wazuh-data:

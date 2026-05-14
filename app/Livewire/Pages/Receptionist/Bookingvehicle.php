@@ -11,6 +11,7 @@ use App\Models\VehicleBooking;
 use App\Models\Vehicle;
 use App\Models\Department;
 use App\Models\User;
+use App\Services\SecurityMonitoringService;
 
 #[Layout('layouts.receptionist')]
 #[Title('Vehicle Booking')]
@@ -123,6 +124,22 @@ class Bookingvehicle extends Component
     public function submit()
     {
         $this->validate();
+
+        SecurityMonitoringService::logFormSubmit('vehicle_booking', [
+            'department_id' => $this->department_id,
+            'borrower_user_id' => $this->borrower_user_id,
+            'borrower_name' => $this->borrower_name,
+            'vehicle_id' => $this->vehicle_id,
+            'date_from' => $this->date_from,
+            'date_to' => $this->date_to,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'purpose' => $this->purpose,
+            'destination' => $this->destination,
+            'odd_even_area' => $this->odd_even_area,
+            'purpose_type' => $this->purpose_type,
+            'purpose_type_other' => $this->purpose_type_other,
+        ]);
 
         $user = Auth::user();
         $companyId = (int) ($user?->company_id ?? 0);

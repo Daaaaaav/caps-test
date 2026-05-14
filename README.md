@@ -1,61 +1,209 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CAPS Test - Run Guide
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project supports two ways to run:
 
-## About Laravel
+- Docker (recommended for Linux/macOS/Windows)
+- Native local setup (Fedora/Linux focused)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Wazuh is optional in both flows.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 1. Clone Project
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+git clone <your-repo-url>
+cd caps-test
+```
 
-## Learning Laravel
+## 2. Docker Quick Start (Recommended)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Use Docker if your team needs the same setup across Windows and Linux.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Note for Fedora/RHEL users: bind mounts use SELinux relabel (`:z`) in compose so containers can read project files.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Linux/macOS (helper script)
 
-## Laravel Sponsors
+```bash
+chmod +x scripts/docker-dev.sh
+./scripts/docker-dev.sh init
+./scripts/docker-dev.sh start
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Windows PowerShell (helper script)
 
-### Premium Partners
+```powershell
+.\scripts\docker-dev.ps1 -Action init
+.\scripts\docker-dev.ps1 -Action start
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Open:
 
-## Contributing
+- App: http://localhost:8000
+- Vite: http://localhost:5173
+- MySQL (host): localhost:3307
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+If `3307` is busy too, set a different value in `.env` before start:
 
-## Code of Conduct
+```env
+MYSQL_HOST_PORT=3310
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Start with Wazuh (optional)
 
-## Security Vulnerabilities
+Linux/macOS:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+./scripts/docker-dev.sh start --wazuh
+```
 
-## License
+Windows PowerShell:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+.\scripts\docker-dev.ps1 -Action start -Wazuh
+```
+
+### Common Docker helper commands
+
+Linux/macOS:
+
+```bash
+./scripts/docker-dev.sh logs
+./scripts/docker-dev.sh logs --wazuh
+./scripts/docker-dev.sh test
+./scripts/docker-dev.sh stop
+./scripts/docker-dev.sh stop --volumes
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\docker-dev.ps1 -Action logs
+.\scripts\docker-dev.ps1 -Action logs -Wazuh
+.\scripts\docker-dev.ps1 -Action test
+.\scripts\docker-dev.ps1 -Action stop
+.\scripts\docker-dev.ps1 -Action stop -Volumes
+```
+
+Manual Docker commands are documented in docs/DOCKER_SETUP.md.
+
+## 3. Native Local Setup (Fedora/Linux)
+
+Use this if you want to run without Docker.
+
+### Prerequisites
+
+- PHP 8.2+
+- Composer 2+
+- Node.js and npm
+- MariaDB or MySQL
+- Git
+
+Example Fedora install command:
+
+```bash
+sudo dnf install -y php php-cli php-mbstring php-xml php-pdo php-mysqlnd php-bcmath php-curl php-zip unzip composer nodejs npm mariadb-server git ripgrep
+```
+
+Start and enable MariaDB:
+
+```bash
+sudo systemctl enable --now mariadb
+```
+
+### Create Database
+
+```bash
+mysql -u root -p
+```
+
+```sql
+CREATE DATABASE caps_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'caps_user'@'localhost' IDENTIFIED BY 'change_this_password';
+GRANT ALL PRIVILEGES ON caps_test.* TO 'caps_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### Environment and Install
+
+```bash
+cp .env.example .env
+```
+
+Set database values in .env:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=caps_test
+DB_USERNAME=caps_user
+DB_PASSWORD=change_this_password
+```
+
+Install and initialize:
+
+```bash
+composer install
+npm install
+php artisan key:generate
+php artisan migrate
+```
+
+Run app:
+
+```bash
+composer run dev
+```
+
+Or run services separately:
+
+```bash
+php artisan serve
+php artisan queue:listen --tries=1
+npm run dev
+```
+
+## 4. Wazuh (Optional)
+
+If Wazuh is not available, the security report page can still run by reading Laravel logs.
+
+Fedora install script:
+
+```bash
+chmod +x scripts/wazuh_install_manager_fedora.sh
+./scripts/wazuh_install_manager_fedora.sh
+```
+
+Test simulation:
+
+```bash
+chmod +x scripts/wazuh_test_simulation.sh
+./scripts/wazuh_test_simulation.sh
+```
+
+Check alerts:
+
+```bash
+sudo tail -f /var/ossec/logs/alerts/alerts.log
+```
+
+One-command web test:
+
+```bash
+chmod +x scripts/run_wazuh_web_test.sh scripts/wazuh_test_simulation.sh
+./scripts/run_wazuh_web_test.sh
+```
+
+## 5. Useful Commands
+
+```bash
+php artisan test
+php artisan optimize:clear
+tail -f storage/logs/laravel.log
+```
+
+## 6. Notes
+
+- Docker is the easiest cross-platform flow for teams.
+- Keep secrets and real credentials out of git.
+- Update PROJECT_PATH in Wazuh scripts if your local path is different.

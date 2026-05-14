@@ -124,6 +124,9 @@ Route::get('/google/oauth/callback', fn() => redirect('/google/oauth/init'));
 */
 Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('login');
+    Route::post('/login', function () {
+        return redirect()->route('login');
+    })->middleware('throttle:5,1');
     Route::get('/register', RegisterPage::class)->name('register');
 });
 
