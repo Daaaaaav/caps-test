@@ -15,11 +15,22 @@ use App\Models\Delivery;
 #[Title('Dashboard')]
 class Dashboard extends Component
 {
-    public $activeFilter = 'all';
+    public $activeFilter  = 'all';
+    public int $selectedYear;
 
-    public function setFilter($type)
+    public function mount(): void
+    {
+        $this->selectedYear = (int) date('Y');
+    }
+
+    public function setFilter($type): void
     {
         $this->activeFilter = $type;
+    }
+
+    public function setYear(int $year): void
+    {
+        $this->selectedYear = $year;
     }
 
     public function render()
@@ -27,50 +38,84 @@ class Dashboard extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // ===== KPI STATS =====
+            // Year range indicator
+            $yearStart = "{$this->selectedYear}-01-01";
+            $yearEnd   = "{$this->selectedYear}-12-31 23:59:59";
+
+            $totalRooms    = BookingRoom::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->count();
+            $totalVehicles = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->count();
+            $totalUsers    = User::where('company_id', $companyId)->whereHas('role', fn($q) => $q->where('name', 'Receptionist'))->count();
+
+            // Trend: compare selected year vs previous year
+            $prevStart = ($this->selectedYear - 1) . '-01-01';
+            $prevEnd   = ($this->selectedYear - 1) . '-12-31 23:59:59';
+
+            $prevRooms    = BookingRoom::where('company_id', $companyId)->whereBetween('created_at', [$prevStart, $prevEnd])->count();
+            $prevVehicles = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$prevStart, $prevEnd])->count();
+
+            $allTrend     = $this->calcTrend($prevRooms + $prevVehicles, $totalRooms + $totalVehicles);
+            $roomTrendKpi = $this->calcTrend($prevRooms, $totalRooms);
+            $vehTrendKpi  = $this->calcTrend($prevVehicles, $totalVehicles);
+
             $stats = [
                 [
-                    'key' => 'all',
-                    'label' => 'All Activity',
-                    'value' => 
-                        BookingRoom::where('company_id', $companyId)->count() +
-                        VehicleBooking::where('company_id', $companyId)->count(),
-                    'trend' => 12,
-                    'direction' => 'up'
+                    'key'       => 'all',
+                    'label'     => 'All Activity',
+                    'value'     => $totalRooms + $totalVehicles,
+                    'trend'     => abs($allTrend),
+                    'direction' => $allTrend >= 0 ? 'up' : 'down',
                 ],
                 [
-                    'key' => 'room',
-                    'label' => 'Room Bookings',
-                    'value' => BookingRoom::where('company_id', $companyId)->count(),
-                    'trend' => 5,
-                    'direction' => 'up'
+                    'key'       => 'room',
+                    'label'     => 'Room Bookings',
+                    'value'     => $totalRooms,
+                    'trend'     => abs($roomTrendKpi),
+                    'direction' => $roomTrendKpi >= 0 ? 'up' : 'down',
                 ],
                 [
-                    'key' => 'vehicle',
-                    'label' => 'Vehicle Bookings',
-                    'value' => VehicleBooking::where('company_id', $companyId)->count(),
-                    'trend' => -3,
-                    'direction' => 'down'
+                    'key'       => 'vehicle',
+                    'label'     => 'Vehicle Bookings',
+                    'value'     => $totalVehicles,
+                    'trend'     => abs($vehTrendKpi),
+                    'direction' => $vehTrendKpi >= 0 ? 'up' : 'down',
                 ],
                 [
-                    'key' => 'users',
-                    'label' => 'Receptionists',
-                    'value' => User::where('company_id', $companyId)
-                        ->whereHas('role', fn($q) => $q->where('name', 'Receptionist'))
-                        ->count(),
-                    'trend' => 2,
-                    'direction' => 'up'
+                    'key'       => 'users',
+                    'label'     => 'Receptionists',
+                    'value'     => $totalUsers,
+                    'trend'     => 0,
+                    'direction' => 'up',
                 ],
             ];
 
-            // ===== CHART DATA =====
-            $labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            
-            // TO DO: Change dummy retrieval data after done with AI
-            $room = [8, 12, 10, 15, 9, 14, 11, 13, 16, 12, 10, 14];
-            $vehicle = [5, 8, 6, 10, 7, 9, 8, 11, 9, 7, 6, 10];
+            // Monthly counts for selected year
+            $months = collect(range(1, 12));
 
-            // ===== FILTER LOGIC =====
+            $roomByMonth = BookingRoom::where('company_id', $companyId)
+                ->whereYear('created_at', $this->selectedYear)
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->groupByRaw('MONTH(created_at)')
+                ->pluck('count', 'month');
+
+            $vehicleByMonth = VehicleBooking::where('company_id', $companyId)
+                ->whereYear('created_at', $this->selectedYear)
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->groupByRaw('MONTH(created_at)')
+                ->pluck('count', 'month');
+
+            $labels  = $months->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+            $room    = $months->map(fn($m) => (int) ($roomByMonth[$m] ?? 0))->toArray();
+            $vehicle = $months->map(fn($m) => (int) ($vehicleByMonth[$m] ?? 0))->toArray();
+
+            // Available years for selector
+            $roomYears    = BookingRoom::where('company_id', $companyId)->selectRaw('YEAR(created_at) as y')->groupByRaw('YEAR(created_at)')->pluck('y');
+            $vehicleYears = VehicleBooking::where('company_id', $companyId)->selectRaw('YEAR(created_at) as y')->groupByRaw('YEAR(created_at)')->pluck('y');
+            $availableYears = $roomYears->merge($vehicleYears)->unique()->sort()->values()->toArray();
+            if (empty($availableYears)) {
+                $availableYears = [(int) date('Y')];
+            }
+
+            // Filter logic
             if ($this->activeFilter === 'room') {
                 $datasets = [
                     [
@@ -103,10 +148,12 @@ class Dashboard extends Component
             }
 
             return view('livewire.pages.superadmin.dashboard', [
-                'stats' => $stats,
-                'labels' => $labels,
-                'datasets' => $datasets,
-                'activeFilter' => $this->activeFilter,
+                'stats'          => $stats,
+                'labels'         => $labels,
+                'datasets'       => $datasets,
+                'activeFilter'   => $this->activeFilter,
+                'selectedYear'   => $this->selectedYear,
+                'availableYears' => $availableYears,
             ]);
         } catch (\Exception $e) {
             $this->dispatch('toast', 
@@ -116,7 +163,6 @@ class Dashboard extends Component
                 duration: 4000
             );
 
-            // Return fallback data
             return view('livewire.pages.superadmin.dashboard', [
                 'stats' => [
                     ['key' => 'all', 'label' => 'All Activity', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
@@ -124,10 +170,18 @@ class Dashboard extends Component
                     ['key' => 'vehicle', 'label' => 'Vehicle Bookings', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
                     ['key' => 'users', 'label' => 'Receptionists', 'value' => 0, 'trend' => 0, 'direction' => 'up'],
                 ],
-                'labels' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                'datasets' => [],
-                'activeFilter' => $this->activeFilter,
+                'labels'         => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                'datasets'       => [],
+                'activeFilter'   => $this->activeFilter,
+                'selectedYear'   => $this->selectedYear,
+                'availableYears' => [(int) date('Y')],
             ]);
         }
+    }
+
+    private function calcTrend(int $prev, int $curr): float
+    {
+        if ($prev === 0) return $curr > 0 ? 100 : 0;
+        return round(($curr - $prev) / $prev * 100, 1);
     }
 }

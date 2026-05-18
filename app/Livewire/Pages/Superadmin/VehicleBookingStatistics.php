@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\VehicleBooking;
 
 #[Layout('layouts.superadmin')]
@@ -14,14 +13,14 @@ use App\Models\VehicleBooking;
 class VehicleBookingStatistics extends Component
 {
     public $chartType = 'line';
-    public $showList = false;
+    public $showList  = false;
 
-    public function setChartType($type)
+    public function setChartType($type): void
     {
         $this->chartType = $type;
     }
 
-    public function toggleList()
+    public function toggleList(): void
     {
         $this->showList = !$this->showList;
     }
@@ -31,46 +30,33 @@ class VehicleBookingStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // Get booking stats
-            $totalBookings = VehicleBooking::where('company_id', $companyId)->count();
-            $pendingBookings = VehicleBooking::where('company_id', $companyId)->where('status', 'pending')->count();
-            $approvedBookings = VehicleBooking::where('company_id', $companyId)->where('status', 'approved')->count();
+            // ── KPI counts ────────────────────────────────────────────────────
+            $totalBookings     = VehicleBooking::where('company_id', $companyId)->count();
+            $pendingBookings   = VehicleBooking::where('company_id', $companyId)->where('status', 'pending')->count();
+            $approvedBookings  = VehicleBooking::where('company_id', $companyId)->where('status', 'approved')->count();
             $completedBookings = VehicleBooking::where('company_id', $companyId)->where('status', 'completed')->count();
+            $rejectedBookings  = VehicleBooking::where('company_id', $companyId)->where('status', 'rejected')->count();
 
-            // Use dummy data if no real data
-            if ($totalBookings == 0) {
-                $totalBookings = 38;
-                $pendingBookings = 6;
-                $approvedBookings = 25;
-                $completedBookings = 7;
-            }
-
-            // Monthly chart data
-            $monthlyStats = VehicleBooking::where('company_id', $companyId)
-                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            // ── Monthly chart — all 12 months, zero-filled ────────────────────
+            $raw = VehicleBooking::where('company_id', $companyId)
                 ->whereYear('created_at', date('Y'))
-                ->groupBy('month')
-                ->orderBy('month')
-                ->get();
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->groupByRaw('MONTH(created_at)')
+                ->orderByRaw('MONTH(created_at)')
+                ->pluck('count', 'month');
 
-            if ($monthlyStats->isEmpty()) {
-                // TO DO: Change dummy retrieval data after done with AI
-                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                $data = [2, 4, 3, 5, 2, 6, 4, 5, 7, 4, 3, 5];
-            } else {
-                $labels = $monthlyStats->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
-                $data = $monthlyStats->pluck('count')->toArray();
-            }
+            $months = collect(range(1, 12));
+            $labels = $months->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+            $data   = $months->map(fn($m) => (int) ($raw[$m] ?? 0))->toArray();
 
             $kpis = [
-                ['label' => 'Total Bookings', 'value' => $totalBookings, 'color' => 'blue', 'icon' => 'truck'],
-                ['label' => 'Pending', 'value' => $pendingBookings, 'color' => 'yellow', 'icon' => 'clock'],
-                ['label' => 'Approved', 'value' => $approvedBookings, 'color' => 'green', 'icon' => 'check-circle'],
-                ['label' => 'Completed', 'value' => $completedBookings, 'color' => 'purple', 'icon' => 'check-badge'],
+                ['label' => 'Total Bookings', 'value' => $totalBookings,     'color' => 'blue',   'icon' => 'truck'],
+                ['label' => 'Pending',         'value' => $pendingBookings,   'color' => 'yellow', 'icon' => 'clock'],
+                ['label' => 'Approved',        'value' => $approvedBookings,  'color' => 'green',  'icon' => 'check-circle'],
+                ['label' => 'Completed',       'value' => $completedBookings, 'color' => 'purple', 'icon' => 'check-badge'],
             ];
 
-            // Get booking items if list is shown
-            $bookings = $this->showList 
+            $bookings = $this->showList
                 ? VehicleBooking::where('company_id', $companyId)
                     ->with(['vehicle', 'user', 'department'])
                     ->orderBy('created_at', 'desc')
@@ -78,29 +64,29 @@ class VehicleBookingStatistics extends Component
                 : collect();
 
             return view('livewire.pages.superadmin.vehicle-booking-statistics', [
-                'kpis' => $kpis,
-                'labels' => $labels,
-                'data' => $data,
+                'kpis'     => $kpis,
+                'labels'   => $labels,
+                'data'     => $data,
                 'bookings' => $bookings,
             ]);
+
         } catch (\Exception $e) {
-            $this->dispatch('toast', 
-                type: 'error',
-                title: 'Error',
+            $this->dispatch('toast',
+                type: 'error', title: 'Error',
                 message: 'Failed to retrieve vehicle booking data: ' . $e->getMessage(),
                 duration: 4000
             );
 
             return view('livewire.pages.superadmin.vehicle-booking-statistics', [
                 'kpis' => [
-                    ['label' => 'Total Bookings', 'value' => 0, 'color' => 'blue', 'icon' => 'truck'],
-                    ['label' => 'Pending', 'value' => 0, 'color' => 'yellow', 'icon' => 'clock'],
-                    ['label' => 'Approved', 'value' => 0, 'color' => 'green', 'icon' => 'check-circle'],
-                    ['label' => 'Completed', 'value' => 0, 'color' => 'purple', 'icon' => 'check-badge'],
+                    ['label' => 'Total Bookings', 'value' => 0, 'color' => 'blue',   'icon' => 'truck'],
+                    ['label' => 'Pending',         'value' => 0, 'color' => 'yellow', 'icon' => 'clock'],
+                    ['label' => 'Approved',        'value' => 0, 'color' => 'green',  'icon' => 'check-circle'],
+                    ['label' => 'Completed',       'value' => 0, 'color' => 'purple', 'icon' => 'check-badge'],
                 ],
-                'labels' => [],
-                'data' => [],
-                'bookings' => collect([]),
+                'labels'   => [],
+                'data'     => [],
+                'bookings' => collect(),
             ]);
         }
     }

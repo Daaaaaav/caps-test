@@ -6,10 +6,33 @@
                 <h1 class="text-2xl font-semibold text-gray-900">Superadmin Analytics</h1>
                 <p class="text-sm text-gray-500">Interactive system insights</p>
             </div>
-            <button wire:click="setFilter('all')" 
+            <button wire:click="setFilter('all')"
                 class="px-5 py-2.5 bg-gray-900 text-white rounded-xl shadow-sm hover:bg-gray-800 transition">
                 Reset View
             </button>
+        </div>
+
+        {{-- YEAR SELECTOR --}}
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Select Year</p>
+                    <p class="text-xs text-gray-400">Viewing data for {{ $selectedYear }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    @if(empty($availableYears))
+                        <span class="text-sm text-gray-400">No data available</span>
+                    @else
+                        @foreach($availableYears as $year)
+                            <button wire:click="setYear({{ $year }})"
+                                class="px-4 py-2 rounded-lg font-medium transition-all duration-200
+                                    {{ $selectedYear === $year ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                {{ $year }}
+                            </button>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
         </div>
 
         {{-- KPI CARDS --}}
@@ -38,81 +61,78 @@
 
         {{-- CHART --}}
         <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Booking Trends</h3>
-            <div style="position: relative; height: 400px;">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                Booking Trends — {{ $selectedYear }}
+            </h3>
+            <div wire:ignore style="position: relative; height: 400px;">
                 <canvas id="chart"></canvas>
             </div>
         </div>
     </main>
 </div>
 
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     function buildChart() {
         const ctx = document.getElementById('chart');
-        if (!ctx) {
-            console.error('Chart canvas not found');
-            return;
-        }
+        if (!ctx) return;
 
-        const labels = @json($labels);
+        const labels   = @json($labels);
         const datasets = @json($datasets);
 
-        console.log('Building chart with labels:', labels);
-        console.log('Building chart with datasets:', datasets);
+        // Apply monochrome colors regardless of what PHP passes
+        const colors = ['#1f2937', '#6b7280'];
+        datasets.forEach((ds, i) => {
+            ds.borderColor       = colors[i] ?? '#1f2937';
+            ds.backgroundColor   = (colors[i] ?? '#1f2937') + '1a'; // 10% opacity
+            ds.borderWidth       = 2.5;
+            ds.tension           = 0.4;
+            ds.fill              = false;
+            ds.pointRadius       = 4;
+            ds.pointHoverRadius  = 6;
+        });
 
-        if (window.chart && typeof window.chart.destroy === 'function') {
-            window.chart.destroy();
+        if (window.dashChart && typeof window.dashChart.destroy === 'function') {
+            window.dashChart.destroy();
         }
 
-        window.chart = new Chart(ctx, {
+        window.dashChart = new Chart(ctx, {
             type: 'line',
-            data: { 
-                labels: labels, 
-                datasets: datasets 
-            },
+            data: { labels, datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { 
-                    duration: 500 
-                },
+                animation: { duration: 400 },
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
+                    legend: { display: true, position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y
+                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Bookings' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Month' }
                     }
                 }
             }
         });
-
-        console.log('Chart built successfully');
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, building chart');
-        setTimeout(buildChart, 100);
-    });
-    
-    document.addEventListener('livewire:navigated', function() {
-        console.log('Livewire navigated, rebuilding chart');
-        setTimeout(buildChart, 100);
-    });
+    document.addEventListener('DOMContentLoaded', () => buildChart());
 
-    // Also rebuild on Livewire updates
-    if (typeof Livewire !== 'undefined') {
-        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
-            succeed(({ snapshot, effect }) => {
-                setTimeout(buildChart, 100);
-            });
+    document.addEventListener('livewire:init', () => {
+        Livewire.hook('morph.updated', () => {
+            setTimeout(() => buildChart(), 100);
         });
-    }
+    });
 </script>
+@endpush

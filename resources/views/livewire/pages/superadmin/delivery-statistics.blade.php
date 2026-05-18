@@ -73,10 +73,18 @@
                         @forelse($deliveries as $delivery)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-gray-900">#{{ $delivery->delivery_id }}</td>
-                                <td class="px-6 py-4 text-gray-900 font-medium">{{ $delivery->recipient_name ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 text-gray-900 font-medium">{{ $delivery->nama_penerima ?? 'N/A' }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $delivery->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                        {{ ucfirst($delivery->status ?? 'pending') }}
+                                    @php
+                                        $statusColors = [
+                                            'pending' => 'bg-yellow-100 text-yellow-700',
+                                            'stored'  => 'bg-gray-100 text-gray-700',
+                                            'done'    => 'bg-green-100 text-green-700',
+                                        ];
+                                        $s = $delivery->status ?? 'pending';
+                                    @endphp
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusColors[$s] ?? 'bg-gray-100 text-gray-700' }}">
+                                        {{ ucfirst($s) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-gray-600">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>

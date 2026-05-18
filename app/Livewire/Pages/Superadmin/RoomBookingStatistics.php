@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\BookingRoom;
 
 #[Layout('layouts.superadmin')]
@@ -16,12 +15,12 @@ class RoomBookingStatistics extends Component
     public $viewType = 'monthly';
     public $showList = false;
 
-    public function setViewType($type)
+    public function setViewType($type): void
     {
         $this->viewType = $type;
     }
 
-    public function toggleList()
+    public function toggleList(): void
     {
         $this->showList = !$this->showList;
     }
@@ -31,64 +30,56 @@ class RoomBookingStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // Get booking stats
-            $totalBookings = BookingRoom::where('company_id', $companyId)->count();
-            $pendingBookings = BookingRoom::where('company_id', $companyId)->where('status', 'pending')->count();
-            $approvedBookings = BookingRoom::where('company_id', $companyId)->where('status', 'approved')->count();
-            $rejectedBookings = BookingRoom::where('company_id', $companyId)->where('status', 'rejected')->count();
+            // ── KPI counts (status stored as string or numeric — cover both) ──
+            $totalBookings    = BookingRoom::where('company_id', $companyId)->count();
+            $pendingBookings  = BookingRoom::where('company_id', $companyId)
+                ->whereIn('status', [BookingRoom::ST_PENDING, 'pending', 'PENDING'])->count();
+            $approvedBookings = BookingRoom::where('company_id', $companyId)
+                ->whereIn('status', [BookingRoom::ST_APPROVED, 'approved', 'APPROVED'])->count();
+            $rejectedBookings = BookingRoom::where('company_id', $companyId)
+                ->whereIn('status', [BookingRoom::ST_REJECTED, 'rejected', 'REJECTED'])->count();
+            $doneBookings     = BookingRoom::where('company_id', $companyId)
+                ->whereIn('status', [BookingRoom::ST_DONE, 'done', 'DONE'])->count();
 
-            // Use dummy data if no real data
-            if ($totalBookings == 0) {
-                $totalBookings = 45;
-                $pendingBookings = 8;
-                $approvedBookings = 32;
-                $rejectedBookings = 5;
-            }
-
-            // Chart data based on view type
+            // ── Chart data ────────────────────────────────────────────────────
             if ($this->viewType === 'monthly') {
-                $stats = BookingRoom::where('company_id', $companyId)
-                    ->selectRaw('MONTH(created_at) as period, COUNT(*) as count')
+                // All 12 months of the current year, zero-filled
+                $raw = BookingRoom::where('company_id', $companyId)
                     ->whereYear('created_at', date('Y'))
-                    ->groupBy('period')
-                    ->orderBy('period')
-                    ->get();
+                    ->selectRaw('MONTH(created_at) as period, COUNT(*) as count')
+                    ->groupByRaw('MONTH(created_at)')
+                    ->orderByRaw('MONTH(created_at)')
+                    ->pluck('count', 'period');
 
-                if ($stats->isEmpty()) {
-                    // Dummy monthly data
-                    $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    $data = [3, 5, 4, 6, 3, 7, 5, 6, 8, 5, 4, 6];
-                } else {
-                    $labels = $stats->pluck('period')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
-                    $data = $stats->pluck('count')->toArray();
-                }
+                $months = collect(range(1, 12));
+                $labels = $months->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+                $data   = $months->map(fn($m) => (int) ($raw[$m] ?? 0))->toArray();
             } else {
-                $stats = BookingRoom::where('company_id', $companyId)
+                // Last 7 days, zero-filled for missing dates
+                $raw = BookingRoom::where('company_id', $companyId)
+                    ->where('created_at', '>=', now()->subDays(6)->startOfDay())
                     ->selectRaw('DATE(created_at) as period, COUNT(*) as count')
-                    ->where('created_at', '>=', now()->subDays(7))
-                    ->groupBy('period')
-                    ->orderBy('period')
-                    ->get();
+                    ->groupByRaw('DATE(created_at)')
+                    ->orderByRaw('DATE(created_at)')
+                    ->pluck('count', 'period');
 
-                if ($stats->isEmpty()) {
-                    // TO DO: Change dummy retrieval data after done with AI
-                    $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                    $data = [2, 3, 1, 4, 2, 3, 2];
-                } else {
-                    $labels = $stats->pluck('period')->map(fn($d) => date('M d', strtotime($d)))->toArray();
-                    $data = $stats->pluck('count')->toArray();
+                $labels = [];
+                $data   = [];
+                for ($i = 6; $i >= 0; $i--) {
+                    $date     = now()->subDays($i)->format('Y-m-d');
+                    $labels[] = now()->subDays($i)->format('M d');
+                    $data[]   = (int) ($raw[$date] ?? 0);
                 }
             }
 
             $kpis = [
-                ['label' => 'Total Bookings', 'value' => $totalBookings, 'color' => 'blue'],
-                ['label' => 'Pending', 'value' => $pendingBookings, 'color' => 'yellow'],
-                ['label' => 'Approved', 'value' => $approvedBookings, 'color' => 'green'],
-                ['label' => 'Rejected', 'value' => $rejectedBookings, 'color' => 'red'],
+                ['label' => 'Total Bookings', 'value' => $totalBookings,    'color' => 'blue'],
+                ['label' => 'Pending',         'value' => $pendingBookings,  'color' => 'yellow'],
+                ['label' => 'Approved',        'value' => $approvedBookings, 'color' => 'green'],
+                ['label' => 'Rejected',        'value' => $rejectedBookings, 'color' => 'red'],
             ];
 
-            // Get booking items if list is shown
-            $bookings = $this->showList 
+            $bookings = $this->showList
                 ? BookingRoom::where('company_id', $companyId)
                     ->with(['room', 'user', 'department'])
                     ->orderBy('created_at', 'desc')
@@ -96,15 +87,15 @@ class RoomBookingStatistics extends Component
                 : collect();
 
             return view('livewire.pages.superadmin.room-booking-statistics', [
-                'kpis' => $kpis,
-                'labels' => $labels,
-                'data' => $data,
+                'kpis'     => $kpis,
+                'labels'   => $labels,
+                'data'     => $data,
                 'bookings' => $bookings,
             ]);
+
         } catch (\Exception $e) {
-            $this->dispatch('toast', 
-                type: 'error',
-                title: 'Error',
+            $this->dispatch('toast',
+                type: 'error', title: 'Error',
                 message: 'Failed to retrieve room booking data: ' . $e->getMessage(),
                 duration: 4000
             );
@@ -112,13 +103,13 @@ class RoomBookingStatistics extends Component
             return view('livewire.pages.superadmin.room-booking-statistics', [
                 'kpis' => [
                     ['label' => 'Total Bookings', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Pending', 'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Approved', 'value' => 0, 'color' => 'green'],
-                    ['label' => 'Rejected', 'value' => 0, 'color' => 'red'],
+                    ['label' => 'Pending',         'value' => 0, 'color' => 'yellow'],
+                    ['label' => 'Approved',        'value' => 0, 'color' => 'green'],
+                    ['label' => 'Rejected',        'value' => 0, 'color' => 'red'],
                 ],
-                'labels' => [],
-                'data' => [],
-                'bookings' => collect([]),
+                'labels'   => [],
+                'data'     => [],
+                'bookings' => collect(),
             ]);
         }
     }

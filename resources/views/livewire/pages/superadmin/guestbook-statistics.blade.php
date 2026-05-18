@@ -59,8 +59,7 @@
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b bg-gray-50">
                     <h3 class="font-semibold text-gray-900">Recent Visitors</h3>
-                </div>
-                <table class="w-full text-sm">
+                </div>                <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-500 uppercase text-xs border-b">
                         <tr>
                             <th class="px-6 py-3 text-left font-medium">ID</th>

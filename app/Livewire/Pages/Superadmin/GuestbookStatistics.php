@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\Guestbook;
 
 #[Layout('layouts.superadmin')]
@@ -14,14 +13,14 @@ use App\Models\Guestbook;
 class GuestbookStatistics extends Component
 {
     public $timeRange = '7days';
-    public $showList = false;
+    public $showList  = false;
 
-    public function setTimeRange($range)
+    public function setTimeRange($range): void
     {
         $this->timeRange = $range;
     }
 
-    public function toggleList()
+    public function toggleList(): void
     {
         $this->showList = !$this->showList;
     }
@@ -31,144 +30,73 @@ class GuestbookStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // Determine date range
             $days = match($this->timeRange) {
-                '7days' => 7,
                 '30days' => 30,
                 '90days' => 90,
-                default => 7,
+                default  => 7,
             };
 
-            // Get guestbook stats
+            $since = now()->subDays($days)->startOfDay();
+
+            // ── KPI counts ────────────────────────────────────────────────────
             $totalVisitors = Guestbook::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
+                ->where('created_at', '>=', $since)
                 ->count();
 
+            // Currently inside: checked in but not yet checked out
             $checkedIn = Guestbook::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
+                ->where('created_at', '>=', $since)
                 ->whereNotNull('jam_in')
                 ->whereNull('jam_out')
                 ->count();
 
+            // Already left: has a check-out time
             $checkedOut = Guestbook::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
+                ->where('created_at', '>=', $since)
                 ->whereNotNull('jam_out')
                 ->count();
 
-            // TO DO: Change dummy retrieval data after done with AI
-            if ($totalVisitors == 0) {
-                $totalVisitors = match($this->timeRange) {
-                    '7days' => 42,
-                    '30days' => 180,
-                    '90days' => 540,
-                    default => 42,
-                };
-                $checkedIn = round($totalVisitors * 0.15);
-                $checkedOut = $totalVisitors - $checkedIn;
-            }
-
-            // Get guestbook items list
-            $guestbooks = Guestbook::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-          // TO DO: Change dummy retrieval data after done with AI
-            if ($guestbooks->isEmpty()) {
-                $dummyData = collect([
-                    (object)[
-                        'guestbook_id' => 1,
-                        'name' => 'John Doe',
-                        'instansi' => 'ABC Corporation',
-                        'keperluan' => 'Business meeting with management team',
-                        'jam_in' => '09:00',
-                        'jam_out' => '11:30',
-                    ],
-                    (object)[
-                        'guestbook_id' => 2,
-                        'name' => 'Jane Smith',
-                        'instansi' => 'XYZ Industries',
-                        'keperluan' => 'Product demonstration and consultation',
-                        'jam_in' => '10:15',
-                        'jam_out' => null,
-                    ],
-                    (object)[
-                        'guestbook_id' => 3,
-                        'name' => 'Michael Johnson',
-                        'instansi' => 'Tech Solutions Ltd',
-                        'keperluan' => 'Technical support and system maintenance',
-                        'jam_in' => '13:00',
-                        'jam_out' => '15:45',
-                    ],
-                    (object)[
-                        'guestbook_id' => 4,
-                        'name' => 'Sarah Williams',
-                        'instansi' => 'Global Partners Inc',
-                        'keperluan' => 'Contract negotiation meeting',
-                        'jam_in' => '14:30',
-                        'jam_out' => null,
-                    ],
-                    (object)[
-                        'guestbook_id' => 5,
-                        'name' => 'David Brown',
-                        'instansi' => 'Innovation Hub',
-                        'keperluan' => 'Project collaboration discussion',
-                        'jam_in' => null,
-                        'jam_out' => null,
-                    ],
-                ]);
-                $guestbooks = $dummyData;
-            }
-
-            // Chart data - daily visitors
-            $dailyStats = Guestbook::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
+            // ── Daily chart — zero-filled for every day in range ──────────────
+            $raw = Guestbook::where('company_id', $companyId)
+                ->where('created_at', '>=', $since)
                 ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-                ->groupBy(DB::raw('DATE(created_at)'))
-                ->orderBy('date')
-                ->get();
+                ->groupByRaw('DATE(created_at)')
+                ->orderByRaw('DATE(created_at)')
+                ->pluck('count', 'date');
 
-            if ($dailyStats->isEmpty()) {
-                // Generate dummy data based on time range
-                $labels = [];
-                $data = [];
-                
-                if ($this->timeRange === '7days') {
-                    $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                    $data = [5, 7, 6, 8, 5, 4, 7];
-                } elseif ($this->timeRange === '30days') {
-                    for ($i = 29; $i >= 0; $i--) {
-                        $labels[] = now()->subDays($i)->format('M d');
-                        $data[] = rand(3, 9);
-                    }
-                } else {
-                    for ($i = 89; $i >= 0; $i -= 3) {
-                        $labels[] = now()->subDays($i)->format('M d');
-                        $data[] = rand(15, 25);
-                    }
-                }
-            } else {
-                $labels = $dailyStats->pluck('date')->map(fn($d) => date('M d', strtotime($d)))->toArray();
-                $data = $dailyStats->pluck('count')->toArray();
+            $labels = [];
+            $data   = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $date     = now()->subDays($i)->format('Y-m-d');
+                $labels[] = now()->subDays($i)->format('M d');
+                $data[]   = (int) ($raw[$date] ?? 0);
             }
+
+            // ── Visitor list ──────────────────────────────────────────────────
+            $guestbooks = $this->showList
+                ? Guestbook::where('company_id', $companyId)
+                    ->where('created_at', '>=', $since)
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                : collect();
 
             $stats = [
-                ['label' => 'Total Visitors', 'value' => $totalVisitors, 'color' => 'blue'],
-                ['label' => 'Currently In', 'value' => $checkedIn, 'color' => 'yellow'],
-                ['label' => 'Checked Out', 'value' => $checkedOut, 'color' => 'green'],
-                ['label' => 'Avg per Day', 'value' => $days > 0 ? round($totalVisitors / $days, 1) : 0, 'color' => 'purple'],
+                ['label' => 'Total Visitors', 'value' => $totalVisitors,                                                    'color' => 'blue'],
+                ['label' => 'Currently In',   'value' => $checkedIn,                                                        'color' => 'yellow'],
+                ['label' => 'Checked Out',    'value' => $checkedOut,                                                       'color' => 'green'],
+                ['label' => 'Avg per Day',    'value' => $days > 0 ? round($totalVisitors / $days, 1) : 0,                  'color' => 'purple'],
             ];
 
             return view('livewire.pages.superadmin.guestbook-statistics', [
-                'stats' => $stats,
-                'labels' => $labels,
-                'data' => $data,
+                'stats'      => $stats,
+                'labels'     => $labels,
+                'data'       => $data,
                 'guestbooks' => $guestbooks,
             ]);
+
         } catch (\Exception $e) {
-            $this->dispatch('toast', 
-                type: 'error',
-                title: 'Error',
+            $this->dispatch('toast',
+                type: 'error', title: 'Error',
                 message: 'Failed to retrieve guestbook data: ' . $e->getMessage(),
                 duration: 4000
             );
@@ -176,13 +104,13 @@ class GuestbookStatistics extends Component
             return view('livewire.pages.superadmin.guestbook-statistics', [
                 'stats' => [
                     ['label' => 'Total Visitors', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Currently In', 'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Checked Out', 'value' => 0, 'color' => 'green'],
-                    ['label' => 'Avg per Day', 'value' => 0, 'color' => 'purple'],
+                    ['label' => 'Currently In',   'value' => 0, 'color' => 'yellow'],
+                    ['label' => 'Checked Out',    'value' => 0, 'color' => 'green'],
+                    ['label' => 'Avg per Day',    'value' => 0, 'color' => 'purple'],
                 ],
-                'labels' => [],
-                'data' => [],
-                'guestbooks' => collect([]),
+                'labels'     => [],
+                'data'       => [],
+                'guestbooks' => collect(),
             ]);
         }
     }

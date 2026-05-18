@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\Delivery;
 
 #[Layout('layouts.superadmin')]
@@ -14,14 +13,14 @@ use App\Models\Delivery;
 class DeliveryStatistics extends Component
 {
     public $timeRange = '7days';
-    public $showList = false;
+    public $showList  = false;
 
-    public function setTimeRange($range)
+    public function setTimeRange($range): void
     {
         $this->timeRange = $range;
     }
 
-    public function toggleList()
+    public function toggleList(): void
     {
         $this->showList = !$this->showList;
     }
@@ -31,96 +30,63 @@ class DeliveryStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // Determine date range
             $days = match($this->timeRange) {
-                '7days' => 7,
                 '30days' => 30,
                 '90days' => 90,
-                default => 7,
+                default  => 7,
             };
 
-            // Get delivery stats
-            $totalDeliveries = Delivery::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
-                ->count();
+            $since = now()->subDays($days)->startOfDay();
 
-            $pendingDeliveries = Delivery::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
-                ->where('status', 'pending')
-                ->count();
+            // ── KPI counts ────────────────────────────────────────────────────
+            // Delivery statuses: pending | stored | done
+            // "done" covers both delivered and taken (direction field distinguishes them)
+            $totalDeliveries     = Delivery::where('company_id', $companyId)->where('created_at', '>=', $since)->count();
+            $pendingDeliveries   = Delivery::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'pending')->count();
+            $storedDeliveries    = Delivery::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'stored')->count();
+            $completedDeliveries = Delivery::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'done')->count();
 
-            $completedDeliveries = Delivery::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
-                ->where('status', 'completed')
-                ->count();
-
-            // TO DO: Change dummy retrieval data after done with AI
-            if ($totalDeliveries == 0) {
-                $totalDeliveries = match($this->timeRange) {
-                    '7days' => 28,
-                    '30days' => 120,
-                    '90days' => 360,
-                    default => 28,
-                };
-                $pendingDeliveries = round($totalDeliveries * 0.2);
-                $completedDeliveries = $totalDeliveries - $pendingDeliveries;
-            }
-
-            // Get delivery items list
-            $deliveries = Delivery::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            // Chart data - daily deliveries
-            $dailyStats = Delivery::where('company_id', $companyId)
-                ->where('created_at', '>=', now()->subDays($days))
+            // ── Daily chart — zero-filled for every day in range ──────────────
+            $raw = Delivery::where('company_id', $companyId)
+                ->where('created_at', '>=', $since)
                 ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
+                ->groupByRaw('DATE(created_at)')
+                ->orderByRaw('DATE(created_at)')
+                ->pluck('count', 'date');
 
-            if ($dailyStats->isEmpty()) {
-                // Generate dummy data based on time range
-                $labels = [];
-                $data = [];
-                
-                if ($this->timeRange === '7days') {
-                    $labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                    $data = [3, 5, 4, 6, 3, 4, 3];
-                } elseif ($this->timeRange === '30days') {
-                    for ($i = 29; $i >= 0; $i--) {
-                        $labels[] = now()->subDays($i)->format('M d');
-                        $data[] = rand(2, 6);
-                    }
-                } else {
-                    for ($i = 89; $i >= 0; $i -= 3) {
-                        $labels[] = now()->subDays($i)->format('M d');
-                        $data[] = rand(8, 15);
-                    }
-                }
-            } else {
-                $labels = $dailyStats->pluck('date')->map(fn($d) => date('M d', strtotime($d)))->toArray();
-                $data = $dailyStats->pluck('count')->toArray();
+            $labels = [];
+            $data   = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $date     = now()->subDays($i)->format('Y-m-d');
+                $labels[] = now()->subDays($i)->format('M d');
+                $data[]   = (int) ($raw[$date] ?? 0);
             }
+
+            // ── Delivery list ─────────────────────────────────────────────────
+            $deliveries = $this->showList
+                ? Delivery::where('company_id', $companyId)
+                    ->where('created_at', '>=', $since)
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                : collect();
 
             $stats = [
-                ['label' => 'Total Deliveries', 'value' => $totalDeliveries, 'color' => 'blue'],
-                ['label' => 'Pending', 'value' => $pendingDeliveries, 'color' => 'yellow'],
-                ['label' => 'Completed', 'value' => $completedDeliveries, 'color' => 'green'],
-                ['label' => 'Avg per Day', 'value' => $days > 0 ? round($totalDeliveries / $days, 1) : 0, 'color' => 'purple'],
+                ['label' => 'Total Deliveries', 'value' => $totalDeliveries,     'color' => 'blue'],
+                ['label' => 'Pending',           'value' => $pendingDeliveries,   'color' => 'yellow'],
+                ['label' => 'Stored',            'value' => $storedDeliveries,    'color' => 'purple'],
+                ['label' => 'Completed',         'value' => $completedDeliveries, 'color' => 'green'],
             ];
 
             return view('livewire.pages.superadmin.delivery-statistics', [
-                'stats' => $stats,
-                'labels' => $labels,
-                'data' => $data,
+                'stats'      => $stats,
+                'labels'     => $labels,
+                'data'       => $data,
                 'deliveries' => $deliveries,
             ]);
+
         } catch (\Exception $e) {
-            $this->dispatch('toast', 
-                type: 'error',
-                title: 'Error',
+            $this->dispatch('toast',
+                type: 'error', title: 'Error',
                 message: 'Failed to retrieve delivery data: ' . $e->getMessage(),
                 duration: 4000
             );
@@ -128,13 +94,13 @@ class DeliveryStatistics extends Component
             return view('livewire.pages.superadmin.delivery-statistics', [
                 'stats' => [
                     ['label' => 'Total Deliveries', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Pending', 'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Completed', 'value' => 0, 'color' => 'green'],
-                    ['label' => 'Avg per Day', 'value' => 0, 'color' => 'purple'],
+                    ['label' => 'Pending',           'value' => 0, 'color' => 'yellow'],
+                    ['label' => 'Stored',            'value' => 0, 'color' => 'purple'],
+                    ['label' => 'Completed',         'value' => 0, 'color' => 'green'],
                 ],
-                'labels' => [],
-                'data' => [],
-                'deliveries' => collect([]),
+                'labels'     => [],
+                'data'       => [],
+                'deliveries' => collect(),
             ]);
         }
     }
