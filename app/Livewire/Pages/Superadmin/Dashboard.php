@@ -147,6 +147,9 @@ class Dashboard extends Component
                 ];
             }
 
+            // Dispatch chart data as a browser event so JS can update without re-rendering the canvas
+            $this->dispatch('chart-data-updated', labels: $labels, datasets: $datasets);
+
             return view('livewire.pages.superadmin.dashboard', [
                 'stats'          => $stats,
                 'labels'         => $labels,
@@ -155,6 +158,9 @@ class Dashboard extends Component
                 'selectedYear'   => $this->selectedYear,
                 'availableYears' => $availableYears,
             ]);
+
+            // Dispatch chart data as a browser event so JS can update without re-rendering
+            $this->dispatch('chart-data-updated', labels: $labels, datasets: $datasets);
         } catch (\Exception $e) {
             $this->dispatch('toast', 
                 type: 'error',

@@ -74,24 +74,34 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    function buildChart() {
+    const CHART_COLORS = {
+        'Room Bookings':    { border: '#2563eb', bg: 'rgba(37, 99, 235, 0.1)' },
+        'Vehicle Bookings': { border: '#059669', bg: 'rgba(5, 150, 105, 0.1)' },
+    };
+    const FALLBACK_COLORS = ['#7c3aed', '#db2777'];
+
+    function applyDatasetStyles(datasets) {
+        return datasets.map((ds, i) => {
+            const c = CHART_COLORS[ds.label] ?? {
+                border: FALLBACK_COLORS[i] ?? '#374151',
+                bg:     (FALLBACK_COLORS[i] ?? '#374151') + '1a',
+            };
+            return {
+                ...ds,
+                borderColor:      c.border,
+                backgroundColor:  c.bg,
+                borderWidth:      2.5,
+                tension:          0.4,
+                fill:             false,
+                pointRadius:      4,
+                pointHoverRadius: 6,
+            };
+        });
+    }
+
+    function buildChart(labels, datasets) {
         const ctx = document.getElementById('chart');
         if (!ctx) return;
-
-        const labels   = @json($labels);
-        const datasets = @json($datasets);
-
-        // Apply monochrome colors regardless of what PHP passes
-        const colors = ['#1f2937', '#6b7280'];
-        datasets.forEach((ds, i) => {
-            ds.borderColor       = colors[i] ?? '#1f2937';
-            ds.backgroundColor   = (colors[i] ?? '#1f2937') + '1a'; // 10% opacity
-            ds.borderWidth       = 2.5;
-            ds.tension           = 0.4;
-            ds.fill              = false;
-            ds.pointRadius       = 4;
-            ds.pointHoverRadius  = 6;
-        });
 
         if (window.dashChart && typeof window.dashChart.destroy === 'function') {
             window.dashChart.destroy();
@@ -99,7 +109,7 @@
 
         window.dashChart = new Chart(ctx, {
             type: 'line',
-            data: { labels, datasets },
+            data: { labels, datasets: applyDatasetStyles(datasets) },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -119,19 +129,32 @@
                         ticks: { stepSize: 1 },
                         title: { display: true, text: 'Bookings' }
                     },
-                    x: {
-                        title: { display: true, text: 'Month' }
-                    }
+                    x: { title: { display: true, text: 'Month' } }
                 }
             }
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => buildChart());
+    function updateChart(labels, datasets) {
+        if (!window.dashChart) {
+            buildChart(labels, datasets);
+            return;
+        }
+        // Update data in-place — no destroy/rebuild, smooth animation
+        window.dashChart.data.labels = labels;
+        window.dashChart.data.datasets = applyDatasetStyles(datasets);
+        window.dashChart.update('active');
+    }
 
+    // Initial render — use the PHP-baked values
+    document.addEventListener('DOMContentLoaded', () => {
+        buildChart(@json($labels), @json($datasets));
+    });
+
+    // Subsequent year/filter changes — use the event payload from Livewire
     document.addEventListener('livewire:init', () => {
-        Livewire.hook('morph.updated', () => {
-            setTimeout(() => buildChart(), 100);
+        Livewire.on('chart-data-updated', ({ labels, datasets }) => {
+            updateChart(labels, datasets);
         });
     });
 </script>
