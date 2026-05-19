@@ -185,40 +185,68 @@ class DataPreprocessor
     }
 
     /**
-     * Create time-series dataset for forecasting
+     * Create time-series dataset for forecasting.
+     * Uses ALL available historical data by default (no date limit)
+     * so the model can learn from patterns across years.
      */
-    public function createTimeSeriesDataset(string $model, int $companyId, int $days = 180): array
+    public function createTimeSeriesDataset(string $model, int $companyId, int $days = 0): array
     {
         $modelClass = match($model) {
-            'room_booking' => BookingRoom::class,
+            'room_booking'    => BookingRoom::class,
             'vehicle_booking' => VehicleBooking::class,
-            'guestbook' => Guestbook::class,
-            'delivery' => Delivery::class,
-            default => throw new \InvalidArgumentException("Unknown model: $model"),
+            'guestbook'       => Guestbook::class,
+            'delivery'        => Delivery::class,
+            default           => throw new \InvalidArgumentException("Unknown model: $model"),
         };
 
-        $data = $modelClass::where('company_id', $companyId)
-            ->where('created_at', '>=', now()->subDays($days))
+        $query = \Illuminate\Support\Facades\DB::table((new $modelClass)->getTable())
+            ->where('company_id', $companyId)
+            ->whereNull('deleted_at'); // respect soft deletes manually
+
+        // Only apply a date limit when explicitly requested (days > 0)
+        // For guestbook, always limit to the seeded window to avoid sparse leading zeros
+        if ($days > 0) {
+            $query->where('created_at', '>=', now()->subDays($days));
+        } else {
+            // Default: use the last 730 days (2 years) — matches the seeder window
+            // and avoids a long sparse prefix that confuses the LSTM
+            $query->where('created_at', '>=', now()->subDays(730));
+        }
+
+        $data = $query
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date')
             ->get();
 
-        // Fill missing dates with zero
+        if ($data->isEmpty()) {
+            return [];
+        }
+
+        // Build a zero-filled daily series from the query window start to today
+        // Use the query's actual start date (730 days ago by default) rather than
+        // the earliest DB record, to avoid a long sparse prefix of zeros
+        $windowDays = $days > 0 ? $days : 730;
+        $startDate  = now()->subDays($windowDays)->startOfDay();
+        $endDate    = Carbon::today();
+        $totalDays  = $startDate->diffInDays($endDate) + 1;
+
+        // Build a lookup map: date string → count (avoids firstWhere cast issues)
+        $countByDate = $data->pluck('count', 'date')->toArray();
+
         $timeSeries = [];
-        $startDate = now()->subDays($days);
-        
-        for ($i = 0; $i < $days; $i++) {
-            $date = $startDate->copy()->addDays($i)->format('Y-m-d');
-            $count = $data->firstWhere('date', $date)?->count ?? 0;
-            
+
+        for ($i = 0; $i < $totalDays; $i++) {
+            $date  = $startDate->copy()->addDays($i)->format('Y-m-d');
+            $count = (int) ($countByDate[$date] ?? 0);
+
             $timeSeries[] = [
-                'date' => $date,
-                'count' => $count,
+                'date'        => $date,
+                'count'       => $count,
                 'day_of_week' => Carbon::parse($date)->dayOfWeek,
-                'is_weekend' => Carbon::parse($date)->isWeekend(),
-                'week_of_year' => Carbon::parse($date)->weekOfYear,
-                'month' => Carbon::parse($date)->month,
+                'is_weekend'  => Carbon::parse($date)->isWeekend(),
+                'week_of_year'=> Carbon::parse($date)->weekOfYear,
+                'month'       => Carbon::parse($date)->month,
             ];
         }
 

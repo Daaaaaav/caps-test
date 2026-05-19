@@ -12,7 +12,7 @@ use App\Models\Guestbook;
 #[Title('Guestbook Statistics')]
 class GuestbookStatistics extends Component
 {
-    public $timeRange = '7days';
+    public $timeRange = '90days';
     public $showList  = false;
 
     public function setTimeRange($range): void
@@ -86,6 +86,8 @@ class GuestbookStatistics extends Component
                 ['label' => 'Checked Out',    'value' => $checkedOut,                                                       'color' => 'green'],
                 ['label' => 'Avg per Day',    'value' => $days > 0 ? round($totalVisitors / $days, 1) : 0,                  'color' => 'purple'],
             ];
+
+            $this->dispatch('guestbook-chart-updated', labels: $labels, data: $data);
 
             return view('livewire.pages.superadmin.guestbook-statistics', [
                 'stats'      => $stats,

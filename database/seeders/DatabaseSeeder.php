@@ -329,38 +329,125 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // ===== ANNOUNCEMENTS/GUESTBOOK =====
-        for ($i=1; $i<=30; $i++) {
+        // ===== ANNOUNCEMENTS =====
+        for ($i = 1; $i <= 30; $i++) {
             $randomDate = $now->copy()->subDays(rand(0, $daysBack));
 
             Announcement::create([
-                'company_id'=>$companyId,
-                'description'=>"📢 Pengumuman {$companyName} #{$i}",
-                'event_at'=>$randomDate->copy()->addDays(rand(2,10)),
-                'created_at'=>$randomDate,
+                'company_id'  => $companyId,
+                'description' => "📢 Pengumuman {$companyName} #{$i}",
+                'event_at'    => $randomDate->copy()->addDays(rand(2, 10)),
+                'created_at'  => $randomDate,
             ]);
 
             Information::create([
-                'company_id'=>$companyId,
-                'department_id'=>Arr::random($depts)->department_id,
-                'description'=>"📰 Info khusus {$companyName} #{$i}",
-                'event_at'=>$randomDate->copy()->addDays(rand(1,5)),
-                'created_at'=>$randomDate,
-            ]);
-
-            Guestbook::create([
-                'company_id'=>$companyId,
-                'department_id'=>Arr::random($depts)->department_id,
-                'date'=>$randomDate->toDateString(),
-                'jam_in'=>sprintf("%02d:%02d:00", rand(8,10), rand(0,59)),
-                'jam_out'=>sprintf("%02d:%02d:00", rand(14,17), rand(0,59)),
-                'name'=>"Tamu #{$i}",
-                'instansi'=>"Instansi {$i}",
-                'keperluan'=>"Meeting",
-                'petugas_penjaga'=>$receptionist->full_name,
-                'created_at'=>$randomDate,
+                'company_id'    => $companyId,
+                'department_id' => Arr::random($depts)->department_id,
+                'description'   => "📰 Info khusus {$companyName} #{$i}",
+                'event_at'      => $randomDate->copy()->addDays(rand(1, 5)),
+                'created_at'    => $randomDate,
             ]);
         }
+
+        // ===== GUESTBOOK — dense daily visitor data for LSTM training =====
+        // Generates realistic visitor patterns across 2 years:
+        //   - Weekdays: 3–12 visitors/day  (higher Mon–Thu)
+        //   - Weekends: 0–3 visitors/day
+        //   - Indonesian public holidays: 0–1 visitors
+        //   - Monthly trend: slight growth over time
+        // This gives ~1,000+ entries with clear temporal patterns the LSTM can learn.
+
+        $guestNames = [
+            'Budi Santoso','Siti Rahayu','Ahmad Fauzi','Dewi Lestari','Eko Prasetyo',
+            'Fitri Handayani','Gunawan Wibowo','Hana Pertiwi','Irfan Maulana','Joko Susilo',
+            'Kartini Wahyu','Lukman Hakim','Maya Sari','Nanda Putra','Oki Setiawan',
+            'Putri Anggraini','Rizky Firmansyah','Sari Indah','Teguh Santoso','Umar Bakri',
+            'Vina Kusuma','Wahyu Hidayat','Xena Pratiwi','Yudi Nugroho','Zahra Amelia',
+            'Arif Rahman','Bella Safitri','Candra Wijaya','Dina Permata','Edi Kurniawan',
+        ];
+
+        $instansiList = [
+            'PT Maju Bersama','CV Karya Mandiri','Dinas Pertanian Kota Bogor',
+            'Universitas Indonesia','Institut Pertanian Bogor','Kementerian LHK',
+            'BRIN','Yayasan Hijau Nusantara','PT Agro Lestari','Balai Penelitian Tanaman',
+            'Pemerintah Kota Bogor','Sekolah Alam Bogor','PT Wisata Alam Indonesia',
+            'Komunitas Pecinta Tanaman','Lembaga Konservasi Nasional',
+        ];
+
+        $keperluanList = [
+            'Kunjungan penelitian','Rapat koordinasi','Studi banding',
+            'Pengambilan data lapangan','Konsultasi teknis','Kunjungan wisata edukasi',
+            'Pertemuan kemitraan','Pengiriman dokumen','Survei lokasi',
+            'Kunjungan dinas','Seminar dan workshop','Magang mahasiswa',
+        ];
+
+        // Indonesian public holidays (approximate, recurring annually)
+        $holidays = [
+            '01-01', // New Year
+            '02-10', // Imlek (approx)
+            '03-29', // Nyepi (approx)
+            '04-18', // Good Friday (approx)
+            '05-01', // Labour Day
+            '05-29', // Ascension (approx)
+            '06-01', // Pancasila Day
+            '08-17', // Independence Day
+            '12-25', // Christmas
+            '12-26', // Boxing Day
+        ];
+
+        $guestCounter = 1;
+        $seedDays     = 730; // 2 years of daily data
+
+        for ($dayOffset = $seedDays; $dayOffset >= 0; $dayOffset--) {
+            $date    = $now->copy()->subDays($dayOffset)->startOfDay();
+            $dow     = $date->dayOfWeek; // 0=Sun, 6=Sat
+            $mmdd    = $date->format('m-d');
+            $isHoliday = in_array($mmdd, $holidays);
+
+            // Determine visitor count for this day
+            if ($isHoliday) {
+                $count = rand(0, 1);
+            } elseif ($dow === 0 || $dow === 6) {
+                // Weekend — very few visitors
+                $count = rand(0, 3);
+            } elseif ($dow === 5) {
+                // Friday — slightly lower
+                $count = rand(2, 7);
+            } else {
+                // Mon–Thu — peak days
+                // Add a gentle upward trend over time
+                $trendBonus = (int) floor(($seedDays - $dayOffset) / 180); // +1 every ~6 months
+                $count = rand(3, 10) + $trendBonus;
+            }
+
+            // Create individual guestbook entries for each visitor that day
+            for ($v = 0; $v < $count; $v++) {
+                $jamInHour   = rand(8, 14);
+                $jamInMin    = rand(0, 59);
+                $jamOutHour  = $jamInHour + rand(1, 3);
+                $jamOutHour  = min($jamOutHour, 17);
+
+                $entryTime = $date->copy()->setTime($jamInHour, $jamInMin, 0);
+
+                Guestbook::create([
+                    'company_id'     => $companyId,
+                    'department_id'  => Arr::random($depts)->department_id,
+                    'date'           => $date->toDateString(),
+                    'jam_in'         => sprintf('%02d:%02d:00', $jamInHour, $jamInMin),
+                    'jam_out'        => sprintf('%02d:%02d:00', $jamOutHour, rand(0, 59)),
+                    'name'           => $guestNames[($guestCounter - 1) % count($guestNames)],
+                    'instansi'       => Arr::random($instansiList),
+                    'keperluan'      => Arr::random($keperluanList),
+                    'petugas_penjaga'=> $receptionist->full_name,
+                    'created_at'     => $entryTime,
+                    'updated_at'     => $entryTime,
+                ]);
+
+                $guestCounter++;
+            }
+        }
+
+        echo "  ✅ Created {$guestCounter} guestbook entries over {$seedDays} days.\n";
 
         // ===== ROOM BOOKINGS (Offline & Online) =====
         foreach (range(1, 80) as $i) {

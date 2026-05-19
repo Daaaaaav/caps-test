@@ -13,58 +13,38 @@ use App\Services\AI\DataPreprocessor;
 #[Title('LSTM Predictions')]
 class LSTMPredictions extends Component
 {
-    public $predictionType = 'room_booking';
-    public $useDummyData   = false;
-    public $forecastDays   = 21;
+    public int $forecastDays = 21;
 
-    public function setPredictionType($type): void
+    public function setForecastDays(int $days): void
     {
-        $this->predictionType = $type;
-    }
-
-    public function toggleDummyData(): void
-    {
-        $this->useDummyData = !$this->useDummyData;
-    }
-
-    public function setForecastDays($days): void
-    {
-        $this->forecastDays = (int) $days;
+        $this->forecastDays = $days;
     }
 
     public function render()
     {
         try {
-            $companyId  = Auth::user()->company_id;
-            $lstmClient = new LSTMClient();
+            $companyId       = Auth::user()->company_id;
+            $lstmClient      = new LSTMClient();
             $isLSTMAvailable = $lstmClient->isAvailable();
 
-            // Always get a time series from the database
+            // Always predict visitor traffic (guestbook) on this page
             $preprocessor = new DataPreprocessor();
-            $timeSeries   = $preprocessor->createTimeSeriesDataset(
-                $this->predictionType, $companyId, 90
-            );
+            $timeSeries   = $preprocessor->createTimeSeriesDataset('guestbook', $companyId);
 
-            // ── Get predictions ───────────────────────────────────────────────
+            // ── Get predictions from LSTM service ─────────────────────────────
             $result = null;
 
             if ($isLSTMAvailable) {
-                if ($this->forecastDays == 21) {
-                    $result = $this->useDummyData
-                        ? $lstmClient->getDemo()
-                        : $lstmClient->predict3Weeks($timeSeries, false);
-                } else {
-                    $result = $lstmClient->predict(
-                        $timeSeries, $this->forecastDays, $this->useDummyData
-                    );
-                }
+                $result = $this->forecastDays === 21
+                    ? $lstmClient->predict3Weeks($timeSeries, false)
+                    : $lstmClient->predict($timeSeries, $this->forecastDays, false);
             }
 
-            // ── Fallback when LSTM is offline or returned nothing ─────────────
+            // ── Fallback to statistical model when LSTM is offline ────────────
             if (!$result || empty($result['predictions'])) {
                 $fallback = $lstmClient->predictWithFallback($timeSeries, $this->forecastDays);
                 $result   = array_merge($fallback, [
-                    'data_source'    => $isLSTMAvailable ? 'real' : 'statistical',
+                    'data_source'    => 'statistical',
                     'title'          => 'Booking Predictions',
                     'description'    => null,
                     'weekly_summary' => $this->buildWeeklySummary($fallback['predictions'] ?? []),
@@ -135,8 +115,6 @@ class LSTMPredictions extends Component
             ]);
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private function buildWeeklySummary(array $predictions): array
     {

@@ -48,11 +48,11 @@ class OccupancyForecasting extends Component
 
         if ($isAvailable) {
             if (in_array($this->forecastType, ['room', 'combined'])) {
-                $result = $lstm->predict($roomHistory, $this->forecastDays, count($roomHistory) < 30);
+                $result = $lstm->predict($roomHistory, $this->forecastDays, false);
                 $roomForecast = $result['predictions'] ?? null;
             }
             if (in_array($this->forecastType, ['vehicle', 'combined'])) {
-                $result = $lstm->predict($vehicleHistory, $this->forecastDays, count($vehicleHistory) < 30);
+                $result = $lstm->predict($vehicleHistory, $this->forecastDays, false);
                 $vehicleForecast = $result['predictions'] ?? null;
             }
         } else {
@@ -95,7 +95,6 @@ class OccupancyForecasting extends Component
     private function getRoomHistory(int $companyId): array
     {
         return BookingRoom::where('company_id', $companyId)
-            ->where('created_at', '>=', now()->subDays(90))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupByRaw('DATE(created_at)')
             ->orderByRaw('DATE(created_at)')
@@ -107,7 +106,6 @@ class OccupancyForecasting extends Component
     private function getVehicleHistory(int $companyId): array
     {
         return VehicleBooking::where('company_id', $companyId)
-            ->where('created_at', '>=', now()->subDays(90))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupByRaw('DATE(created_at)')
             ->orderByRaw('DATE(created_at)')

@@ -12,12 +12,23 @@ use App\Models\BookingRoom;
 #[Title('Room Booking Statistics')]
 class RoomBookingStatistics extends Component
 {
-    public $viewType = 'monthly';
-    public $showList = false;
+    public string $viewType    = 'monthly';
+    public bool   $showList    = false;
+    public int    $selectedYear;
 
-    public function setViewType($type): void
+    public function mount(): void
+    {
+        $this->selectedYear = (int) date('Y');
+    }
+
+    public function setViewType(string $type): void
     {
         $this->viewType = $type;
+    }
+
+    public function setYear(int $year): void
+    {
+        $this->selectedYear = $year;
     }
 
     public function toggleList(): void
@@ -30,22 +41,36 @@ class RoomBookingStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            // ── KPI counts (status stored as string or numeric — cover both) ──
-            $totalBookings    = BookingRoom::where('company_id', $companyId)->count();
-            $pendingBookings  = BookingRoom::where('company_id', $companyId)
-                ->whereIn('status', [BookingRoom::ST_PENDING, 'pending', 'PENDING'])->count();
-            $approvedBookings = BookingRoom::where('company_id', $companyId)
-                ->whereIn('status', [BookingRoom::ST_APPROVED, 'approved', 'APPROVED'])->count();
-            $rejectedBookings = BookingRoom::where('company_id', $companyId)
-                ->whereIn('status', [BookingRoom::ST_REJECTED, 'rejected', 'REJECTED'])->count();
-            $doneBookings     = BookingRoom::where('company_id', $companyId)
-                ->whereIn('status', [BookingRoom::ST_DONE, 'done', 'DONE'])->count();
+            $yearStart = "{$this->selectedYear}-01-01";
+            $yearEnd   = "{$this->selectedYear}-12-31 23:59:59";
+
+            // ── KPI counts scoped to selected year ────────────────────────────
+            // booking_rooms only stores string statuses: 'pending', 'approved', 'rejected', 'completed'
+            $base = BookingRoom::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd]);
+
+            $totalBookings     = (clone $base)->count();
+            $pendingBookings   = (clone $base)->where('status', 'pending')->count();
+            $approvedBookings  = (clone $base)->where('status', 'approved')->count();
+            $rejectedBookings  = (clone $base)->where('status', 'rejected')->count();
+            $completedBookings = (clone $base)->whereIn('status', ['completed', 'done'])->count();
+
+            // ── Available years for selector ──────────────────────────────────
+            $availableYears = BookingRoom::where('company_id', $companyId)
+                ->selectRaw('YEAR(created_at) as y')
+                ->groupByRaw('YEAR(created_at)')
+                ->orderByRaw('YEAR(created_at)')
+                ->pluck('y')
+                ->map(fn($y) => (int) $y)
+                ->toArray();
+
+            if (empty($availableYears)) {
+                $availableYears = [(int) date('Y')];
+            }
 
             // ── Chart data ────────────────────────────────────────────────────
             if ($this->viewType === 'monthly') {
-                // All 12 months of the current year, zero-filled
                 $raw = BookingRoom::where('company_id', $companyId)
-                    ->whereYear('created_at', date('Y'))
+                    ->whereYear('created_at', $this->selectedYear)
                     ->selectRaw('MONTH(created_at) as period, COUNT(*) as count')
                     ->groupByRaw('MONTH(created_at)')
                     ->orderByRaw('MONTH(created_at)')
@@ -55,7 +80,7 @@ class RoomBookingStatistics extends Component
                 $labels = $months->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
                 $data   = $months->map(fn($m) => (int) ($raw[$m] ?? 0))->toArray();
             } else {
-                // Last 7 days, zero-filled for missing dates
+                // Daily: last 7 days (not year-filtered — always shows recent activity)
                 $raw = BookingRoom::where('company_id', $companyId)
                     ->where('created_at', '>=', now()->subDays(6)->startOfDay())
                     ->selectRaw('DATE(created_at) as period, COUNT(*) as count')
@@ -73,24 +98,30 @@ class RoomBookingStatistics extends Component
             }
 
             $kpis = [
-                ['label' => 'Total Bookings', 'value' => $totalBookings,    'color' => 'blue'],
-                ['label' => 'Pending',         'value' => $pendingBookings,  'color' => 'yellow'],
-                ['label' => 'Approved',        'value' => $approvedBookings, 'color' => 'green'],
-                ['label' => 'Rejected',        'value' => $rejectedBookings, 'color' => 'red'],
+                ['label' => 'Total Bookings', 'value' => $totalBookings,     'color' => 'blue'],
+                ['label' => 'Pending',         'value' => $pendingBookings,   'color' => 'yellow'],
+                ['label' => 'Approved',        'value' => $approvedBookings,  'color' => 'green'],
+                ['label' => 'Rejected',        'value' => $rejectedBookings,  'color' => 'red'],
+                ['label' => 'Completed',       'value' => $completedBookings, 'color' => 'gray'],
             ];
 
             $bookings = $this->showList
                 ? BookingRoom::where('company_id', $companyId)
+                    ->whereBetween('created_at', [$yearStart, $yearEnd])
                     ->with(['room', 'user', 'department'])
                     ->orderBy('created_at', 'desc')
                     ->get()
                 : collect();
 
+            $this->dispatch('room-chart-updated', labels: $labels, data: $data);
+
             return view('livewire.pages.superadmin.room-booking-statistics', [
-                'kpis'     => $kpis,
-                'labels'   => $labels,
-                'data'     => $data,
-                'bookings' => $bookings,
+                'kpis'           => $kpis,
+                'labels'         => $labels,
+                'data'           => $data,
+                'bookings'       => $bookings,
+                'selectedYear'   => $this->selectedYear,
+                'availableYears' => $availableYears,
             ]);
 
         } catch (\Exception $e) {
@@ -106,10 +137,13 @@ class RoomBookingStatistics extends Component
                     ['label' => 'Pending',         'value' => 0, 'color' => 'yellow'],
                     ['label' => 'Approved',        'value' => 0, 'color' => 'green'],
                     ['label' => 'Rejected',        'value' => 0, 'color' => 'red'],
+                    ['label' => 'Completed',       'value' => 0, 'color' => 'gray'],
                 ],
-                'labels'   => [],
-                'data'     => [],
-                'bookings' => collect(),
+                'labels'         => [],
+                'data'           => [],
+                'bookings'       => collect(),
+                'selectedYear'   => $this->selectedYear,
+                'availableYears' => [(int) date('Y')],
             ]);
         }
     }

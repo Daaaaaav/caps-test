@@ -9,8 +9,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.regularizers import l2
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import (
@@ -132,7 +133,7 @@ def create_sequences(data, window=7):
     return np.array(X), np.array(y)
 
 
-# BUILD MODEL
+# BUILD MODEL — single LSTM layer with mild dropout, suitable for sparse real-world data
 def build_model(input_shape):
 
     model = Sequential()
@@ -140,9 +141,14 @@ def build_model(input_shape):
     model.add(
         LSTM(
             64,
-            input_shape=input_shape
+            input_shape=input_shape,
+            kernel_regularizer=l2(1e-5),
+            recurrent_regularizer=l2(1e-5),
         )
     )
+
+    # Light dropout — enough to prevent memorisation without killing signal
+    model.add(Dropout(0.1))
 
     model.add(Dense(1))
 
@@ -152,6 +158,17 @@ def build_model(input_shape):
     )
 
     return model
+
+
+# CONFIDENCE SCORE — based on normalised RMSE relative to the data range
+def compute_confidence(rmse: float, y_test: np.ndarray) -> float:
+    data_range = float(np.max(y_test) - np.min(y_test))
+    if data_range < 1e-6:
+        return 0.5
+
+    nrmse = rmse / data_range
+    confidence = max(0.30, min(0.92, 1.0 - nrmse))
+    return round(confidence, 4)
 
 
 # CONFIDENCE INTERVAL
@@ -352,18 +369,21 @@ def predict(request: RequestData):
         (X.shape[1], X.shape[2])
     )
 
-    # Early stopping
+    # Early stopping — monitor val_loss to stop when generalisation degrades
     early_stop = EarlyStopping(
-        monitor='loss',
-        patience=5,
-        restore_best_weights=True
+        monitor='val_loss',
+        patience=10,
+        restore_best_weights=True,
+        min_delta=1e-4,
     )
 
-    # Training
+    # Training with validation split so we can detect overfitting
     model.fit(
         X_train,
         y_train,
-        epochs=100,
+        epochs=150,
+        batch_size=16,
+        validation_split=0.15,
         callbacks=[early_stop],
         verbose=0
     )
@@ -397,25 +417,41 @@ def predict(request: RequestData):
         request.forecast_days
     )
 
-    # Confidence intervals
+    # Historical floor: the average of non-zero days in the last 90 days.
+    # Ensures predictions are never zero when there is real past activity.
+    recent = df['count'].tail(90)
+    nonzero = recent[recent > 0]
+    historical_floor = float(nonzero.mean()) if len(nonzero) > 0 else 0.0
+
+    # Compute a single confidence score for this forecast
+    confidence_score = compute_confidence(rmse, y_test)
+
+    # Confidence intervals — use inverse-transformed RMSE for meaningful bounds
+    # Approximate real-scale RMSE by scaling back through the count column range
+    count_min = scaler.data_min_[0]
+    count_max = scaler.data_max_[0]
+    count_range = count_max - count_min if count_max > count_min else 1.0
+    rmse_real = float(rmse) * count_range
+
     final = []
 
     for item in future:
+        raw_pred = item["predicted"]
 
-        lower, upper = confidence_interval(
-            item["predicted"],
-            rmse
-        )
+        # Apply floor: if model predicts near-zero but history shows activity,
+        # blend toward the historical average
+        if raw_pred < historical_floor * 0.1 and historical_floor > 0:
+            raw_pred = historical_floor * 0.5
+
+        lower = max(0.0, raw_pred - 1.96 * rmse_real)
+        upper = raw_pred + 1.96 * rmse_real
 
         final.append({
             "date": item["date"],
-            "predicted": round(item["predicted"], 2),
-            "lower_bound": round(float(lower), 2),
-            "upper_bound": round(float(upper), 2),
-            "confidence": round(
-                float(max(0, 1 - rmse)),
-                4
-            )
+            "predicted": round(raw_pred, 2),
+            "lower_bound": round(lower, 2),
+            "upper_bound": round(upper, 2),
+            "confidence": confidence_score,
         })
 
     return {
@@ -448,7 +484,9 @@ def predict_three_weeks(request: RequestData):
         not request.use_dummy_data
         and len(request.data) < 45
     ):
-        request.use_dummy_data = True
+        # Not enough real data — proceed anyway with what we have
+        # rather than silently switching to dummy data
+        pass
 
     result = predict(request)
 
@@ -491,7 +529,7 @@ def predict_three_weeks(request: RequestData):
 
         result["weekly_summary"] = weekly_summary
         result["forecast_period"] = "3 weeks (21 days)"
-        result["title"] = "LSTM Model Predictions (Based on Dummy Booking Counts) for the Following 3 Weeks"
+        result["title"] = "Booking Predictions for the Following 3 Weeks"
 
     return result
 

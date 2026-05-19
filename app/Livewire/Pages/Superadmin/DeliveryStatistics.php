@@ -12,7 +12,7 @@ use App\Models\Delivery;
 #[Title('Delivery Statistics')]
 class DeliveryStatistics extends Component
 {
-    public $timeRange = '7days';
+    public $timeRange = '90days';
     public $showList  = false;
 
     public function setTimeRange($range): void
@@ -76,6 +76,8 @@ class DeliveryStatistics extends Component
                 ['label' => 'Stored',            'value' => $storedDeliveries,    'color' => 'purple'],
                 ['label' => 'Completed',         'value' => $completedDeliveries, 'color' => 'green'],
             ];
+
+            $this->dispatch('delivery-chart-updated', labels: $labels, data: $data);
 
             return view('livewire.pages.superadmin.delivery-statistics', [
                 'stats'      => $stats,
