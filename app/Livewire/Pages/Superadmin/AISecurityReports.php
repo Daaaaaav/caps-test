@@ -29,17 +29,11 @@ class AISecurityReports extends Component
     {
         try {
 
+            // Request alerts already filtered by severity from the service
             $report = app(WazuhAlertService::class)
-                ->getRecentAlerts(25);
+                ->getRecentAlerts(25, $this->selectedSeverity);
 
             $alerts = collect($report['alerts']);
-
-            if ($this->selectedSeverity !== 'all') {
-                $alerts = $alerts->where(
-                    'severity',
-                    $this->selectedSeverity
-                );
-            }
 
             return view(
                 'livewire.pages.superadmin.a-i-security-reports',
