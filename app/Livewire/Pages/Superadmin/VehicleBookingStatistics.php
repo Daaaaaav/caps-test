@@ -12,23 +12,12 @@ use App\Models\VehicleBooking;
 #[Title('Vehicle Booking Statistics')]
 class VehicleBookingStatistics extends Component
 {
-    public string $chartType   = 'line';
-    public bool   $showList    = false;
-    public int    $selectedYear;
+    public string $timeRange = '90days';
+    public bool   $showList  = false;
 
-    public function mount(): void
+    public function setTimeRange(string $range): void
     {
-        $this->selectedYear = (int) date('Y');
-    }
-
-    public function setChartType(string $type): void
-    {
-        $this->chartType = $type;
-    }
-
-    public function setYear(int $year): void
-    {
-        $this->selectedYear = $year;
+        $this->timeRange = $range;
     }
 
     public function toggleList(): void
@@ -41,42 +30,38 @@ class VehicleBookingStatistics extends Component
         try {
             $companyId = Auth::user()->company_id;
 
-            $yearStart = "{$this->selectedYear}-01-01";
-            $yearEnd   = "{$this->selectedYear}-12-31 23:59:59";
+            $days = match($this->timeRange) {
+                '30days' => 30,
+                '90days' => 90,
+                default  => 7,
+            };
 
-            // ── KPI counts scoped to selected year ────────────────────────────
+            $since = now()->subDays($days)->startOfDay();
+
+            // ── KPI counts ────────────────────────────────────────────────────
             // vehicle_bookings statuses: pending | approved | on_progress | completed | cancelled | rejected | returned
-            $totalBookings     = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->count();
-            $pendingBookings   = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->where('status', 'pending')->count();
-            $approvedBookings  = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->where('status', 'approved')->count();
-            $onProgressBookings = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->where('status', 'on_progress')->count();
-            $completedBookings = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->whereIn('status', ['completed', 'returned'])->count();
-            $rejectedBookings  = VehicleBooking::where('company_id', $companyId)->whereBetween('created_at', [$yearStart, $yearEnd])->whereIn('status', ['rejected', 'cancelled'])->count();
+            $totalBookings      = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->count();
+            $pendingBookings    = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'pending')->count();
+            $approvedBookings   = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'approved')->count();
+            $onProgressBookings = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'on_progress')->count();
+            $completedBookings  = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->whereIn('status', ['completed', 'returned'])->count();
+            $rejectedBookings   = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->whereIn('status', ['rejected', 'cancelled'])->count();
 
-            // ── Available years for selector ──────────────────────────────────
-            $availableYears = VehicleBooking::where('company_id', $companyId)
-                ->selectRaw('YEAR(created_at) as y')
-                ->groupByRaw('YEAR(created_at)')
-                ->orderByRaw('YEAR(created_at)')
-                ->pluck('y')
-                ->map(fn($y) => (int) $y)
-                ->toArray();
-
-            if (empty($availableYears)) {
-                $availableYears = [(int) date('Y')];
-            }
-
-            // ── Monthly chart — all 12 months, zero-filled ────────────────────
+            // ── Daily chart — zero-filled for every day in range ──────────────
             $raw = VehicleBooking::where('company_id', $companyId)
-                ->whereYear('created_at', $this->selectedYear)
-                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-                ->groupByRaw('MONTH(created_at)')
-                ->orderByRaw('MONTH(created_at)')
-                ->pluck('count', 'month');
+                ->where('created_at', '>=', $since)
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupByRaw('DATE(created_at)')
+                ->orderByRaw('DATE(created_at)')
+                ->pluck('count', 'date');
 
-            $months = collect(range(1, 12));
-            $labels = $months->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
-            $data   = $months->map(fn($m) => (int) ($raw[$m] ?? 0))->toArray();
+            $labels = [];
+            $data   = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $date     = now()->subDays($i)->format('Y-m-d');
+                $labels[] = now()->subDays($i)->format('M d');
+                $data[]   = (int) ($raw[$date] ?? 0);
+            }
 
             $kpis = [
                 ['label' => 'Total Bookings', 'value' => $totalBookings,      'color' => 'blue',   'icon' => 'truck'],
@@ -89,21 +74,19 @@ class VehicleBookingStatistics extends Component
 
             $bookings = $this->showList
                 ? VehicleBooking::where('company_id', $companyId)
-                    ->whereBetween('created_at', [$yearStart, $yearEnd])
+                    ->where('created_at', '>=', $since)
                     ->with(['vehicle', 'user', 'department'])
                     ->orderBy('created_at', 'desc')
                     ->get()
                 : collect();
 
-            $this->dispatch('vehicle-chart-updated', labels: $labels, data: $data, chartType: $this->chartType);
+            $this->dispatch('vehicle-chart-updated', labels: $labels, data: $data);
 
             return view('livewire.pages.superadmin.vehicle-booking-statistics', [
-                'kpis'           => $kpis,
-                'labels'         => $labels,
-                'data'           => $data,
-                'bookings'       => $bookings,
-                'selectedYear'   => $this->selectedYear,
-                'availableYears' => $availableYears,
+                'kpis'     => $kpis,
+                'labels'   => $labels,
+                'data'     => $data,
+                'bookings' => $bookings,
             ]);
 
         } catch (\Exception $e) {
@@ -122,11 +105,9 @@ class VehicleBookingStatistics extends Component
                     ['label' => 'Completed',       'value' => 0, 'color' => 'gray',   'icon' => 'check-badge'],
                     ['label' => 'Rejected',        'value' => 0, 'color' => 'red',    'icon' => 'x-circle'],
                 ],
-                'labels'         => [],
-                'data'           => [],
-                'bookings'       => collect(),
-                'selectedYear'   => $this->selectedYear,
-                'availableYears' => [(int) date('Y')],
+                'labels'   => [],
+                'data'     => [],
+                'bookings' => collect(),
             ]);
         }
     }

@@ -101,21 +101,21 @@
 
         {{-- FILTER BUTTONS --}}
         <div class="flex flex-wrap gap-3">
-            <button wire:click="setSeverity('all')" 
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'all' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+            <button wire:click="setSeverity('all')"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'all' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
                 All
             </button>
-            <button wire:click="setSeverity('high')" 
+            <button wire:click="setSeverity('high')"
                 class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'high' ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                High
+                🔴 High
             </button>
-            <button wire:click="setSeverity('medium')" 
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'medium' ? 'bg-yellow-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                Medium
+            <button wire:click="setSeverity('medium')"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'medium' ? 'bg-yellow-500 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                🟡 Medium
             </button>
-            <button wire:click="setSeverity('low')" 
+            <button wire:click="setSeverity('low')"
                 class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'low' ? 'bg-green-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                Low
+                🟢 Low
             </button>
         </div>
 

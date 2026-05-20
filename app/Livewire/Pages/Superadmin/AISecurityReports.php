@@ -38,7 +38,8 @@ class AISecurityReports extends Component
             return view(
                 'livewire.pages.superadmin.a-i-security-reports',
                 [
-                    'alerts' => $alerts->values()->toArray(),
+                    'alerts'           => $alerts->values()->toArray(),
+                    'selectedSeverity' => $this->selectedSeverity,
                     ...$report,
                 ]
             );
@@ -50,13 +51,14 @@ class AISecurityReports extends Component
             return view(
                 'livewire.pages.superadmin.a-i-security-reports',
                 [
-                    'alerts' => [],
-                    'stats' => [],
-                    'source_label' => 'Unavailable',
-                    'source_host' => null,
-                    'api_endpoints' => [],
-                    'last_updated' => null,
-                    'available' => false,
+                    'alerts'           => [],
+                    'stats'            => [],
+                    'source_label'     => 'Unavailable',
+                    'source_host'      => null,
+                    'api_endpoints'    => [],
+                    'last_updated'     => null,
+                    'available'        => false,
+                    'selectedSeverity' => $this->selectedSeverity,
                 ]
             );
         }

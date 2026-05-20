@@ -185,6 +185,15 @@
                         @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- PHONE --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" wire:model="phone" placeholder="e.g. 08123456789"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg
+                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
+                        @error('phone') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
                     {{-- PASSWORD --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">

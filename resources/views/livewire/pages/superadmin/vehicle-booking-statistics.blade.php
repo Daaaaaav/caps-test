@@ -1,29 +1,25 @@
 <div class="min-h-screen bg-gray-50">
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+
         {{-- HEADER --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Vehicle Booking Statistics</h1>
-                <p class="text-sm text-gray-500">Monitor vehicle booking activity &mdash; {{ $selectedYear }}</p>
+                <p class="text-sm text-gray-500">Monitor vehicle booking activity and trends</p>
             </div>
-        </div>
-
-        {{-- YEAR SELECTOR --}}
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Select Year</p>
-                    <p class="text-xs text-gray-400">KPIs and monthly chart update per year</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    @foreach($availableYears as $year)
-                        <button wire:click="setYear({{ $year }})"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition
-                                {{ $selectedYear === $year ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            {{ $year }}
-                        </button>
-                    @endforeach
-                </div>
+            <div class="flex gap-2">
+                <button wire:click="setTimeRange('7days')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '7days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                    7 Days
+                </button>
+                <button wire:click="setTimeRange('30days')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '30days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                    30 Days
+                </button>
+                <button wire:click="setTimeRange('90days')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '90days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                    90 Days
+                </button>
             </div>
         </div>
 
@@ -50,21 +46,11 @@
         {{-- CHART --}}
         <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Monthly Booking Trend — {{ $selectedYear }}</h3>
-                <div class="flex gap-2">
-                    <button wire:click="setChartType('line')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $chartType === 'line' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                        Line
-                    </button>
-                    <button wire:click="setChartType('bar')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $chartType === 'bar' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                        Bar
-                    </button>
-                    <button wire:click="toggleList"
-                        class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium transition">
-                        {{ $showList ? 'Hide List' : 'Show List' }}
-                    </button>
-                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Daily Booking Trend</h3>
+                <button wire:click="toggleList"
+                    class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium transition">
+                    {{ $showList ? 'Hide List' : 'Show List' }}
+                </button>
             </div>
             <div wire:ignore style="position: relative; height: 400px;">
                 <canvas id="vehicleChart"></canvas>
@@ -130,12 +116,13 @@
                 </table>
             </div>
         @endif
+
     </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    function buildVehicleChart(labels, data, chartType) {
+    function buildVehicleChart(labels, data) {
         const ctx = document.getElementById('vehicleChart');
         if (!ctx) return;
 
@@ -144,20 +131,14 @@
         }
 
         window.vehicleChart = new Chart(ctx, {
-            type: chartType,
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Vehicle Bookings',
                     data: data,
-                    borderColor: '#059669',
-                    backgroundColor: chartType === 'bar' ? 'rgba(5, 150, 105, 0.7)' : 'rgba(5, 150, 105, 0.1)',
-                    fill: chartType === 'line',
-                    tension: 0.4,
-                    borderRadius: chartType === 'bar' ? 8 : 0,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2.5,
+                    backgroundColor: '#4b5563',
+                    borderRadius: 6,
                 }]
             },
             options: {
@@ -168,19 +149,19 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Bookings' } },
-                    x: { title: { display: true, text: 'Month' } }
+                    x: { title: { display: true, text: 'Date' } }
                 }
             }
         });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        buildVehicleChart(@json($labels), @json($data), @json($chartType));
+        buildVehicleChart(@json($labels), @json($data));
     });
 
     document.addEventListener('livewire:init', () => {
-        Livewire.on('vehicle-chart-updated', ({ labels, data, chartType }) => {
-            buildVehicleChart(labels, data, chartType);
+        Livewire.on('vehicle-chart-updated', ({ labels, data }) => {
+            buildVehicleChart(labels, data);
         });
     });
 </script>

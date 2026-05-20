@@ -195,10 +195,11 @@ class ReceptionistUsers extends Component
                     'full_name'    => $this->name,
                     'email'        => $this->email,
                     'password'     => Hash::make($this->password),
-                    'phone_number' => $this->phone,
+                    'phone_number' => $this->phone ?: '-',
                     'status'       => $this->status,
                     'company_id'   => $companyId,
                     'role_id'      => $role->role_id,
+                    'is_agent'     => 'no',
                 ]);
 
                 $this->dispatch(
