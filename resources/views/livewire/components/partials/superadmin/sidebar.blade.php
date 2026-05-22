@@ -1,5 +1,5 @@
 <flux:sidebar sticky collapsible="mobile" 
-    class="fixed inset-y-0 left-0 z-40 bg-zinc-900 border-r border-zinc-800 lg:w-64 w-full max-w-[19rem] overflow-y-auto overflow-x-hidden">
+    class="fixed inset-y-0 left-0 z-40 bg-zinc-900 border-r border-zinc-800 lg:w-64 w-full max-w-[19rem] overflow-y-auto overflow-x-hidden box-border">
     
     {{-- HEADER --}}
     <flux:sidebar.header>
@@ -72,7 +72,7 @@
 
     <flux:sidebar.spacer />
 
-    {{-- SETTINGS + HELP -- }}
+    {{-- SETTINGS + HELP --}}
     <flux:sidebar.nav>
         <flux:sidebar.item icon="cog-6-tooth" href="{{ route('superadmin.settings') }}"
             :current="request()->routeIs('superadmin.settings')">
@@ -82,6 +82,16 @@
         <flux:sidebar.item icon="information-circle" href="{{ route('superadmin.help') }}"
             :current="request()->routeIs('superadmin.help')">
             Help
+        </flux:sidebar.item>
+
+        {{-- Logout for MOBILE --}}
+        <flux:sidebar.item
+            class="lg:hidden"
+            icon="arrow-right-start-on-rectangle"
+            as="button"
+            type="submit"
+            form="logout-form">
+            Logout
         </flux:sidebar.item>
     </flux:sidebar.nav>
 
