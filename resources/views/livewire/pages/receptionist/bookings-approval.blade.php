@@ -149,9 +149,19 @@
 
                         <div>
                             <label class="{{ $label }}">Tanggal</label>
-                            <div class="relative">
-                                <input type="date" class="{{ $input }} pl-9" wire:model.live="selectedDate">
-                                <x-heroicon-o-calendar class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
+                            <div class="relative flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <input type="date" class="{{ $input }} pl-9" wire:model.live="selectedDate">
+                                    <x-heroicon-o-calendar class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
+                                </div>
+                                @if($selectedDate)
+                                    <button type="button"
+                                        wire:click="clearDate"
+                                        title="Clear date filter"
+                                        class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
+                                        <x-heroicon-o-x-mark class="w-4 h-4"/>
+                                    </button>
+                                @endif
                             </div>
                         </div>
 

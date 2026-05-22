@@ -86,7 +86,11 @@ class Vehiclestatus extends Component
 
     public function mount(): void
     {
-        $this->vehicles = Vehicle::orderBy('name')->get();
+        // Deduplicate by name: keep only the first vehicle per unique name
+        $this->vehicles = Vehicle::orderBy('name')
+            ->get()
+            ->unique(fn($v) => $v->name ?? $v->plate_number ?? $v->vehicle_id);
+
         $this->vehicleMap = $this->vehicles
             ->mapWithKeys(fn($v) => [(int) $v->vehicle_id => (string) ($v->name ?? $v->plate_number ?? ('#' . $v->vehicle_id))])
             ->toArray();

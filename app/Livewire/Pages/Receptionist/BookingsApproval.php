@@ -248,6 +248,13 @@ class BookingsApproval extends Component
         $this->selectRoom(null);
     }
 
+    public function clearDate(): void
+    {
+        $this->selectedDate = null;
+        $this->resetPage('pendingPage');
+        $this->resetPage('ongoingPage');
+    }
+
     public function openFilterModal(): void
     {
         $this->showFilterModal = true;
@@ -595,7 +602,7 @@ class BookingsApproval extends Component
         }
 
         $selected = $this->selectedDateValue();
-        if ($this->dateMode !== 'semua' && $selected) {
+        if ($selected) {
             $query->whereDate('date', $selected);
         }
 

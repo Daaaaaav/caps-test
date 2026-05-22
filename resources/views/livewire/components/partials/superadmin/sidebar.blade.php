@@ -72,8 +72,18 @@
 
     <flux:sidebar.spacer />
 
-    {{-- LOGOUT --}}
+    {{-- SETTINGS + HELP + LOGOUT --}}
     <flux:sidebar.nav>
+        <flux:sidebar.item icon="cog-6-tooth" href="{{ route('superadmin.settings') }}"
+            :current="request()->routeIs('superadmin.settings')">
+            Settings
+        </flux:sidebar.item>
+
+        <flux:sidebar.item icon="information-circle" href="{{ route('superadmin.help') }}"
+            :current="request()->routeIs('superadmin.help')">
+            Help
+        </flux:sidebar.item>
+
         <flux:sidebar.item icon="arrow-right-start-on-rectangle" as="button" type="submit"
             form="logout-form">
             Logout

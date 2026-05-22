@@ -137,6 +137,7 @@ class Login extends Component
                 if (Auth::attempt(['email' => Str::lower($this->email), 'password' => $this->password], $this->remember)) {
                     RateLimiter::clear($key);
                     request()->session()->regenerate();
+                    request()->session()->forget('url.intended');
 
                     Log::info('LOGIN_SUCCESS', [
                         'ip' => request()->ip(),
@@ -144,7 +145,7 @@ class Login extends Component
                         'user_id' => Auth::id(),
                     ]);
 
-                    return redirect()->intended(route('home'));
+                    return redirect()->route('home');
                 }
 
                 throw ValidationException::withMessages([
@@ -209,6 +210,7 @@ class Login extends Component
             $key = 'login:' . Str::lower($this->email) . '|' . request()->ip();
             RateLimiter::clear($key);
             request()->session()->regenerate();
+            request()->session()->forget('url.intended');
 
             Log::info('LOGIN_SUCCESS', [
                 'ip' => request()->ip(),
@@ -217,7 +219,7 @@ class Login extends Component
                 'otp' => true,
             ]);
 
-            return redirect()->intended(route('home'));
+            return redirect()->route('home');
         }
 
         throw ValidationException::withMessages([

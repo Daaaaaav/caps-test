@@ -136,11 +136,19 @@
 
     {{-- SETTINGS + MOBILE LOGOUT (via global logout form) --}}
     <flux:sidebar.nav>
-        <flux:sidebar.item icon="cog-6-tooth" href="#">
+        <flux:sidebar.item
+            icon="cog-6-tooth"
+            href="{{ route('receptionist.settings') }}"
+            :current="request()->routeIs('receptionist.settings')"
+        >
             Settings
         </flux:sidebar.item>
 
-        <flux:sidebar.item icon="information-circle" href="#">
+        <flux:sidebar.item
+            icon="information-circle"
+            href="{{ route('receptionist.help') }}"
+            :current="request()->routeIs('receptionist.help')"
+        >
             Help
         </flux:sidebar.item>
 
