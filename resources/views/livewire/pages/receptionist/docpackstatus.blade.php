@@ -1,5 +1,4 @@
-<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
-    @php
+@php
     use Carbon\Carbon;
     use Illuminate\Support\Facades\Storage;
 
@@ -31,39 +30,39 @@
         }
     }
 
-    $card = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
+    $card  = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
     $label = 'block text-sm font-medium text-gray-700 mb-2';
     $input = 'w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 bg-white transition';
-    $chip = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-gray-100 text-xs';
-    $icoAvatar = 'w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0';
-    @endphp
+    $chip  = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-gray-100 text-xs';
+    $icoAvatar = 'w-10 h-10 bg-[#4E653D] rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0 overflow-hidden relative';
+@endphp
 
+<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
     <main class="px-4 sm:px-6 py-6 space-y-6">
+        
         {{-- HERO --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-900 to-black text-white shadow-2xl">
+        <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl">
             <div class="pointer-events-none absolute inset-0 opacity-10">
-                <div class="absolute top-0 -right-4 w-24 h-24 bg-white rounded-full blur-xl"></div>
-                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-white rounded-full blur-lg"></div>
+                <div class="absolute top-0 -right-4 w-24 h-24 bg-[#CDDEA7] rounded-full blur-xl"></div>
+                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
             </div>
             <div class="relative z-10 p-6 sm:p-8">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                            <x-heroicon-o-archive-box class="w-6 h-6 text-white"/>
+                        <div class="w-12 h-12 bg-[#CDDEA7]/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-[#CDDEA7]/20">
+                            <x-heroicon-o-archive-box class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
                             <h2 class="text-lg sm:text-xl font-semibold">Documents & Packages — Status</h2>
-                            <p class="text-sm text-white/80">Pantau item pending & tersimpan sebelum delivered/taken.
-                            </p>
+                            <p class="text-sm text-[#CDDEA7]/80">Pantau item pending & tersimpan sebelum delivered/taken.</p>
                         </div>
                     </div>
 
                     {{-- MOBILE FILTER BUTTON --}}
                     <button type="button"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 text-xs font-medium border border-white/30 hover:bg-white/20 md:hidden"
-                        wire:click="openFilterModal">
-                        <x-heroicon-o-bars-3 class="w-4 h-4"/>
+                            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
+                            wire:click="openFilterModal">
+                        <x-heroicon-o-funnel class="w-4 h-4"/>
                         <span>Filter</span>
                     </button>
                 </div>
@@ -71,67 +70,111 @@
         </div>
 
         {{-- MAIN LAYOUT: LEFT (ITEMS LIST) + RIGHT (SIDEBAR) --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
             {{-- LEFT: ITEMS LIST CARD --}}
             <section class="{{ $card }} md:col-span-3">
                 {{-- Header: title + tabs + type scope --}}
-                <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900">Items</h3>
-                            <p class="text-xs text-gray-500">Daftar dokumen & paket yang diterima.</p>
-                        </div>
+                <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900">Items List</h3>
+                        <p class="text-xs text-gray-500">Daftar dokumen & paket yang diterima.</p>
+                    </div>
 
-                        {{-- Tabs: Pending / Stored --}}
-                        <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium">
-                            <button type="button" wire:click="setTab('pending')" class="px-3 py-1 rounded-full transition
-                                        {{ $activeTab === 'pending'
-    ? 'bg-gray-900 text-white shadow-sm'
-    : 'text-gray-700 hover:bg-gray-200' }}">
+                    <div class="flex flex-wrap items-center gap-3">
+                        {{-- Staging Tabs: Pending vs Stored --}}
+                        <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium shrink-0">
+                            <button type="button" wire:click="setTab('pending')" 
+                                class="px-3.5 py-1 rounded-full transition {{ $activeTab === 'pending' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                 Pending
                             </button>
-                            <button type="button" wire:click="setTab('stored')" class="px-3 py-1 rounded-full transition
-                                        {{ $activeTab === 'stored'
-    ? 'bg-gray-900 text-white shadow-sm'
-    : 'text-gray-700 hover:bg-gray-200' }}">
+                            <button type="button" wire:click="setTab('stored')" 
+                                class="px-3.5 py-1 rounded-full transition {{ $activeTab === 'stored' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                 Stored
                             </button>
                         </div>
-                    </div>
 
-                    {{-- Type scope: All / Document / Package --}}
-                    <div class="flex justify-end">
-                        <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-[11px] font-medium">
-                            <button type="button" wire:click="$set('type', 'all')" class="px-3 py-1 rounded-full transition
-                                        {{ $type === 'all'
-    ? 'bg-gray-900 text-white shadow-sm'
-    : 'text-gray-700 hover:bg-gray-200' }}">
+                        {{-- Type Scope Tabs --}}
+                        <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium shrink-0">
+                            <button type="button" wire:click="$set('type', 'all')" 
+                                class="px-3.5 py-1 rounded-full transition {{ $type === 'all' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                 All
                             </button>
-                            <button type="button" wire:click="$set('type', 'document')" class="px-3 py-1 rounded-full transition
-                                        {{ $type === 'document'
-    ? 'bg-gray-900 text-white shadow-sm'
-    : 'text-gray-700 hover:bg-gray-200' }}">
+                            <button type="button" wire:click="$set('type', 'document')" 
+                                class="px-3.5 py-1 rounded-full transition {{ $type === 'document' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                 Document
                             </button>
-                            <button type="button" wire:click="$set('type', 'package')" class="px-3 py-1 rounded-full transition
-                                        {{ $type === 'package'
-    ? 'bg-gray-900 text-white shadow-sm'
-    : 'text-gray-700 hover:bg-gray-200' }}">
+                            <button type="button" wire:click="$set('type', 'package')" 
+                                class="px-3.5 py-1 rounded-full transition {{ $type === 'package' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                 Package
+                            </button>
+                        </div>
+
+                        {{-- Layout Toggler --}}
+                        <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
+                            <button type="button" 
+                                    wire:click="setViewMode('card')" 
+                                    class="p-1.5 rounded-md transition-all {{ $viewMode === 'card' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
+                                    title="Card View">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </button>
+                            <button type="button" 
+                                    wire:click="setViewMode('table')" 
+                                    class="p-1.5 rounded-md transition-all {{ $viewMode === 'table' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
+                                    title="Table View">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
                             </button>
                         </div>
                     </div>
                 </div>
 
+                {{-- Advanced Filter Badge Under Title --}}
+                <div class="px-4 sm:px-6 py-2 border-b border-gray-200/60 bg-gray-50/20 text-xs">
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if($departmentId)
+                            @php
+                                $activeDept = $departments->firstWhere('department_id', $departmentId);
+                                $activeDeptLabel = $activeDept ? $activeDept->department_name : 'Unknown';
+                            @endphp
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
+                                <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
+                                <span>Dept: {{ $activeDeptLabel }}</span>
+                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('departmentId', '')">×</button>
+                            </span>
+                        @endif
+
+                        @if($userId)
+                            @php
+                                $activeUser = $users->firstWhere('user_id', $userId);
+                                $activeUserLabel = $activeUser ? $activeUser->full_name : 'Unknown';
+                            @endphp
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
+                                <x-heroicon-o-user class="w-3.5 h-3.5"/>
+                                <span>User: {{ $activeUserLabel }}</span>
+                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('userId', '')">×</button>
+                            </span>
+                        @endif
+
+                        @if(!$departmentId && !$userId)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
+                                <x-heroicon-o-funnel class="w-3.5 h-3.5"/>
+                                <span>No advanced filter</span>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+
                 {{-- Filters (search, date, order) --}}
-                <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 bg-gray-50/30">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="{{ $label }}">Search</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
-                                    placeholder="Cari nama item / pengirim / penerima…" wire:model.live="q">
+                                    placeholder="Cari nama item, pengirim…" wire:model.live="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
                         </div>
@@ -144,200 +187,350 @@
                         </div>
                         <div>
                             <label class="{{ $label }}">Urutkan</label>
-                            <select class="{{ $input }}" wire:model.live="dateMode">
-                                <option value="semua">Default (terbaru)</option>
-                                <option value="terbaru">Terbaru</option>
-                                <option value="terlama">Terlama</option>
-                            </select>
+                            <div class="relative">
+                                <select class="{{ $input }} appearance-none pr-8 bg-white" wire:model.live="dateMode">
+                                    <option value="semua">Default (terbaru)</option>
+                                    <option value="terbaru">Terbaru</option>
+                                    <option value="terlama">Terlama</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- LIST (GRID LAYOUT) --}}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 bg-gray-50/50">
-                    
-                    {{-- PENDING TAB (MODIFIED) --}}
-                    @if($activeTab === 'pending')
-                        @forelse($pending as $row)
-                            @php
-                                $avatarChar = strtoupper(substr($row->item_name ?? 'P', 0, 1));
-                                $rowNo = ($pending->firstItem() ?? 1) + $loop->index;
-                            @endphp
+                {{-- LIST (2-COLUMN GRID LAYOUT) --}}
+                <div class="px-4 sm:px-6 py-5 bg-gray-50/50">
+                    @if($viewMode === 'card')
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            
+                            {{-- PENDING TAB --}}
+                            @if($activeTab === 'pending')
+                                @forelse($pending as $row)
+                                    @php
+                                        $avatarChar = strtoupper(substr($row->item_name ?? 'P', 0, 1));
+                                        $rowNo = ($pending->firstItem() ?? 1) + $loop->index;
+                                    @endphp
 
-                            {{-- START: MODIFIED PENDING CARD DESIGN --}}
-                            <div wire:key="pend-{{ $row->delivery_id }}"
-                                class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition-all duration-200">
-                                
-                                <div class="flex items-start gap-4">
-                                    {{-- 1. Avatar/Image on the left --}}
-                                    <div class="{{ $icoAvatar }} mt-0.5">
-                                        @if($row->image)
-                                            <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
-                                                class="w-full h-full object-cover rounded-xl">
-                                        @else
-                                            {{ $avatarChar }}
-                                        @endif
-                                    </div>
+                                    <div wire:key="pend-{{ $row->delivery_id }}"
+                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
+                                        
+                                        <div class="space-y-3">
+                                            <div class="flex items-start gap-4">
+                                                {{-- Image on the left --}}
+                                                <div class="{{ $icoAvatar }} mt-0.5 border border-gray-200 shrink-0">
+                                                    @if($row->image)
+                                                        <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
+                                                            class="w-full h-full object-cover">
+                                                    @else
+                                                        <span class="text-white font-semibold text-sm">{{ $avatarChar }}</span>
+                                                    @endif
+                                                </div>
 
-                                    <div class="min-w-0 flex-1">
-                                        {{-- 2. TOP ROW: Title, Type, Status --}}
-                                        <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
-                                            <h4 class="font-semibold text-gray-900 text-base truncate pr-2 max-w-full">
-                                                {{ $row->item_name }}
-                                            </h4>
-                                            <div class="flex-shrink-0 flex items-center gap-2">
-                                                {{-- Type Chip --}}
-                                                <span class="text-[11px] px-2 py-0.5 rounded border border-gray-300 text-gray-600 bg-gray-50 flex-shrink-0">
-                                                    {{ strtoupper($row->type) }}
-                                                </span>
-                                                {{-- Status Chip --}}
-                                                <span class="text-[11px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium flex-shrink-0">
-                                                    Pending
-                                                </span>
+                                                <div class="min-w-0 flex-1 space-y-1">
+                                                    {{-- TOP ROW: Title, Type, Status --}}
+                                                    <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
+                                                        <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
+                                                            {{ $row->item_name }}
+                                                        </h4>
+                                                        <div class="flex-shrink-0 flex items-center gap-2">
+                                                            {{-- Type Badge --}}
+                                                            <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-medium uppercase">
+                                                                {{ $row->type }}
+                                                            </span>
+                                                            {{-- Status Badge --}}
+                                                            <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 bg-amber-100 text-amber-800">
+                                                                Pending
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Senders & Receiver information --}}
+                                                    <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
+                                                        @if($row->nama_pengirim)
+                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
+                                                                <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
+                                                                <span class="truncate">From: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                        @if($row->nama_penerima)
+                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
+                                                                <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
+                                                                <span class="truncate">To: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {{-- 3. MIDDLE SECTION: Sender, Receiver, Received Date --}}
-                                        <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
-                                            @if($row->nama_pengirim)
-                                                <div class="flex items-center gap-2">
-                                                    <x-heroicon-o-user class="w-4 h-4 text-gray-400"/>
-                                                    <span class="truncate font-medium text-gray-800">From: {{ $row->nama_pengirim }}</span>
-                                                </div>
-                                            @endif
-                                            @if($row->nama_penerima)
-                                                <div class="flex items-center gap-2">
-                                                    <x-heroicon-o-user class="w-4 h-4 text-gray-400"/>
-                                                    <span class="truncate font-medium text-gray-800">To: {{ $row->nama_penerima }}</span>
-                                                </div>
-                                            @endif
+                                            {{-- Date details --}}
                                             @if($row->created_at)
-                                                <div class="flex items-center gap-2 text-[12px] text-gray-600">
-                                                    <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400"/>
-                                                    <span>Received: {{ fmtDate($row->created_at) }} {{ fmtTime($row->created_at) }}</span>
+                                                <div class="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                                    <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                    <span>Received: <span class="font-medium text-gray-700">{{ fmtDate($row->created_at) }} · {{ fmtTime($row->created_at) }}</span></span>
                                                 </div>
                                             @endif
                                         </div>
+
+                                        {{-- BOTTOM ACTIONS --}}
+                                        <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
+                                            <span class="text-[11px] font-semibold text-gray-500 mr-auto">
+                                                No. {{ $rowNo }}
+                                            </span>
+                                            <div class="flex gap-2">
+                                                <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
+                                                    wire:loading.attr="disabled"
+                                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-2 focus:ring-gray-900/10 focus:outline-none transition shadow-sm">
+                                                    Edit
+                                                </button>
+                                                <button type="button" wire:click="storeItem({{ $row->delivery_id }})"
+                                                    wire:loading.attr="disabled"
+                                                    class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:ring-2 focus:ring-[#4E653D]/20 focus:outline-none transition shadow-sm">
+                                                    Store
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                @empty
+                                    <div class="col-span-full py-16 text-center text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">
+                                        <x-heroicon-o-document-text class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
+                                        Tidak ada data pending
+                                    </div>
+                                @endforelse
+                            @endif
 
-                                {{-- 4. BOTTOM ACTIONS --}}
-                                <div class="pt-3 mt-auto border-t border-gray-100 flex items-center justify-end gap-3">
-                                    <span class="text-[11px] text-gray-500 mr-auto">
-                                        #{{ $rowNo }}
-                                    </span>
-                                    
-                                    <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
-                                        wire:loading.attr="disabled"
-                                        class="px-4 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500/20 transition">
-                                        Edit
-                                    </button>
-                                    <button type="button" wire:click="storeItem({{ $row->delivery_id }})"
-                                        wire:loading.attr="disabled"
-                                        class="px-4 py-2 text-xs font-medium rounded-lg bg-gray-900 text-white hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-900/20 shadow-sm transition">
-                                        Store
-                                    </button>
-                                </div>
-                            </div>
-                            {{-- END: MODIFIED PENDING CARD DESIGN --}}
-                        @empty
-                            <div class="col-span-full px-4 py-14 text-center text-gray-500 text-sm">Tidak ada data</div>
-                        @endforelse
-                    @endif
+                            {{-- STORED TAB --}}
+                            @if($activeTab === 'stored')
+                                @forelse($stored as $row)
+                                    @php
+                                        $avatarChar = strtoupper(substr($row->item_name ?? 'S', 0, 1));
+                                        $rowNo = ($stored->firstItem() ?? 1) + $loop->index;
+                                        $dir = $storedDirections[$row->delivery_id] ?? 'taken';
+                                        $dirLabel = $dir === 'deliver' ? 'Deliver' : 'Taken';
+                                        $actionLabel = $dir === 'deliver' ? 'Delivered' : 'Taken';
+                                    @endphp
 
-                    {{-- STORED TAB (MODIFIED) --}}
-                    @if($activeTab === 'stored')
-                        @forelse($stored as $row)
-                            @php
-                                $avatarChar = strtoupper(substr($row->item_name ?? 'S', 0, 1));
-                                $rowNo = ($stored->firstItem() ?? 1) + $loop->index;
-                                $dir = $storedDirections[$row->delivery_id] ?? 'taken';
-                                $dirLabel = $dir === 'deliver' ? 'Deliver' : 'Taken';
-                                $actionLabel = $dir === 'deliver' ? 'Delivered' : 'Taken';
-                            @endphp
+                                    <div wire:key="stor-{{ $row->delivery_id }}"
+                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
+                                        
+                                        <div class="space-y-3">
+                                            <div class="flex items-start gap-4">
+                                                {{-- Image on the left --}}
+                                                <div class="{{ $icoAvatar }} mt-0.5 border border-gray-200 shrink-0">
+                                                    @if($row->image)
+                                                        <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
+                                                            class="w-full h-full object-cover">
+                                                    @else
+                                                        <span class="text-white font-semibold text-sm">{{ $avatarChar }}</span>
+                                                    @endif
+                                                </div>
 
-                            {{-- START: MODIFIED STORED CARD DESIGN --}}
-                            <div wire:key="stor-{{ $row->delivery_id }}"
-                                class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition-all duration-200">
-                                
-                                <div class="flex items-start gap-4">
-                                    {{-- 1. Avatar/Image on the left --}}
-                                    <div class="{{ $icoAvatar }} mt-0.5">
-                                        @if($row->image)
-                                            <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
-                                                class="w-full h-full object-cover rounded-xl">
+                                                <div class="min-w-0 flex-1 space-y-1">
+                                                    {{-- TOP ROW: Title, Type, Status --}}
+                                                    <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
+                                                        <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
+                                                            {{ $row->item_name }}
+                                                        </h4>
+                                                        <div class="flex-shrink-0 flex items-center gap-2">
+                                                            {{-- Type Badge --}}
+                                                            <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-medium uppercase">
+                                                                {{ $row->type }}
+                                                            </span>
+                                                            {{-- Status Badge --}}
+                                                            <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 bg-blue-100 text-blue-800">
+                                                                Stored
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Senders & Receiver information --}}
+                                                    <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
+                                                        @if($row->nama_pengirim)
+                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
+                                                                <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
+                                                                <span class="truncate">From: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                        @if($row->nama_penerima)
+                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
+                                                                <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
+                                                                <span class="truncate">To: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Direction info --}}
+                                            <div class="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                                <x-heroicon-o-arrow-up-right class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                <span>Direction: <span class="font-semibold text-gray-700 uppercase tracking-wide">{{ $dirLabel }}</span></span>
+                                            </div>
+                                        </div>
+
+                                        {{-- BOTTOM ACTIONS --}}
+                                        <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
+                                            <span class="text-[11px] font-semibold text-gray-500 mr-auto">
+                                                No. {{ $rowNo }}
+                                            </span>
+                                            <div class="flex gap-2">
+                                                <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
+                                                    wire:loading.attr="disabled"
+                                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-2 focus:ring-gray-900/10 focus:outline-none transition shadow-sm">
+                                                    Edit
+                                                </button>
+                                                <button type="button" wire:click="finalizeItem({{ $row->delivery_id }})"
+                                                    wire:loading.attr="disabled"
+                                                    class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:ring-2 focus:ring-[#4E653D]/20 focus:outline-none transition shadow-sm">
+                                                    {{ $actionLabel }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="col-span-full py-16 text-center text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">
+                                        <x-heroicon-o-document-text class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
+                                        Tidak ada data stored
+                                    </div>
+                                @endforelse
+                            @endif
+                        </div>
+                    @else
+                        {{-- TABLE VIEW MODE --}}
+                        <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
+                                        <th class="px-6 py-3.5">#</th>
+                                        <th class="px-6 py-3.5">Item Name</th>
+                                        <th class="px-6 py-3.5">Type</th>
+                                        <th class="px-6 py-3.5">Sender</th>
+                                        <th class="px-6 py-3.5">Receiver</th>
+                                        @if($activeTab === 'pending')
+                                            <th class="px-6 py-3.5">Received Date</th>
                                         @else
-                                            {{ $avatarChar }}
+                                            <th class="px-6 py-3.5">Direction</th>
                                         @endif
-                                    </div>
-
-                                    <div class="min-w-0 flex-1">
-                                        {{-- 2. TOP ROW: Title, Type, Status --}}
-                                        <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
-                                            <h4 class="font-semibold text-gray-900 text-base truncate pr-2 max-w-full">
-                                                {{ $row->item_name }}
-                                            </h4>
-                                            <div class="flex-shrink-0 flex items-center gap-2">
-                                                {{-- Type Chip --}}
-                                                <span class="text-[11px] px-2 py-0.5 rounded border border-gray-300 text-gray-600 bg-gray-50 flex-shrink-0">
-                                                    {{ strtoupper($row->type) }}
-                                                </span>
-                                                {{-- Status Chip --}}
-                                                <span class="text-[11px] px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium flex-shrink-0">
-                                                    Stored
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {{-- 3. MIDDLE SECTION: Sender, Receiver, Direction --}}
-                                        <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
-                                            @if($row->nama_pengirim)
-                                                <div class="flex items-center gap-2">
-                                                    <x-heroicon-o-user class="w-4 h-4 text-gray-400"/>
-                                                    <span class="truncate font-medium text-gray-800">From: {{ $row->nama_pengirim }}</span>
-                                                </div>
-                                            @endif
-                                            @if($row->nama_penerima)
-                                                <div class="flex items-center gap-2">
-                                                    <x-heroicon-o-user class="w-4 h-4 text-gray-400"/>
-                                                    <span class="truncate font-medium text-gray-800">To: {{ $row->nama_penerima }}</span>
-                                                </div>
-                                            @endif
-                                            <div class="flex items-center gap-2 text-[12px] text-gray-600">
-                                                <x-heroicon-o-arrow-up-right class="w-3.5 h-3.5 text-gray-400"/>
-                                                <span>Direction: {{ $dirLabel }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- 4. BOTTOM ACTIONS --}}
-                                <div class="pt-3 mt-auto border-t border-gray-100 flex items-center justify-end gap-3">
-                                    <span class="text-[11px] text-gray-500 mr-auto">
-                                        #{{ $rowNo }}
-                                    </span>
-                                    
-                                    <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
-                                        wire:loading.attr="disabled"
-                                        class="px-4 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500/20 transition">
-                                        Edit
-                                    </button>
-                                    <button type="button" wire:click="finalizeItem({{ $row->delivery_id }})"
-                                        wire:loading.attr="disabled"
-                                        class="px-4 py-2 text-xs font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 shadow-sm transition">
-                                        {{ $actionLabel }}
-                                    </button>
-                                </div>
-                            </div>
-                            {{-- END: MODIFIED STORED CARD DESIGN --}}
-                        @empty
-                            <div class="col-span-full px-4 py-14 text-center text-gray-500 text-sm">Tidak ada data</div>
-                        @endforelse
+                                        <th class="px-6 py-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @if($activeTab === 'pending')
+                                        @forelse($pending as $row)
+                                            @php
+                                                $rowNo = ($pending->firstItem() ?? 1) + $loop->index;
+                                            @endphp
+                                            <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
+                                                <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-[#4E653D] flex items-center justify-center text-white text-xs font-semibold">
+                                                            @if($row->image)
+                                                                <img src="{{ Storage::disk('public')->url($row->image) }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                {{ strtoupper(substr($row->item_name ?? 'P', 0, 1)) }}
+                                                            @endif
+                                                        </div>
+                                                        <div class="font-semibold text-gray-900">{{ $row->item_name }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium uppercase border border-gray-200 text-gray-700 bg-gray-50">
+                                                        {{ $row->type }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">{{ $row->nama_pengirim ?? '—' }}</td>
+                                                <td class="px-6 py-4 font-medium">{{ $row->nama_penerima ?? '—' }}</td>
+                                                <td class="px-6 py-4 text-xs text-gray-500">
+                                                    {{ fmtDate($row->created_at) }} {{ fmtTime($row->created_at) }}
+                                                </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
+                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
+                                                            Edit
+                                                        </button>
+                                                        <button type="button" wire:click="storeItem({{ $row->delivery_id }})"
+                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm">
+                                                            Store
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">Tidak ada data pending</td>
+                                            </tr>
+                                        @endforelse
+                                    @else
+                                        @forelse($stored as $row)
+                                            @php
+                                                $rowNo = ($stored->firstItem() ?? 1) + $loop->index;
+                                                $dir = $storedDirections[$row->delivery_id] ?? 'taken';
+                                                $dirLabel = $dir === 'deliver' ? 'Deliver' : 'Taken';
+                                                $actionLabel = $dir === 'deliver' ? 'Delivered' : 'Taken';
+                                            @endphp
+                                            <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
+                                                <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-[#4E653D] flex items-center justify-center text-white text-xs font-semibold">
+                                                            @if($row->image)
+                                                                <img src="{{ Storage::disk('public')->url($row->image) }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                {{ strtoupper(substr($row->item_name ?? 'S', 0, 1)) }}
+                                                            @endif
+                                                        </div>
+                                                        <div class="font-semibold text-gray-900">{{ $row->item_name }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium uppercase border border-gray-200 text-gray-700 bg-gray-50">
+                                                        {{ $row->type }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">{{ $row->nama_pengirim ?? '—' }}</td>
+                                                <td class="px-6 py-4 font-medium">{{ $row->nama_penerima ?? '—' }}</td>
+                                                <td class="px-6 py-4">
+                                                    @if($dir === 'deliver')
+                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold border border-blue-200 text-blue-700 bg-blue-50">
+                                                            {{ $dirLabel }}
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50">
+                                                            {{ $dirLabel }}
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
+                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
+                                                            Edit
+                                                        </button>
+                                                        <button type="button" wire:click="finalizeItem({{ $row->delivery_id }})"
+                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm">
+                                                            {{ $actionLabel }}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">Tidak ada data stored</td>
+                                            </tr>
+                                        @endforelse
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     @endif
                 </div>
 
                 {{-- Pagination --}}
-                <div class="px-4 sm:px-6 py-5 bg-white border-t border-gray-200 rounded-b-2xl">
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-200 bg-white">
                     <div class="flex justify-center">
                         @if($activeTab === 'pending')
                             {{ $pending->onEachSide(1)->links() }}
@@ -352,35 +545,45 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 {{-- Filter by Department & User --}}
                 <section class="{{ $card }}">
-                    <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">Advanced Filters</h3>
-                        <p class="text-xs text-gray-500 mt-1">Filter berdasarkan department & user.</p>
+                    <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">Advanced Filters</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Filter berdasarkan department & user.</p>
                     </div>
 
-                    <div class="px-4 py-3 space-y-4">
+                    <div class="p-4 space-y-4 bg-white">
                         {{-- Department Filter --}}
-                        <div>
+                        <div class="space-y-1">
                             <label class="{{ $label }}">Department</label>
                             <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
                                 placeholder="Cari department...">
-                            <select wire:model.live="departmentId" class="{{ $input }} mt-2">
-                                <option value="">Semua Department</option>
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative mt-2">
+                                <select wire:model.live="departmentId" class="{{ $input }} appearance-none pr-8">
+                                    <option value="">Semua Department</option>
+                                    @foreach($departments as $dept)
+                                        <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- User Filter --}}
-                        <div>
+                        <div class="space-y-1">
                             <label class="{{ $label }}">Receptionist / User</label>
                             <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="Cari user...">
-                            <select wire:model.live="userId" class="{{ $input }} mt-2">
-                                <option value="">Semua User</option>
-                                @foreach($users as $u)
-                                    <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative mt-2">
+                                <select wire:model.live="userId" class="{{ $input }} appearance-none pr-8">
+                                    <option value="">Semua User</option>
+                                    @foreach($users as $u)
+                                        <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -390,48 +593,56 @@
 
     {{-- MOBILE FILTER MODAL --}}
     @if($showFilterModal)
-        <div class="fixed inset-0 z-40 md:hidden">
-            <div class="absolute inset-0 bg-black/40" wire:click="closeFilterModal"></div>
-            <div class="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl max-h-[80vh] overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+        <div class="fixed inset-0 z-50 md:hidden flex items-end">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="closeFilterModal"></div>
+            <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
+                <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-900">Advanced Filters</h3>
-                        <p class="text-[11px] text-gray-500">Filter berdasarkan department & user.</p>
+                        <h3 class="text-sm font-semibold tracking-tight text-foreground">Advanced Filters</h3>
+                        <p class="text-[11px] text-muted-foreground mt-0.5">Filter berdasarkan department & user.</p>
                     </div>
-                    <button type="button" class="text-gray-500 hover:text-gray-700" wire:click="closeFilterModal">
-                        <x-heroicon-o-x-mark class="w-5 h-5"/>
-                    </button>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
                 </div>
 
-                <div class="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div class="p-5 space-y-5 overflow-y-auto flex-1">
                     {{-- Department Filter --}}
-                    <div>
-                        <label class="{{ $label }}">Department</label>
-                        <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Department</label>
+                        <input type="text" wire:model.live="departmentQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                             placeholder="Cari department...">
-                        <select wire:model.live="departmentId" class="{{ $input }} mt-2">
-                            <option value="">Semua Department</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative mt-2">
+                            <select wire:model.live="departmentId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
+                                <option value="">Semua Department</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- User Filter --}}
-                    <div>
-                        <label class="{{ $label }}">Receptionist / User</label>
-                        <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="Cari user...">
-                        <select wire:model.live="userId" class="{{ $input }} mt-2">
-                            <option value="">Semua User</option>
-                            @foreach($users as $u)
-                                <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                            @endforeach
-                        </select>
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Receptionist / User</label>
+                        <input type="text" wire:model.live="userQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" placeholder="Cari user...">
+                        <div class="relative mt-2">
+                            <select wire:model.live="userId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
+                                <option value="">Semua User</option>
+                                @foreach($users as $u)
+                                    <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="px-4 py-3 border-t border-gray-200">
-                    <button type="button" class="w-full h-10 rounded-xl bg-gray-900 text-white text-xs font-medium"
+                <div class="p-5 border-t border-border bg-muted/10">
+                    <button type="button" class="w-full h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 focus:ring-2 focus:ring-primary/20 transition shadow-sm"
                         wire:click="closeFilterModal">
                         Apply & Close
                     </button>
@@ -442,53 +653,51 @@
 
     {{-- EDIT MODAL --}}
     @if($showEdit)
-        <div class="fixed inset-0 z-50">
-            <div class="absolute inset-0 bg-black/50"></div>
-            <div class="absolute inset-0 flex items-center justify-center p-4">
-                <div class="w-full max-w-lg bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-                    <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-                        <h3 class="font-semibold text-black">Edit Item</h3>
-                        <button type="button" class="text-gray-500 hover:text-gray-700"
-                            wire:click="$set('showEdit', false)">
-                            <x-heroicon-o-x-mark class="w-5 h-5"/>
-                        </button>
-                    </div>
-                    <div class="p-5 space-y-4">
-                        <div>
-                            <label class="{{ $label }}">Item Name</label>
-                            <input type="text" class="{{ $input }}" wire:model.defer="edit.item_name">
-                            @error('edit.item_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="$set('showEdit', false)"></div>
+            <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <x-heroicon-o-pencil class="w-4 h-4 text-primary" />
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="{{ $label }}">Nama Pengirim</label>
-                                <input type="text" class="{{ $input }}" wire:model.defer="edit.nama_pengirim">
-                                @error('edit.nama_pengirim') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="{{ $label }}">Nama Penerima</label>
-                                <input type="text" class="{{ $input }}" wire:model.defer="edit.nama_penerima">
-                                @error('edit.nama_penerima') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <h3 class="font-bold text-foreground text-base tracking-tight">Edit Item Details</h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="$set('showEdit', false)">✕</button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Item Name</label>
+                        <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.item_name">
+                        @error('edit.item_name') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nama Pengirim</label>
+                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.nama_pengirim">
+                            @error('edit.nama_pengirim') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nama Penerima</label>
+                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.nama_penerima">
+                            @error('edit.nama_penerima') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
                     </div>
-
-                    <div class="px-5 py-4 border-t border-gray-200 flex items-center justify-end gap-2">
-                        <button type="button" wire:click="$set('showEdit', false)"
-                            class="h-10 px-4 rounded-xl bg-gray-200 text-gray-900 text-sm font-medium hover:bg-gray-300 focus:outline-none">
-                            Batal
-                        </button>
-                        <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
-                            class="h-10 px-4 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-900/20 disabled:opacity-60 transition shadow-sm">
-                            <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
-                            <span wire:loading wire:target="saveEdit" class="flex items-center gap-2">
-                                <x-heroicon-o-arrow-path class="animate-spin -ml-1 mr-1 h-4 w-4 text-white"/>
-                                Menyimpan…
-                            </span>
-                        </button>
-                    </div>
+                </div>
+                <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/10">
+                    <button type="button" wire:click="$set('showEdit', false)"
+                        class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
+                        <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
+                        <span>Batal</span>
+                    </button>
+                    <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
+                        class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
+                        <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
+                        <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
+                            <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-primary-foreground"/>
+                            Menyimpan…
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>

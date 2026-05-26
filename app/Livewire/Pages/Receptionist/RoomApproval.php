@@ -8,21 +8,24 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
+
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
 
 #[Layout('layouts.receptionist')]
 #[Title('Room Approval')]
 class RoomApproval extends Component
 {
-    public array $pending = [];
-    public array $ongoing = [];
+    use WithPagination;
+    use HasViewMode;
+
+    protected string $paginationTheme = 'tailwind';
+
+    public int $perPending = 6;
+    public int $perOngoing = 6;
 
     public ?int $rejectId = null;
     public string $reject_reason = ''; // UI only
-
-    public function mount(): void
-    {
-        $this->reloadBuckets();
-    }
 
     public function approve(int $id): void
     {
@@ -33,7 +36,6 @@ class RoomApproval extends Component
         // processed already?
         if ($row->status !== BookingRoom::ST_PENDING) {
             $this->dispatch('toast', type: 'info', message: 'Booking sudah diproses.');
-            $this->reloadBuckets();
             return;
         }
 
@@ -44,7 +46,8 @@ class RoomApproval extends Component
         ]);
 
         $this->dispatch('toast', type: 'success', message: 'Booking disetujui.');
-        $this->reloadBuckets();
+        $this->resetPage('pendingPage');
+        $this->resetPage('ongoingPage');
     }
 
     public function askReject(int $id): void
@@ -70,41 +73,14 @@ class RoomApproval extends Component
 
         $this->rejectId = null;
         $this->reject_reason = '';
-        $this->reloadBuckets();
+        $this->resetPage('pendingPage');
+        $this->resetPage('ongoingPage');
     }
 
     /** Poller */
     public function tick(): void
     {
-        try {
-            $this->reloadBuckets();
-        } catch (\Throwable $e) {
-            \Log::error('[RoomApproval tick] ' . $e->getMessage());
-        }
-    }
-
-    private function reloadBuckets(): void
-    {
-        $cid = Auth::user()?->company_id;
-
-        // Pending list
-        $pend = BookingRoom::with('room')
-            ->company($cid)
-            ->pending()
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
-
-        // Ongoing: all approved (you can filter by time here if you want)
-        $ongo = BookingRoom::with('room')
-            ->company($cid)
-            ->approved()
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
-
-        $this->pending = $pend->map(fn($r) => $this->uiMap($r))->all();
-        $this->ongoing = $ongo->map(fn($r) => $this->uiMap($r))->all();
+        // No action needed; Livewire will automatically re-render and re-query
     }
 
     private function uiMap(BookingRoom $r): array
@@ -123,9 +99,29 @@ class RoomApproval extends Component
 
     public function render()
     {
+        $cid = Auth::user()?->company_id;
+
+        // Paginated pending list
+        $pending = BookingRoom::with('room')
+            ->company($cid)
+            ->pending()
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->paginate($this->perPending, pageName: 'pendingPage')
+            ->through(fn($r) => $this->uiMap($r));
+
+        // Paginated ongoing list
+        $ongoing = BookingRoom::with('room')
+            ->company($cid)
+            ->approved()
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->paginate($this->perOngoing, pageName: 'ongoingPage')
+            ->through(fn($r) => $this->uiMap($r));
+
         return view('livewire.pages.receptionist.room-approval', [
-            'pending' => $this->pending,
-            'ongoing' => $this->ongoing,
+            'pending' => $pending,
+            'ongoing' => $ongoing,
         ]);
     }
 }

@@ -1,266 +1,179 @@
-<div class="bg-gray-50" wire:poll.2000ms.keep-alive>
-    <main class="px-4 sm:px-6 py-6">
-        <div class="space-y-8">
+<div class="min-h-screen bg-background" wire:poll.60s>
+    <main class="px-4 sm:px-6 py-6 space-y-6">
 
-            {{-- Greeting --}}
-            <div class="rounded-2xl bg-gradient-to-r from-gray-900 to-black text-white p-6 shadow-2xl">
-                <h2 class="text-lg font-semibold">Selamat Datang di Dashboard Receptionist</h2>
-                <p class="text-sm text-gray-300">
-                    Berikut total data 7 hari terakhir dari setiap modul
-                </p>
-            </div>
+        {{-- Page header — simple greeting --}}
+        <x-page-header
+            title="Dashboard"
+            subtitle="Overview of the last 7 days across all modules."
+        />
 
-            {{-- Statistics Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {{-- Total Room Bookings --}}
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Room Bookings (7 hari)</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ $weeklyRoomBookingsCount }}
-                            </p>
-                            <p class="text-xs text-green-600 mt-1">+12% vs last week</p>
-                        </div>
-                        <div class="p-3 bg-gray-100 rounded-lg">
-                            <x-heroicon-o-calendar-days class="w-6 h-6 text-gray-700" />
-                        </div>
+        {{-- KPI Cards --}}
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <x-stat-card
+                label="Room Bookings"
+                :value="$weeklyRoomBookingsCount"
+                icon="heroicon-o-calendar-days"
+                href="{{ route('receptionist.schedule') }}"
+            />
+            <x-stat-card
+                label="Vehicle Bookings"
+                :value="$weeklyVehicleBookingsCount"
+                icon="heroicon-o-truck"
+                href="{{ route('receptionist.bookingvehicle') }}"
+            />
+            <x-stat-card
+                label="Guest Visits"
+                :value="$weeklyGuestsCount"
+                icon="heroicon-o-user-group"
+                href="{{ route('receptionist.guestbook') }}"
+            />
+            <x-stat-card
+                label="Documents / Packages"
+                :value="$weeklyDocsCount"
+                icon="heroicon-o-archive-box"
+                href="{{ route('receptionist.docpackform') }}"
+            />
+        </section>
+
+        {{-- Quick Actions + Recent Activity --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            {{-- Recent Activity — spans 2 cols --}}
+            <div class="lg:col-span-2 space-y-4">
+
+                {{-- Latest Room Bookings --}}
+                <div class="bg-card border border-border rounded-lg">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                        <h3 class="text-sm font-semibold text-card-foreground">Recent Room Bookings</h3>
+                        <a href="{{ route('receptionist.bookinghistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
                     </div>
+                    @if($latestBookingRooms->isEmpty())
+                        <x-empty-state icon="heroicon-o-calendar-days" title="No room bookings" description="No bookings found in the last 7 days." />
+                    @else
+                        <div class="divide-y divide-border">
+                            @foreach($latestBookingRooms as $br)
+                                <div class="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0">
+                                            <x-heroicon-o-calendar-days class="w-4 h-4 text-muted-foreground" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-foreground truncate">{{ $br['title'] }}</p>
+                                            <p class="text-xs text-muted-foreground">{{ $br['date'] }} · {{ $br['time'] }}</p>
+                                        </div>
+                                    </div>
+                                    <x-status-badge :status="$br['status']" />
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
-                {{-- Vehicle Bookings --}}
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Vehicle Bookings (7 hari)</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ $weeklyVehicleBookingsCount }}
-                            </p>
-                            <p class="text-xs text-green-600 mt-1">+8% vs last week</p>
-                        </div>
-                        <div class="p-3 bg-gray-100 rounded-lg">
-                            <x-heroicon-o-bolt class="w-6 h-6 text-gray-700" />
-                        </div>
+                {{-- Latest Guest Entries --}}
+                <div class="bg-card border border-border rounded-lg">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                        <h3 class="text-sm font-semibold text-card-foreground">Recent Guests</h3>
+                        <a href="{{ route('receptionist.guestbookhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
                     </div>
-                </div>
-
-                {{-- Guests --}}
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Guest Visits (7 hari)</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ $weeklyGuestsCount }}
-                            </p>
-                            <p class="text-xs text-green-600 mt-1">+15% vs last week</p>
+                    @if($latestGuests->isEmpty())
+                        <x-empty-state icon="heroicon-o-user-group" title="No guests" description="No guest entries found recently." />
+                    @else
+                        <div class="divide-y divide-border">
+                            @foreach($latestGuests as $g)
+                                <div class="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold shrink-0">
+                                            {{ strtoupper(substr($g['name'], 0, 1)) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-foreground truncate">{{ $g['name'] }}</p>
+                                            <p class="text-xs text-muted-foreground">{{ $g['purpose'] }} · {{ $g['date'] }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-muted-foreground font-mono">{{ $g['time_in'] }}</span>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="p-3 bg-gray-100 rounded-lg">
-                            <x-heroicon-o-user-group class="w-6 h-6 text-gray-700" />
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Documents --}}
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Documents/Packages (7 hari)</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ $weeklyDocsCount }}
-                            </p>
-                            <p class="text-xs text-green-600 mt-1">+5% vs last week</p>
-                        </div>
-                        <div class="p-3 bg-gray-100 rounded-lg">
-                            <x-heroicon-o-archive-box class="w-6 h-6 text-gray-700" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Charts Section --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {{-- Activity Chart (new style like report page) --}}
-                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-base font-semibold text-gray-900 flex items-center gap-2">
-                            <x-heroicon-o-chart-bar class="h-5 w-5 text-gray-900" />
-                            Weekly Activity – Room / Vehicle / DocPac / Guestbook
-                        </h3>
-                        <p class="text-xs text-gray-500">
-                            7 hari terakhir (dummy data)
-                        </p>
-                    </div>
-
-                    <div class="h-[320px]" wire:ignore>
-                        <canvas id="activityChart" class="w-full" style="max-height:320px"></canvas>
-                    </div>
-                </div>
-
-                {{-- Status Distribution --}}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">Status Distribution</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium text-gray-700">Approved</span>
-                                <span class="text-sm font-bold text-gray-900">65%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-gray-900 h-2 rounded-full" style="width: 65%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium text-gray-700">Pending</span>
-                                <span class="text-sm font-bold text-gray-900">25%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-gray-600 h-2 rounded-full" style="width: 25%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium text-gray-700">Rejected</span>
-                                <span class="text-sm font-bold text-gray-900">10%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-gray-400 h-2 rounded-full" style="width: 10%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                        <p class="text-xs text-gray-600 mb-1">Total Requests This Month</p>
-                        <p class="text-2xl font-bold text-gray-900">247</p>
-                        <p class="text-xs text-gray-600 mt-1">↑ 18% from last month</p>
-                    </div>
+                    @endif
                 </div>
             </div>
 
+            {{-- Right Column: Quick Actions + Latest Docs --}}
+            <div class="space-y-4">
+
+                {{-- Quick Actions --}}
+                <div class="bg-card border border-border rounded-lg">
+                    <div class="px-4 py-3 border-b border-border">
+                        <h3 class="text-sm font-semibold text-card-foreground">Quick Actions</h3>
+                    </div>
+                    <div class="p-3 space-y-1.5">
+                        <a href="{{ route('receptionist.guestbook') }}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted transition-colors group">
+                            <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <x-heroicon-o-user-plus class="w-4 h-4 text-foreground" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">New Guest Entry</p>
+                                <p class="text-xs text-muted-foreground">Register a visitor</p>
+                            </div>
+                        </a>
+                        <a href="{{ route('receptionist.schedule') }}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted transition-colors group">
+                            <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <x-heroicon-o-calendar-days class="w-4 h-4 text-foreground" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Book a Room</p>
+                                <p class="text-xs text-muted-foreground">Schedule a meeting room</p>
+                            </div>
+                        </a>
+                        <a href="{{ route('receptionist.docpackform') }}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted transition-colors group">
+                            <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <x-heroicon-o-document-text class="w-4 h-4 text-foreground" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">DocPac Form</p>
+                                <p class="text-xs text-muted-foreground">Log a document or package</p>
+                            </div>
+                        </a>
+                        <a href="{{ route('receptionist.bookingvehicle') }}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted transition-colors group">
+                            <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <x-heroicon-o-truck class="w-4 h-4 text-foreground" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Book Vehicle</p>
+                                <p class="text-xs text-muted-foreground">Reserve a vehicle</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Latest Documents & Packages --}}
+                <div class="bg-card border border-border rounded-lg">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                        <h3 class="text-sm font-semibold text-card-foreground">Recent Docs / Packages</h3>
+                        <a href="{{ route('receptionist.docpackhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
+                    </div>
+                    @if($latestDocs->isEmpty())
+                        <x-empty-state icon="heroicon-o-archive-box" title="No documents" description="No documents or packages recorded." />
+                    @else
+                        <div class="divide-y divide-border">
+                            @foreach($latestDocs as $d)
+                                <div class="px-4 py-3 hover:bg-muted/50 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-foreground truncate">{{ $d['item'] }}</p>
+                                        <x-status-badge :status="$d['status']" />
+                                    </div>
+                                    <p class="text-xs text-muted-foreground mt-0.5">{{ $d['type'] }} · {{ $d['direction'] }} · {{ $d['created'] }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
+
     </main>
-
-    {{-- Chart.js v4 seperti di report page --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-    @verbatim
-        <script>
-            let __activityChart;
-
-            function rebuildActivityChart() {
-                const canvas = document.getElementById('activityChart');
-                if (!canvas) return;
-
-                const ctx = canvas.getContext('2d');
-
-                // Dummy weekly data – bisa kamu ganti dari @json kalau nanti mau dinamis
-                const weekly = {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    room: [5, 9, 7, 12, 10, 8, 11],
-                    vehicle: [2, 4, 3, 6, 5, 4, 5],
-                    docpac: [1, 3, 2, 4, 3, 2, 3],
-                    guest: [4, 6, 5, 9, 8, 7, 9],
-                };
-
-                if (__activityChart) {
-                    __activityChart.destroy();
-                }
-
-                const paletteLine = {
-                    room: '#1d4ed8', // blue
-                    vehicle: '#059669', // emerald
-                    docpac: '#f59e0b', // amber
-                    guest: '#7c3aed', // violet
-                };
-
-                const datasets = [
-                    {
-                        label: 'Room',
-                        data: weekly.room,
-                        borderColor: paletteLine.room,
-                        tension: 0.35,
-                        pointRadius: 3,
-                        fill: false,
-                    },
-                    {
-                        label: 'Vehicle',
-                        data: weekly.vehicle,
-                        borderColor: paletteLine.vehicle,
-                        tension: 0.35,
-                        pointRadius: 3,
-                        fill: false,
-                    },
-                    {
-                        label: 'DocPac',
-                        data: weekly.docpac,
-                        borderColor: paletteLine.docpac,
-                        tension: 0.35,
-                        pointRadius: 3,
-                        fill: false,
-                    },
-                    {
-                        label: 'Guestbook',
-                        data: weekly.guest,
-                        borderColor: paletteLine.guest,
-                        tension: 0.35,
-                        pointRadius: 3,
-                        fill: false,
-                    },
-                ];
-
-                __activityChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: weekly.labels,
-                        datasets: datasets,
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                            },
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    precision: 0,
-                                    stepSize: 1,
-                                },
-                                grid: {
-                                    color: 'rgba(0,0,0,0.05)',
-                                },
-                            },
-                            x: {
-                                grid: {
-                                    display: false,
-                                },
-                            },
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            intersect: false,
-                        },
-                    },
-                });
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                rebuildActivityChart();
-            });
-
-            document.addEventListener('livewire:load', () => {
-                rebuildActivityChart();
-            });
-
-            document.addEventListener('livewire:navigated', () => {
-                rebuildActivityChart();
-            });
-        </script>
-    @endverbatim
 </div>

@@ -1,68 +1,80 @@
 <div>
     @if($show)
-        <div class="fixed inset-0 z-50 flex items-center justify-center">
-            <div class="absolute inset-0 bg-black/40" wire:click="close"></div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="close"></div>
 
-            <div class="relative z-10 w-full max-w-xl mx-4 bg-white rounded-xl border-2 border-black shadow-lg"
+            {{-- Modal Content --}}
+            <div class="relative z-10 w-full max-w-xl bg-card rounded-2xl border border-border shadow-2xl overflow-hidden transform transition-all duration-300"
                 wire:keydown.escape="close">
-                <div class="border-b-2 border-black p-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Quick Book</h3>
-                    <button class="px-2 py-1 text-gray-600 hover:text-gray-900" wire:click="close">✕</button>
+                
+                {{-- Header --}}
+                <div class="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/10">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-bold text-foreground tracking-tight">Quick Room Booking</h3>
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="close">✕</button>
                 </div>
 
-                <div class="p-4 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Form Body --}}
+                <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Room</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Room</label>
                             <input type="text" value="{{ $roomName ?? '' }}" disabled
-                                class="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md">
+                                class="w-full h-10 px-3.5 bg-muted text-foreground/80 border border-input rounded-lg text-sm cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Date</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Date</label>
                             <input type="date" wire:model="date"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                            @error('date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('date') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Start Time</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Start Time</label>
                             <input type="time" wire:model="start_time" min="{{ $minStart }}"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                            @error('start_time') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('start_time') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">End Time</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">End Time</label>
                             <input type="time" wire:model="end_time" min="{{ $start_time ?: $minStart }}"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                            @error('end_time') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('end_time') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Meeting Title</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Meeting Title</label>
                             <input type="text" wire:model="meeting_title" placeholder="Enter meeting title"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                            @error('meeting_title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('meeting_title') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Attendees</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Attendees</label>
                             <input type="number" wire:model="number_of_attendees" min="1" placeholder="0"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                            @error('number_of_attendees') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('number_of_attendees') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-900 mb-2">Additional Requirements</label>
-                        <div class="grid grid-cols-2 gap-3">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Additional Requirements</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/20 border border-border rounded-xl p-4">
                             @foreach (['projector', 'whiteboard', 'video_conference', 'catering', 'other'] as $req)
-                                <label class="flex items-center space-x-2">
+                                <label class="flex items-center space-x-2.5 cursor-pointer group">
                                     <input type="checkbox" wire:model.live="requirements" value="{{ $req }}"
-                                        class="rounded border-gray-300 text-gray-900 focus:ring-gray-900">
-                                    <span class="text-sm text-gray-900">{{ ucwords(str_replace('_', ' ', $req)) }}</span>
+                                        class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
+                                    <span class="text-xs text-foreground group-hover:text-primary transition-colors">{{ ucwords(str_replace('_', ' ', $req)) }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -70,21 +82,22 @@
 
                     @if (in_array('other', $requirements ?? [], true))
                         <div>
-                            <label class="block text-sm font-medium text-gray-900 mb-1">Special Notes</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Special Notes</label>
                             <textarea wire:model.defer="special_notes" rows="3"
-                                placeholder="Please specify your other requirement…"
-                                class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"></textarea>
-                            @error('special_notes') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                placeholder="Please specify your other requirements…"
+                                class="w-full px-3.5 py-2.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"></textarea>
+                            @error('special_notes') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                     @endif
                 </div>
 
-                <div class="border-t border-gray-200 px-4 py-3 flex items-center justify-end gap-2">
+                {{-- Footer --}}
+                <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/10">
                     <button wire:click="close"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition">
                         Cancel
                     </button>
-                    <button wire:click="submit" class="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800">
+                    <button wire:click="submit" class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm">
                         Confirm Booking
                     </button>
                 </div>

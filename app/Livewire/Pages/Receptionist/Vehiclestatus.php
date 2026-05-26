@@ -12,11 +12,14 @@ use App\Models\VehicleBooking;
 use App\Models\Vehicle;
 use App\Models\VehicleBookingPhoto;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('Vehicle Status')]
 class Vehiclestatus extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
     protected string $tz = 'Asia/Jakarta';
@@ -48,6 +51,9 @@ class Vehiclestatus extends Component
     /** @var array{before: array, after: array} */
     public array $selectedPhotos = ['before' => [], 'after' => []];
     // *** END BARU ***
+
+    // Mobile filter modal
+    public bool $showFilterModal = false;
 
     protected $queryString = [
         'q' => ['except' => ''],
@@ -337,4 +343,29 @@ class Vehiclestatus extends Component
         $this->resetErrorBag();
     }
     // *** END BARU ***
+
+    // ───────── Mobile Filter Modal ─────────
+    public function openFilterModal(): void
+    {
+        $this->showFilterModal = true;
+    }
+
+    public function closeFilterModal(): void
+    {
+        $this->showFilterModal = false;
+    }
+
+    public function selectVehicle(int $vehicleId): void
+    {
+        $this->vehicleFilter = $vehicleId;
+        $this->resetPage();
+        $this->showFilterModal = false;
+    }
+
+    public function clearVehicleFilter(): void
+    {
+        $this->vehicleFilter = null;
+        $this->resetPage();
+        $this->showFilterModal = false;
+    }
 }

@@ -1,57 +1,53 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-background">
     @php
-        $card   = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
-        $head   = 'bg-gradient-to-r from-gray-900 to-black';
+        $card   = 'bg-card border border-border rounded-2xl shadow-xl overflow-hidden';
+        $head   = 'bg-[#4A2F24]';
         $hpad   = 'px-6 py-5';
-        $label  = 'block text-sm font-medium text-gray-700 mb-2';
-        $input  = 'w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 bg-white transition';
-        $btnBlk = 'px-3 py-2 text-xs font-medium rounded-lg bg-gray-900 text-white hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-900/20 disabled:opacity-60 transition';
+        $label  = 'block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5';
+        $input  = 'w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+        $btnBlk = 'inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60';
     @endphp
 
     <style>
       :root { color-scheme: light; }
       select, option {
-        color:#111827 !important;
-        background:#ffffff !important;
-        -webkit-text-fill-color:#111827 !important;
+        color: var(--foreground) !important;
+        background: var(--background) !important;
       }
-      option:checked { background:#e5e7eb !important; color:#111827 !important; }
+      option:checked { background: var(--muted) !important; color: var(--foreground) !important; }
     </style>
 
-    <div class="px-4 sm:px-6 py-6 space-y-8">
+    <div class="px-4 sm:px-6 py-6 space-y-6">
         {{-- HERO --}}
-        <div class="relative overflow-hidden rounded-2xl {{ $head }} text-white shadow-2xl">
+        <div class="relative overflow-hidden rounded-2xl {{ $head }} text-[#CDDEA7] shadow-2xl">
             <div class="pointer-events-none absolute inset-0 opacity-10">
-                <div class="absolute top-0 -right-4 w-24 h-24 bg-white rounded-full blur-xl"></div>
-                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-white rounded-full blur-lg"></div>
+                <div class="absolute top-0 -right-4 w-24 h-24 bg-[#CDDEA7] rounded-full blur-xl"></div>
+                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
             </div>
             <div class="relative z-10 p-6 sm:p-8">
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                            <x-heroicon-o-truck class="w-6 h-6 text-white"/>
+                        <div class="w-12 h-12 bg-[#CDDEA7]/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-[#CDDEA7]/20">
+                            <x-heroicon-o-truck class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Vehicle Booking (Receptionist)</h2>
-                            <p class="text-sm text-white/80">
+                            <h2 class="text-lg sm:text-xl font-semibold">Vehicle Booking</h2>
+                            <p class="text-xs text-[#CDDEA7]/80 max-w-xl">
                                 Isi form di bawah untuk mengajukan peminjaman kendaraan atas nama user/departemen tertentu.
                             </p>
                         </div>
                     </div>
 
-                    <div class="hidden md:inline-flex rounded-lg overflow-hidden bg-white/10 border border-white/20 backdrop-blur-sm">
+                    <div class="inline-flex rounded-lg overflow-hidden bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 backdrop-blur-sm">
                         <a href="{{ route('receptionist.roomapproval') }}"
-                           class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-white/80 hover:text-white border-r border-white/20 inline-flex items-center gap-2">
+                           class="px-3.5 py-2 text-xs font-semibold text-[#CDDEA7]/80 hover:text-[#CDDEA7] hover:bg-[#CDDEA7]/5 border-r border-[#CDDEA7]/20 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-calendar-days class="w-4 h-4"/>
-                            Room Booking
+                            <span>Room Booking</span>
                         </a>
                         <a href="{{ route('receptionist.vehiclestatus') }}"
-                           class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium bg-white text-gray-900 inline-flex items-center gap-2">
+                           class="px-3.5 py-2 text-xs font-semibold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-truck class="w-4 h-4"/>
-                            Vehicle Status
-                        </a>
-                    </div>
-                            Vehicle Status
+                            <span>Vehicle Status</span>
                         </a>
                     </div>
                 </div>
@@ -60,46 +56,52 @@
 
         {{-- FORM --}}
         <div class="{{ $card }}">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-gray-900 rounded-full"></div>
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900">Booking Kendaraan</h3>
-                        <p class="text-sm text-gray-500">Lengkapi detail peminjaman kendaraan</p>
-                    </div>
+            <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <x-heroicon-o-truck class="w-4.5 h-4.5 text-primary" />
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground">Booking Kendaraan</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">Lengkapi detail peminjaman kendaraan</p>
                 </div>
             </div>
 
             <div class="p-6">
                 @if(session()->has('success'))
-                    <div class="mb-6 text-sm bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg">
-                        {{ session('success') }}
+                    <div class="mb-6 inline-flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold shadow-sm w-full">
+                        <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{{ session('success') }}</span>
                     </div>
                 @endif
 
                 <form wire:submit.prevent="submit" class="space-y-6">
-                    {{-- ROW: Departemen + User --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {{-- Departemen --}}
                         <div>
-                            <label class="{{ $label }}">Departemen <span class="text-red-600">*</span></label>
+                            <label class="{{ $label }}">Departemen <span class="text-destructive">*</span></label>
 
-                            {{-- search departemen --}}
                             <input
                                 type="text"
                                 wire:model.live="departmentSearch"
                                 placeholder="Cari departemen..."
-                                class="{{ $input }} mb-2"
+                                class="{{ $input }} mb-2.5"
                             >
 
-                            <select wire:model.live="department_id" class="{{ $input }}">
-                                <option value="">Pilih departemen</option>
-                                @foreach($departments as $d)
-                                    <option value="{{ $d->department_id }}">{{ $d->department_name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
+                                    <option value="">Pilih departemen</option>
+                                    @foreach($departments as $d)
+                                        <option value="{{ $d->department_id }}">{{ $d->department_name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                             @error('department_id')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -107,222 +109,239 @@
                         <div>
                             <label class="{{ $label }}">User (filtered by department)</label>
 
-                            {{-- search user --}}
                             <input
                                 type="text"
                                 wire:model.live="userSearch"
                                 placeholder="Cari user..."
-                                class="{{ $input }} mb-2 @if(!$department_id) bg-gray-100 cursor-not-allowed @endif"
+                                class="{{ $input }} mb-2.5 disabled:bg-muted disabled:text-muted-foreground"
                                 @disabled(!$department_id)
                             >
 
-                            <select
-                                wire:model.defer="borrower_user_id"
-                                class="{{ $input }} @if(!$department_id) bg-gray-100 cursor-not-allowed @endif"
-                                @disabled(!$department_id)
-                            >
-                                @if(!$department_id)
-                                    <option value="">Pilih departemen terlebih dahulu</option>
-                                @else
-                                    <option value="">— Select User —</option>
-                                    @forelse($users as $u)
-                                        <option value="{{ $u->user_id }}">
-                                            {{ $u->full_name }} — {{ $u->email }}
-                                        </option>
-                                    @empty
-                                        <option value="">— No users found —</option>
-                                    @endforelse
-                                @endif
-                            </select>
+                            <div class="relative">
+                                <select
+                                    wire:model.defer="borrower_user_id"
+                                    class="{{ $input }} appearance-none pr-8 disabled:bg-muted disabled:text-muted-foreground"
+                                    @disabled(!$department_id)
+                                >
+                                    @if(!$department_id)
+                                        <option value="">Pilih departemen terlebih dahulu</option>
+                                    @else
+                                        <option value="">— Select User —</option>
+                                        @forelse($users as $u)
+                                            <option value="{{ $u->user_id }}">
+                                                {{ $u->full_name }} — {{ $u->email }}
+                                            </option>
+                                        @empty
+                                            <option value="">— No users found —</option>
+                                        @endforelse
+                                    @endif
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
 
-                            <p class="text-[11px] text-gray-500 mt-1">
+                            <p class="text-[11px] text-muted-foreground mt-1.5">
                                 Jika tidak memilih user, isi nama peminjam manual di kolom di bawah.
                             </p>
                             @error('borrower_user_id')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Nama peminjam manual --}}
                         <div>
                             <label class="{{ $label }}">
-                                Nama Peminjam (manual) <span class="text-red-600">*</span>
+                                Nama Peminjam (manual) <span class="text-destructive">*</span>
                             </label>
                             <input
                                 type="text"
                                 wire:model.defer="borrower_name"
                                 placeholder="Nama peminjam"
-                                class="{{ $input }}"
+                                class="{{ $input }} md:mt-[50px]"
                             >
                             @error('borrower_name')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Kendaraan --}}
                         <div>
-                            <label class="{{ $label }}">Kendaraan <span class="text-red-600">*</span></label>
-                            <select
-                                wire:model.defer="vehicle_id"
-                                @if(!$hasVehicles) disabled @endif
-                                class="{{ $input }}"
-                            >
-                                @if(!$hasVehicles)
-                                    <option value="">Data kendaraan belum tersedia</option>
-                                @else
-                                    <option value="">Pilih kendaraan</option>
-                                    @foreach($vehicles as $v)
-                                        @php
-                                            $vehicleLabel = $v->name ?? 'Kendaraan';
-                                            $plate = $v->plate_number ? ' — '.$v->plate_number : '';
-                                        @endphp
-                                        <option value="{{ $v->vehicle_id }}">
-                                            {{ $vehicleLabel }}{{ $plate }}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
+                            <label class="{{ $label }}">Kendaraan <span class="text-destructive">*</span></label>
+                            <div class="relative">
+                                <select
+                                    wire:model.defer="vehicle_id"
+                                    @if(!$hasVehicles) disabled @endif
+                                    class="{{ $input }} appearance-none pr-8 disabled:bg-muted disabled:text-muted-foreground"
+                                >
+                                    @if(!$hasVehicles)
+                                        <option value="">Data kendaraan belum tersedia</option>
+                                    @else
+                                        <option value="">Pilih kendaraan</option>
+                                        @foreach($vehicles as $v)
+                                            @php
+                                                $vehicleLabel = $v->name ?? 'Kendaraan';
+                                                $plate = $v->plate_number ? ' — '.$v->plate_number : '';
+                                            @endphp
+                                            <option value="{{ $v->vehicle_id }}">
+                                                {{ $vehicleLabel }}{{ $plate }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                             @error('vehicle_id')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Jam mulai --}}
-                        <div>
-                            <label class="{{ $label }}">Pukul Mulai <span class="text-red-600">*</span></label>
-                            <input type="time" wire:model.defer="start_time" class="{{ $input }}">
-                            @error('start_time')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Jam selesai --}}
-                        <div>
-                            <label class="{{ $label }}">Pukul Selesai <span class="text-red-600">*</span></label>
-                            <input type="time" wire:model.defer="end_time" class="{{ $input }}">
-                            @error('end_time')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Tanggal pinjam --}}
                         <div>
-                            <label class="{{ $label }}">Tanggal Peminjaman <span class="text-red-600">*</span></label>
+                            <label class="{{ $label }}">Tanggal Peminjaman <span class="text-destructive">*</span></label>
                             <input type="date" wire:model.defer="date_from" class="{{ $input }}">
                             @error('date_from')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Tanggal kembali --}}
                         <div>
-                            <label class="{{ $label }}">Tanggal Pengembalian <span class="text-red-600">*</span></label>
+                            <label class="{{ $label }}">Tanggal Pengembalian <span class="text-destructive">*</span></label>
                             <input type="date" wire:model.defer="date_to" class="{{ $input }}">
                             @error('date_to')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
 
-                    {{-- Keperluan --}}
-                    <div>
-                        <label class="{{ $label }}">Keperluan <span class="text-red-600">*</span></label>
-                        <input
-                            type="text"
-                            wire:model.defer="purpose"
-                            placeholder="Uraian singkat keperluan"
-                            class="{{ $input }}"
-                        >
-                        @error('purpose')
-                            <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        {{-- Jam mulai --}}
+                        <div>
+                            <label class="{{ $label }}">Pukul Mulai <span class="text-destructive">*</span></label>
+                            <input type="time" wire:model.defer="start_time" class="{{ $input }}">
+                            @error('start_time')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    {{-- Tujuan --}}
-                    <div>
-                        <label class="{{ $label }}">Tujuan Lokasi</label>
-                        <input
-                            type="text"
-                            wire:model.defer="destination"
-                            placeholder="Contoh: Kantor Cabang Cibubur"
-                            class="{{ $input }}"
-                        >
-                        @error('destination')
-                            <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        {{-- Jam selesai --}}
+                        <div>
+                            <label class="{{ $label }}">Pukul Selesai <span class="text-destructive">*</span></label>
+                            <input type="time" wire:model.defer="end_time" class="{{ $input }}">
+                            @error('end_time')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    {{-- Odd / Even + Jenis Keperluan --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {{-- Odd/even --}}
                         <div>
                             <label class="{{ $label }}">Masuk Area Ganjil/Genap</label>
-                            <select wire:model.defer="odd_even_area" class="{{ $input }}">
-                                <option value="tidak">Tidak Masuk</option>
-                                <option value="ganjil">Ganjil</option>
-                                <option value="genap">Genap</option>
-                            </select>
+                            <div class="relative">
+                                <select wire:model.defer="odd_even_area" class="{{ $input }} appearance-none pr-8">
+                                    <option value="tidak">Tidak Masuk</option>
+                                    <option value="ganjil">Ganjil</option>
+                                    <option value="genap">Genap</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                             @error('odd_even_area')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- Jenis keperluan --}}
                         <div>
                             <label class="{{ $label }}">Jenis Keperluan</label>
-                            <select wire:model.live="purpose_type" class="{{ $input }}">
-                                <option value="">Pilih Keperluan</option>
-                                <option value="dinas">Dinas</option>
-                                <option value="operasional">Operasional</option>
-                                <option value="antar jemput">Antar Jemput</option>
-                                <option value="lainnya">Lainnya</option>
-                            </select>
+                            <div class="relative">
+                                <select wire:model.live="purpose_type" class="{{ $input }} appearance-none pr-8">
+                                    <option value="">Pilih Keperluan</option>
+                                    <option value="dinas">Dinas</option>
+                                    <option value="operasional">Operasional</option>
+                                    <option value="antar jemput">Antar Jemput</option>
+                                    <option value="lainnya">Lainnya</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                             @error('purpose_type')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
 
-                    {{-- Conditional field for "Lainnya" --}}
-                    @if($purpose_type === 'lainnya')
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <label class="{{ $label }}">
-                                Detail Keperluan Lainnya <span class="text-red-600">*</span>
-                            </label>
+                        {{-- Keperluan --}}
+                        <div class="md:col-span-2">
+                            <label class="{{ $label }}">Keperluan <span class="text-destructive">*</span></label>
                             <input
                                 type="text"
-                                wire:model.defer="purpose_type_other"
-                                placeholder="Jelaskan keperluan lainnya secara detail"
+                                wire:model.defer="purpose"
+                                placeholder="Uraian singkat keperluan"
                                 class="{{ $input }}"
                             >
-                            <p class="text-[11px] text-gray-500 mt-1">
-                                Wajib diisi karena Anda memilih "Lainnya"
-                            </p>
-                            @error('purpose_type_other')
-                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
+                            @error('purpose')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-                    @endif
 
-                    {{-- Terms --}}
-                    <div class="pt-2">
-                        <label class="inline-flex items-center gap-2 text-sm">
+                        {{-- Tujuan --}}
+                        <div class="md:col-span-3">
+                            <label class="{{ $label }}">Tujuan Lokasi</label>
                             <input
-                                type="checkbox"
-                                wire:model.defer="terms_agreed"
-                                class="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                                type="text"
+                                wire:model.defer="destination"
+                                placeholder="Contoh: Kantor Cabang Cibubur"
+                                class="{{ $input }}"
                             >
-                            <span>Saya menyetujui syarat & ketentuan peminjaman kendaraan.</span>
-                        </label>
-                        @error('terms_agreed')
-                            <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
+                            @error('destination')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Conditional field for "Lainnya" --}}
+                        @if($purpose_type === 'lainnya')
+                            <div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 md:col-span-3">
+                                <label class="{{ $label }}">
+                                    Detail Keperluan Lainnya <span class="text-destructive">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model.defer="purpose_type_other"
+                                    placeholder="Jelaskan keperluan lainnya secara detail"
+                                    class="{{ $input }}"
+                                >
+                                <p class="text-[11px] text-muted-foreground mt-1.5 font-medium">
+                                    Wajib diisi karena Anda memilih "Lainnya"
+                                </p>
+                                @error('purpose_type_other')
+                                    <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+
+                        {{-- Terms --}}
+                        <div class="pt-2 md:col-span-3">
+                            <label class="inline-flex items-center gap-2.5 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    wire:model.defer="terms_agreed"
+                                    class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all"
+                                >
+                                <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">Saya menyetujui syarat & ketentuan peminjaman kendaraan.</span>
+                            </label>
+                            @error('terms_agreed')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     {{-- Submit Button --}}
-                    <div class="pt-2">
+                    <div class="pt-4 border-t border-border bg-muted/5 -mx-6 -mb-6 p-6 flex items-center justify-end">
                         <button type="submit" class="{{ $btnBlk }}">
-                            Submit Booking
+                            <x-heroicon-o-check class="w-4 h-4" />
+                            <span>Submit Booking</span>
                         </button>
                     </div>
                 </form>

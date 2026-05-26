@@ -1,37 +1,46 @@
-<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+<div class="min-h-screen bg-background" wire:poll.1000ms.keep-alive>
     @php
-        $card   = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
-        $head   = 'bg-gradient-to-r from-gray-900 to-black';
-        $hpad   = 'px-6 py-5';
-        $tag    = 'w-1.5 bg-white rounded-full';
-        $label  = 'block text-sm font-medium text-gray-700 mb-2';
-        $input  = 'w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 bg-white transition';
-        $btnBlk = 'px-3 py-2 text-xs font-medium rounded-lg bg-gray-900 text-white hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-900/20 disabled:opacity-60 transition';
-        $btnGrn = 'px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 disabled:opacity-60 transition';
-        $btnAmb = 'px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-600/20 disabled:opacity-60 transition';
-        $btnRed = 'px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-600/20 disabled:opacity-60 transition';
-        $chip   = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-gray-100 text-xs';
-        $mono   = 'text-[10px] font-mono text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md';
-        $icoAvatar = 'w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0';
-        $editIn = 'w-full h-10 bg-white border border-gray-300 rounded-lg px-3 text-gray-800 focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition hover:border-gray-400 placeholder:text-gray-400';
+        $card      = 'bg-card border border-border rounded-2xl shadow-xl overflow-hidden';
+        $head      = 'bg-gradient-to-r from-slate-900 via-slate-800 to-black';
+        $hpad      = 'px-6 py-5';
+        $tag       = 'w-1.5 bg-white rounded-full';
+        $label     = 'block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5';
+        $input     = 'w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+        $btnBlk    = 'inline-flex items-center justify-center gap-1.5 px-3.5 h-8 text-xs font-semibold rounded-lg bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 transition shadow-sm';
+        $btnGrn    = 'inline-flex items-center justify-center gap-1.5 px-3.5 h-8 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition shadow-sm';
+        $btnAmb    = 'inline-flex items-center justify-center gap-1.5 px-3.5 h-8 text-xs font-semibold rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition shadow-sm';
+        $btnRed    = 'inline-flex items-center justify-center gap-1.5 px-3.5 h-8 text-xs font-semibold rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition shadow-sm';
+        $chip      = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted border border-border text-muted-foreground text-xs font-semibold';
+        $mono      = 'inline-flex items-center text-[10px] font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border';
+        $icoAvatar = 'w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-primary/20';
+        $editIn    = 'w-full h-10 bg-background border border-input rounded-lg px-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
     @endphp
 
-    <div class="px-4 sm:px-6 py-6 space-y-8">
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-900 to-black text-white shadow-2xl">
+    <style>
+      :root { color-scheme: light; }
+      select, option {
+        color: var(--foreground) !important;
+        background: var(--background) !important;
+      }
+      option:checked { background: var(--muted) !important; color: var(--foreground) !important; }
+    </style>
+
+    <div class="px-4 sm:px-6 py-6 space-y-6">
+        <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl">
             <div class="pointer-events-none absolute inset-0 opacity-10">
-                <div class="absolute top-0 -right-4 w-24 h-24 bg-white rounded-full blur-xl"></div>
-                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-white rounded-full blur-lg"></div>
+                <div class="absolute top-0 -right-4 w-24 h-24 bg-[#CDDEA7] rounded-full blur-xl"></div>
+                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
             </div>
             <div class="relative z-10 p-6 sm:p-8">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-[#CDDEA7]/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-[#CDDEA7]/20">
+                        <svg class="w-6 h-6 text-[#CDDEA7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8M4 6h16v12H4z" />
                         </svg>
                     </div>
                     <div>
                         <h2 class="text-lg sm:text-xl font-semibold">Packages</h2>
-                        <p class="text-sm text-white/80">Kelola paket masuk (stored) & pengambilan (taken)</p>
+                        <p class="text-xs text-[#CDDEA7]/80">Kelola paket masuk (stored) & pengambilan (taken)</p>
                     </div>
                 </div>
             </div>
@@ -39,34 +48,38 @@
 
         {{-- FORM TAMBAH/EDIT --}}
         <div class="{{ $card }}">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-gray-900 rounded-full"></div>
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900">Tambah Package</h3>
-                        <p class="text-sm text-gray-500">Lengkapi data paket baru</p>
-                    </div>
+            <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <x-heroicon-o-plus-circle class="w-4.5 h-4.5 text-primary" />
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground">Tambah Package</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">Lengkapi data paket baru</p>
                 </div>
             </div>
 
-            <form wire:submit.prevent="save" class="p-6 space-y-5">
+            <form wire:submit.prevent="save" class="p-6 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="{{ $label }}">Nama Paket</label>
                         <input type="text" wire:model.defer="form.package_name" class="{{ $input }}" placeholder="Contoh: Paket Dokumen PT ABC">
-                        @error('form.package_name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('form.package_name') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="{{ $label }}">Penyimpanan</label>
-                        {{-- NOTE: pakai angka biar cocok storage_id (bigint). Ganti dengan data dari tabel storages kalau sudah ada. --}}
-                        <select wire:model.defer="form.penyimpanan" class="{{ $input }}">
-                            <option value="">-</option>
-                            <option value="1">Rak 1</option>
-                            <option value="2">Rak 2</option>
-                            <option value="3">Rak 3</option>
-                        </select>
-                        @error('form.penyimpanan') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        <div class="relative">
+                            <select wire:model.defer="form.penyimpanan" class="{{ $input }} appearance-none pr-8">
+                                <option value="">-</option>
+                                <option value="1">Rak 1</option>
+                                <option value="2">Rak 2</option>
+                                <option value="3">Rak 3</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                        @error('form.penyimpanan') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -74,30 +87,25 @@
                     <div>
                         <label class="{{ $label }}">Expedition / Sender</label>
                         <input type="text" wire:model.defer="form.nama_pengirim" class="{{ $input }}" placeholder="Kurir / Pengirim">
-                        @error('form.nama_pengirim') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('form.nama_pengirim') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="{{ $label }}">Owner (Penerima)</label>
                         <input type="text" wire:model.defer="form.nama_penerima" class="{{ $input }}" placeholder="Nama penerima">
-                        @error('form.nama_penerima') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('form.nama_penerima') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <div class="pt-2 flex items-center gap-3">
+                <div class="pt-4 border-t border-border bg-muted/5 -mx-6 -mb-6 p-6 flex items-center justify-end">
                     <button type="submit" wire:loading.attr="disabled" wire:target="save"
-                        class="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-gray-900 text-white text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 transition active:scale-95 hover:bg-black disabled:opacity-60 relative overflow-hidden">
+                        class="inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 relative overflow-hidden">
                         <span class="flex items-center gap-2" wire:loading.remove wire:target="save">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Simpan Data
+                            <x-heroicon-o-check class="w-4 h-4" />
+                            <span>Simpan Data</span>
                         </span>
                         <span class="flex items-center gap-2" wire:loading wire:target="save">
-                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
-                            </svg>
-                            Menyimpan…
+                            <x-heroicon-o-arrow-path class="animate-spin h-4 w-4 text-white" />
+                            <span>Menyimpan…</span>
                         </span>
                     </button>
                 </div>
@@ -106,27 +114,27 @@
 
         {{-- ON-GOING (stored) --}}
         <div class="{{ $card }}">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900">On-going Packages</h3>
-                        <p class="text-sm text-gray-500">Menampilkan semua paket berstatus <b>stored</b></p>
-                    </div>
+            <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <x-heroicon-o-archive-box-arrow-down class="w-4.5 h-4.5 text-amber-500" />
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground">On-going Packages</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">Menampilkan semua paket berstatus <b>stored</b></p>
                 </div>
             </div>
 
-            <div class="p-5 space-y-3">
+            <div class="p-6 space-y-4">
                 @forelse ($ongoing as $r)
-                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200"
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border hover:bg-muted/30 transition-colors"
                          wire:key="ongoing-{{ $r->delivery_id }}">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white text-xs font-semibold">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center text-primary text-sm font-semibold shrink-0">
                                 {{ strtoupper(substr($r->package_name, 0, 1)) }}
                             </div>
                             <div class="leading-tight min-w-0">
-                                <div class="font-medium text-gray-800 text-sm truncate">{{ $r->package_name }}</div>
-                                <div class="text-[11px] text-gray-500">
+                                <div class="font-bold text-foreground text-sm truncate">{{ $r->package_name }}</div>
+                                <div class="text-[11px] text-muted-foreground font-medium mt-1">
                                     Stored {{ optional($r->created_at)->format('d M Y H:i') ?? '—' }}
                                     • Container {{ $r->penyimpanan ?? '—' }}
                                     • Recep. {{ $r->receptionist->full_name ?? '—' }}
@@ -161,84 +169,84 @@
                         </div>
                     </div>
                 @empty
-                    <div class="text-center py-8 text-gray-500 text-sm">Tidak ada paket on-going.</div>
+                    <div class="text-center py-10 text-muted-foreground text-sm font-medium">Tidak ada paket on-going.</div>
                 @endforelse
             </div>
 
-            <div class="px-6 py-5 bg-gray-50 border-t border-gray-200">
-                <div class="flex justify-center">
-                    {{ $ongoing->onEachSide(1)->links() }}
-                </div>
+            <div class="px-6 py-4 bg-muted/10 border-t border-border flex justify-end">
+                {{ $ongoing->onEachSide(1)->links() }}
             </div>
         </div>
 
         {{-- COMPLETED (taken) --}}
         <div class="{{ $card }}">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                    <div>
-                        <h3 class="text-base font-semibold text-gray-900">Completed Packages</h3>
-                        <p class="text-sm text-gray-500">Paket berstatus <b>taken</b></p>
-                    </div>
+            <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <x-heroicon-o-check-badge class="w-4.5 h-4.5 text-emerald-500" />
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground">Completed Packages</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">Paket berstatus <b>taken</b></p>
                 </div>
             </div>
 
-            <div class="divide-y divide-gray-200">
+            <div class="divide-y divide-border">
                 @forelse ($done as $e)
                     @php $rowNo = (($done->firstItem() ?? 1) + $loop->index); @endphp
 
-                    <div class="px-6 py-5 hover:bg-gray-50 transition-colors" wire:key="done-{{ $e->delivery_id }}">
+                    <div class="px-6 py-5 hover:bg-muted/10 transition-colors" wire:key="done-{{ $e->delivery_id }}">
                         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                            <div class="flex items-start gap-3 flex-1 min-w-0">
+                            <div class="flex items-start gap-3.5 flex-1 min-w-0">
                                 <div class="{{ $icoAvatar }}">{{ strtoupper(substr($e->package_name, 0, 1)) }}</div>
                                 <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 mb-1.5">
-                                        <h4 class="font-semibold text-gray-900 text-base truncate">{{ $e->package_name }}</h4>
+                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                        <h4 class="font-bold text-foreground text-base truncate">{{ $e->package_name }}</h4>
                                         @if ($e->nama_pengirim)
-                                            <span class="text-[11px] text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">Dari: {{ $e->nama_pengirim }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Dari: {{ $e->nama_pengirim }}</span>
                                         @endif
                                         @if ($e->nama_penerima)
-                                            <span class="text-[11px] text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">Ke: {{ $e->nama_penerima }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Ke: {{ $e->nama_penerima }}</span>
                                         @endif
                                     </div>
 
-                                    <div class="flex flex-wrap gap-1.5 mb-2">
+                                    <div class="flex flex-wrap gap-2 mb-2.5">
                                         <span class="{{ $chip }}">
-                                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
-                                            <span class="font-medium text-gray-700">{{ $e->penyimpanan ?? '—' }}</span>
+                                            <span>{{ $e->penyimpanan ?? '—' }}</span>
                                         </span>
                                         <span class="{{ $chip }}">
-                                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            <span class="font-medium text-gray-700">{{ $e->receptionist->full_name ?? '—' }}</span>
+                                            <span>{{ $e->receptionist->full_name ?? '—' }}</span>
                                         </span>
                                     </div>
 
-                                    <div class="flex flex-wrap items-center gap-4 text-[13px] text-gray-600">
+                                    <div class="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                                         <span class="flex items-center gap-1.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            Stored: {{ optional($e->created_at)->format('d M Y H:i') ?? '—' }}
+                                            <span>Stored: {{ optional($e->created_at)->format('d M Y H:i') ?? '—' }}</span>
                                         </span>
                                         <span class="flex items-center gap-1.5">
-                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                             </svg>
-                                            Taken: {{ optional($e->pengambilan)->format('d M Y H:i') ?? '—' }}
+                                            <span>Taken: {{ optional($e->pengambilan)->format('d M Y H:i') ?? '—' }}</span>
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="text-right shrink-0 space-y-2">
-                                <div class="{{ $mono }}">No. {{ $rowNo }}</div>
-                                <div class="text:[11px] text-gray-500">{{ optional($e->created_at)->format('d M Y H:i') }}</div>
-                                <div class="flex flex-wrap gap-2 justify-end pt-1.5">
+                            <div class="text-right shrink-0 space-y-2 lg:self-stretch flex lg:flex-col lg:justify-between items-end flex-wrap gap-2 lg:gap-0">
+                                <div class="flex flex-col items-end">
+                                    <span class="{{ $mono }}">No. {{ $rowNo }}</span>
+                                    <span class="text-[10px] text-muted-foreground/60 font-semibold mt-1">{{ optional($e->created_at)->format('d M Y H:i') }}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-2 justify-end">
                                     <button wire:click="openEdit({{ $e->delivery_id }})" wire:loading.attr="disabled"
                                             wire:target="openEdit({{ $e->delivery_id }})" class="{{ $btnBlk }}">
                                         <span wire:loading.remove wire:target="openEdit({{ $e->delivery_id }})">Edit</span>
@@ -266,14 +274,12 @@
                         </div>
                     </div>
                 @empty
-                    <div class="px-6 py-14 text-center text-gray-500 text-sm">Tidak ada paket selesai.</div>
+                    <div class="px-6 py-14 text-center text-muted-foreground text-sm font-medium">Tidak ada paket selesai.</div>
                 @endforelse
             </div>
 
-            <div class="px-6 py-5 bg-gray-50 border-t border-gray-200">
-                <div class="flex justify-center">
-                    {{ $done->onEachSide(1)->links() }}
-                </div>
+            <div class="px-6 py-4 bg-muted/10 border-t border-border flex justify-end">
+                {{ $done->onEachSide(1)->links() }}
             </div>
         </div>
     </div>

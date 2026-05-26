@@ -1,32 +1,33 @@
-<div class="min-h-screen bg-gray-50">
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {{-- HEADER --}}
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Superadmin Analytics</h1>
-                <p class="text-sm text-gray-500">Interactive system insights</p>
-            </div>
-            <button wire:click="setFilter('all')"
-                class="px-5 py-2.5 bg-gray-900 text-white rounded-xl shadow-sm hover:bg-gray-800 transition">
-                Reset View
-            </button>
-        </div>
+<div class="min-h-screen bg-background">
+    <main class="px-4 sm:px-6 py-6 space-y-6">
 
-        {{-- YEAR SELECTOR --}}
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-4">
+        {{-- Page header --}}
+        <x-page-header title="Superadmin Analytics" subtitle="Interactive system insights for {{ $selectedYear }}">
+            <x-slot:actions>
+                <button wire:click="setFilter('all')"
+                    class="px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground rounded-md border border-border hover:bg-accent transition-colors">
+                    Reset View
+                </button>
+            </x-slot:actions>
+        </x-page-header>
+
+        {{-- Year Selector --}}
+        <div class="bg-card border border-border rounded-lg p-4">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                    <p class="text-sm font-medium text-gray-500">Select Year</p>
-                    <p class="text-xs text-gray-400">Viewing data for {{ $selectedYear }}</p>
+                    <p class="text-sm font-medium text-muted-foreground">Select Year</p>
+                    <p class="text-xs text-muted-foreground/70">Viewing data for {{ $selectedYear }}</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-1.5">
                     @if(empty($availableYears))
-                        <span class="text-sm text-gray-400">No data available</span>
+                        <span class="text-sm text-muted-foreground">No data available</span>
                     @else
                         @foreach($availableYears as $year)
                             <button wire:click="setYear({{ $year }})"
-                                class="px-4 py-2 rounded-lg font-medium transition-all duration-200
-                                    {{ $selectedYear === $year ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-150
+                                    {{ $selectedYear === $year
+                                        ? 'bg-primary text-primary-foreground shadow-sm'
+                                        : 'bg-secondary text-secondary-foreground hover:bg-accent' }}">
                                 {{ $year }}
                             </button>
                         @endforeach
@@ -35,33 +36,33 @@
             </div>
         </div>
 
-        {{-- KPI CARDS --}}
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {{-- KPI Cards --}}
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach($stats as $s)
                 @php
                     $isActive = $activeFilter === $s['key'];
                     $isUp = $s['direction'] === 'up';
-                    $color = $isUp ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
                 @endphp
                 <div wire:click="setFilter('{{ $s['key'] }}')"
-                    class="cursor-pointer bg-white border border-gray-200 rounded-2xl p-5 shadow-sm transition-all duration-300
-                           hover:shadow-lg hover:-translate-y-1
-                           {{ $isActive ? 'ring-2 ring-gray-900' : '' }}">
+                    class="cursor-pointer bg-card border rounded-lg p-5 transition-all duration-150
+                           hover:bg-accent/50
+                           {{ $isActive ? 'border-foreground ring-1 ring-foreground' : 'border-border' }}">
                     <div class="flex justify-between items-start">
-                        <p class="text-sm font-medium text-gray-500">{{ $s['label'] }}</p>
-                        <span class="text-xs px-2 py-1 rounded-full font-medium {{ $color }}">
+                        <p class="text-sm font-medium text-muted-foreground">{{ $s['label'] }}</p>
+                        <span class="text-xs px-2 py-0.5 rounded-md font-medium
+                            {{ $isUp ? 'text-success bg-success/10' : 'text-destructive bg-destructive/10' }}">
                             {{ $isUp ? '+' : '' }}{{ $s['trend'] }}%
                         </span>
                     </div>
-                    <h2 class="text-3xl font-bold mt-4 text-gray-900">{{ number_format($s['value']) }}</h2>
-                    <div class="mt-3 text-xs text-gray-400">Click to filter</div>
+                    <h2 class="text-2xl font-semibold mt-3 text-card-foreground tracking-tight">{{ number_format($s['value']) }}</h2>
+                    <p class="mt-2 text-xs text-muted-foreground/60">Click to filter chart</p>
                 </div>
             @endforeach
         </section>
 
-        {{-- CHART --}}
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        {{-- Chart --}}
+        <div class="bg-card border border-border p-6 rounded-lg">
+            <h3 class="text-sm font-semibold text-card-foreground mb-4">
                 Booking Trends — {{ $selectedYear }}
             </h3>
             <div wire:ignore style="position: relative; height: 400px;">
@@ -75,8 +76,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     const CHART_COLORS = {
-        'Room Bookings':    { border: '#2563eb', bg: 'rgba(37, 99, 235, 0.1)' },
-        'Vehicle Bookings': { border: '#059669', bg: 'rgba(5, 150, 105, 0.1)' },
+        'Room Bookings':    { border: '#2563eb', bg: 'rgba(37, 99, 235, 0.08)' },
+        'Vehicle Bookings': { border: '#059669', bg: 'rgba(5, 150, 105, 0.08)' },
     };
     const FALLBACK_COLORS = ['#7c3aed', '#db2777'];
 
@@ -84,17 +85,17 @@
         return datasets.map((ds, i) => {
             const c = CHART_COLORS[ds.label] ?? {
                 border: FALLBACK_COLORS[i] ?? '#374151',
-                bg:     (FALLBACK_COLORS[i] ?? '#374151') + '1a',
+                bg:     (FALLBACK_COLORS[i] ?? '#374151') + '14',
             };
             return {
                 ...ds,
                 borderColor:      c.border,
                 backgroundColor:  c.bg,
-                borderWidth:      2.5,
-                tension:          0.4,
+                borderWidth:      2,
+                tension:          0.35,
                 fill:             false,
-                pointRadius:      4,
-                pointHoverRadius: 6,
+                pointRadius:      3,
+                pointHoverRadius: 5,
             };
         });
     }
@@ -113,11 +114,25 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { duration: 400 },
+                animation: { duration: 300 },
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { display: true, position: 'top' },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                            font: { family: 'Inter', size: 12 }
+                        }
+                    },
                     tooltip: {
+                        backgroundColor: 'hsl(0 0% 9%)',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        padding: 10,
+                        cornerRadius: 6,
                         callbacks: {
                             label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y
                         }
@@ -126,10 +141,15 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { stepSize: 1 },
-                        title: { display: true, text: 'Bookings' }
+                        ticks: { stepSize: 1, font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        title: { display: true, text: 'Bookings', font: { family: 'Inter', size: 12 } }
                     },
-                    x: { title: { display: true, text: 'Month' } }
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 11 } },
+                        title: { display: true, text: 'Month', font: { family: 'Inter', size: 12 } }
+                    }
                 }
             }
         });
@@ -140,18 +160,15 @@
             buildChart(labels, datasets);
             return;
         }
-        // Update data in-place — no destroy/rebuild, smooth animation
         window.dashChart.data.labels = labels;
         window.dashChart.data.datasets = applyDatasetStyles(datasets);
         window.dashChart.update('active');
     }
 
-    // Initial render — use the PHP-baked values
     document.addEventListener('DOMContentLoaded', () => {
         buildChart(@json($labels), @json($datasets));
     });
 
-    // Subsequent year/filter changes — use the event payload from Livewire
     document.addEventListener('livewire:init', () => {
         Livewire.on('chart-data-updated', ({ labels, datasets }) => {
             updateChart(labels, datasets);

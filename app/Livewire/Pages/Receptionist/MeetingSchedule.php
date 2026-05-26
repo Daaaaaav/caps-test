@@ -22,6 +22,9 @@ class MeetingSchedule extends Component
 
     public ?int $editingId = null;
 
+    public bool $showOfflineForm = false;
+    public bool $showOnlineForm = false;
+
     /** OFFLINE form state */
     public array $form = [
         'meeting_title' => null,

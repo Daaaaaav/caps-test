@@ -13,11 +13,14 @@ use App\Models\BookingRoom;
 use App\Models\Room;
 use Carbon\Carbon;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('Booking History')]
 class BookingHistory extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
 

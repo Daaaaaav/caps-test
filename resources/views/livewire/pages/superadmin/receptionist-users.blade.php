@@ -157,77 +157,86 @@
 
     {{-- ================= MODAL ================= --}}
     @if($showModal)
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeModal"></div>
 
-            <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-200">
+            {{-- Modal Content --}}
+            <div class="relative w-full max-w-md bg-card rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col">
+                {{-- Header --}}
+                <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <x-heroicon-o-user-plus class="w-4 h-4 text-primary" />
+                        </div>
+                        <h3 class="font-bold text-foreground text-base tracking-tight">
+                            {{ $editMode ? 'Edit Receptionist' : 'Create Receptionist' }}
+                        </h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeModal">✕</button>
+                </div>
 
-                <h2 class="text-xl font-semibold text-gray-900 mb-5">
-                    {{ $editMode ? 'Edit Receptionist' : 'Create Receptionist' }}
-                </h2>
+                <form wire:submit.prevent="save">
+                    {{-- Body --}}
+                    <div class="p-6 space-y-4">
+                        {{-- NAME --}}
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Name</label>
+                            <input type="text" wire:model="name"
+                                class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('name') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
 
-                <form wire:submit.prevent="save" class="space-y-4">
+                        {{-- EMAIL --}}
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Email</label>
+                            <input type="email" wire:model="email"
+                                class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('email') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
 
-                    {{-- NAME --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input type="text" wire:model="name"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
-                        @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        {{-- PHONE --}}
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Phone Number <span class="text-muted-foreground/60 font-normal">(optional)</span></label>
+                            <input type="text" wire:model="phone" placeholder="e.g. 08123456789"
+                                class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('phone') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- PASSWORD --}}
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                                Password {{ $editMode ? '(optional)' : '' }}
+                            </label>
+                            <input type="password" wire:model="password"
+                                class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                            @error('password') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- STATUS --}}
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Status</label>
+                            <select wire:model="status"
+                                class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
                     </div>
 
-                    {{-- EMAIL --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" wire:model="email"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
-                        @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    {{-- PHONE --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-gray-400 font-normal">(optional)</span></label>
-                        <input type="text" wire:model="phone" placeholder="e.g. 08123456789"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
-                        @error('phone') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    {{-- PASSWORD --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Password {{ $editMode ? '(optional)' : '' }}
-                        </label>
-                        <input type="password" wire:model="password"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg
-                                   text-gray-900 focus:ring-2 focus:ring-gray-500">
-                        @error('password') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    {{-- STATUS --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select wire:model="status"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-gray-500">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-
-                    {{-- ACTIONS --}}
-                    <div class="flex gap-3 pt-4">
-                        <button type="submit"
-                            class="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
-                            {{ $editMode ? 'Update' : 'Create' }}
-                        </button>
-
+                    {{-- Footer --}}
+                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
                         <button type="button" wire:click="closeModal"
-                            class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                            Cancel
+                            class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
+                            <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
+                            <span>Batal</span>
+                        </button>
+                        <button type="submit"
+                            class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5">
+                            <x-heroicon-o-check class="w-3.5 h-3.5" />
+                            <span>{{ $editMode ? 'Update' : 'Create' }}</span>
                         </button>
                     </div>
-
                 </form>
             </div>
         </div>

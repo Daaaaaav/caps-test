@@ -11,11 +11,14 @@ use App\Models\VehicleBooking;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('Vehicle History')]
 class Vehicleshistory extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
     protected string $tz = 'Asia/Jakarta';

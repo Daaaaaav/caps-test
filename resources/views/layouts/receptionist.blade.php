@@ -17,25 +17,30 @@ $brandLogo = $authUser?->company?->image ?: asset('images/logo/kebun-raya-bogor.
 $invertStyle = 'filter: brightness(0) invert(1);';
 @endphp
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'App' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo/kebun-raya-bogor.png') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @vite('resources/css/app.css')
     @livewireStyles
-    @fluxAppearance
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="min-h-screen bg-white flex">
+<body class="min-h-screen bg-background text-foreground flex font-sans"
+    x-data="{ sidebarCollapsed: true }"
+    :style="sidebarCollapsed ? '--sbw: 4.5rem' : '--sbw: 16rem'"
+    :class="sidebarCollapsed ? 'sidebar-is-collapsed' : 'sidebar-is-expanded'"
+>
     {{-- Mobile header only (<lg) --}}
-    <flux:header class="lg:hidden fixed top-0 inset-x-0 z-50 bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
+    <flux:header class="lg:hidden fixed top-0 inset-x-0 z-50 bg-sidebar border-b border-sidebar-border">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-        <div class="font-medium text-white">Kebun Raya Bogor</div>
+        <div class="font-semibold text-sidebar-foreground tracking-wide font-sans">Kebun Raya Bogor</div>
 
         <flux:spacer />
 
@@ -68,7 +73,23 @@ $invertStyle = 'filter: brightness(0) invert(1);';
     @include('livewire.components.partials.receptionist.sidebar')
 
     <main class="dark:bg-white flex-1 overflow-y-auto pt-14 lg:pt-0 lg:ml-[var(--sbw)] px-4 sm:px-6 lg:px-8
-                [&_.container]:max-w-none [&_.container]:mx-0 [&_.container]:px-0">
+                [&_.container]:max-w-none [&_.container]:mx-0 [&_.container]:px-0 animate-fade-in-up">
+        
+        {{-- Premium Top Header Bar --}}
+        <header class="hidden lg:flex items-center justify-between py-4 border-b border-border/80 mb-6 select-none">
+            <div class="flex items-center gap-3">
+                {{-- Breadcrumbs Component --}}
+                @include('components.breadcrumbs')
+            </div>
+
+            {{-- Right side info badge --}}
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-semibold text-muted-foreground/80 bg-secondary/80 border border-border px-3 py-1.5 rounded-xl shadow-xs">
+                    {{ now()->format('l, d M Y') }}
+                </span>
+            </div>
+        </header>
+
         {{ $slot }}
     </main>
 
@@ -77,7 +98,6 @@ $invertStyle = 'filter: brightness(0) invert(1);';
 
     @livewireScripts
     @vite('resources/js/app.js')
-    @fluxScripts
 </body>
 
 </html>

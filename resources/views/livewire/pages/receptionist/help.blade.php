@@ -1,32 +1,42 @@
 <div class="min-h-screen bg-gray-50">
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {{-- ===== HEADER ===== --}}
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Help & Support</h1>
-            <p class="text-sm text-gray-500 mt-1">Find answers to common questions about using the system.</p>
+        {{-- HERO BANNER --}}
+        <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl">
+            <div class="pointer-events-none absolute inset-0 opacity-10">
+                <div class="absolute top-0 -right-4 w-24 h-24 bg-[#CDDEA7] rounded-full blur-xl"></div>
+                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
+            </div>
+            <div class="relative z-10 p-6 sm:p-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#CDDEA7]/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-[#CDDEA7]/20">
+                            <x-heroicon-o-question-mark-circle class="w-6 h-6 text-[#CDDEA7]"/>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-semibold text-[#CDDEA7]">Help & Support</h2>
+                            <p class="text-sm text-[#CDDEA7]/80 mt-1">
+                                Find answers to common questions about using the system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- ===== SEARCH ===== --}}
         <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-            <div class="relative flex items-center">
-                <div class="absolute left-3 text-gray-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-4.35-4.35m1.6-5.65a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z" />
-                    </svg>
-                </div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Search Questions</label>
+            <div class="relative">
                 <input type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search questions..."
-                    class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-gray-900
-                           placeholder-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none transition">
+                    class="w-full h-10 pl-9 pr-9 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 bg-white transition text-sm">
+                <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                 @if($search)
                     <button wire:click="$set('search', '')"
-                        class="absolute right-3 text-gray-400 hover:text-gray-600 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                        ✕
                     </button>
                 @endif
             </div>
@@ -36,25 +46,25 @@
         @if(count($filteredFaqs) > 0)
             <div class="space-y-3" x-data="{ open: null }">
                 @foreach($filteredFaqs as $index => $faq)
-                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition hover:border-gray-300">
                         <button
                             @click="open === {{ $index }} ? open = null : open = {{ $index }}"
                             class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition">
-                            <div class="flex items-start gap-3">
-                                <span class="mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 shrink-0">
+                            <div class="flex items-start gap-4">
+                                <span class="mt-0.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#4E653D]/10 text-[#4E653D] border border-[#4E653D]/20 shrink-0">
                                     {{ $faq['category'] }}
                                 </span>
-                                <span class="text-sm font-medium text-gray-900">{{ $faq['question'] }}</span>
+                                <span class="text-sm font-medium text-gray-900 leading-snug">{{ $faq['question'] }}</span>
                             </div>
-                            <svg class="w-5 h-5 text-gray-400 shrink-0 ml-4 transition-transform"
+                            <svg class="w-5 h-5 text-gray-400 shrink-0 ml-4 transition-transform duration-300"
                                 :class="open === {{ $index }} ? 'rotate-180' : ''"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
                         <div x-show="open === {{ $index }}" x-collapse
-                            class="px-6 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                            class="px-6 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4 bg-gray-50/50">
                             {{ $faq['answer'] }}
                         </div>
                     </div>
@@ -62,34 +72,35 @@
             </div>
         @else
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm px-6 py-12 text-center">
-                <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
-                <p class="text-gray-500 text-sm">No results found for "<span class="font-medium">{{ $search }}</span>".</p>
-                <button wire:click="$set('search', '')" class="mt-3 text-sm text-gray-700 underline hover:text-gray-900">
+                <x-heroicon-o-magnifying-glass class="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p class="text-gray-500 text-sm">No results found for "<span class="font-medium text-gray-950">{{ $search }}</span>".</p>
+                <button wire:click="$set('search', '')" class="mt-3 text-sm text-[#4E653D] font-medium hover:text-[#354C2B] underline hover:no-underline transition">
                     Clear search
                 </button>
             </div>
         @endif
 
         {{-- ===== CONTACT CARD ===== --}}
-        <div class="bg-gray-900 text-white rounded-2xl px-6 py-6 shadow-sm">
-            <h3 class="text-base font-semibold mb-1">Still need help?</h3>
-            <p class="text-sm text-gray-300 mb-4">
-                If you can't find an answer above, reach out to your system administrator.
-            </p>
-            <div class="flex flex-wrap gap-3 text-sm">
-                <a href="mailto:admin@kebunraya.id"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-xl font-medium hover:bg-gray-100 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Email Admin
-                </a>
+        <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl p-6 sm:p-8">
+            <div class="pointer-events-none absolute inset-0 opacity-10">
+                <div class="absolute top-0 -right-4 w-24 h-24 bg-[#CDDEA7] rounded-full blur-xl"></div>
+                <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
+            </div>
+            <div class="relative z-10">
+                <h3 class="text-base font-semibold text-white mb-1">Still need help?</h3>
+                <p class="text-sm text-[#CDDEA7]/80 mb-4">
+                    If you can't find an answer above, reach out to your system administrator.
+                </p>
+                <div class="flex flex-wrap gap-3 text-sm">
+                    <a href="mailto:admin@kebunraya.id"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-[#CDDEA7] text-[#4A2F24] rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition shadow-sm">
+                        <x-heroicon-o-envelope class="w-4 h-4 shrink-0" />
+                        <span>Email Admin</span>
+                    </a>
+                </div>
             </div>
         </div>
 
     </main>
 </div>
+

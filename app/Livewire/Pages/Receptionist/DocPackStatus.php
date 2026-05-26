@@ -12,11 +12,14 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('Documents & Packages — Status')]
 class DocPackStatus extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
 

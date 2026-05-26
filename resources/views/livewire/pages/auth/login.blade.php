@@ -86,11 +86,11 @@
                     <div class="flex items-center justify-between">
                         <label class="inline-flex items-center gap-2 text-sm text-gray-600 select-none cursor-pointer">
                             <input type="checkbox" wire:model.defer="remember"
-                                class="h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-800">
+                                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary bg-transparent">
                             <span>Remember me</span>
                         </label>
 
-                        <a href="#" class="text-gray-500 hover:text-gray-800 transition-colors duration-200 text-sm font-medium">
+                        <a href="#" class="text-gray-500 hover:text-primary transition-colors duration-200 text-sm font-medium">
                             Forgot password?
                         </a>
                     </div>
@@ -111,7 +111,7 @@
                     @endif
 
                     <button type="submit"
-                        class="w-full rounded-3xl mt-6 bg-black text-white py-4 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full rounded-3xl mt-6 bg-primary text-primary-foreground py-4 px-6 font-medium tracking-wide hover:bg-primary/95 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/30 transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="login"> SIGN IN </span>
                         <span wire:loading wire:target="login"> Processing... </span>
@@ -121,8 +121,8 @@
                 {{-- OTP VERIFICATION FORM --}}
                 <form wire:submit.prevent="verifyOtp" class="space-y-8">
                     <div class="text-center mb-6">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                            <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </div>
@@ -135,7 +135,7 @@
                     <div class="group">
                         <label for="otpCode" class="block text-sm font-medium text-gray-700 mb-3">Enter OTP Code</label>
                         <input type="text" id="otpCode" wire:model.defer="otpCode" maxlength="6" 
-                            class="w-full px-0 py-3 text-center text-2xl tracking-widest text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
+                            class="w-full px-0 py-3 text-center text-2xl tracking-widest text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-primary focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
                             placeholder="000000" autofocus>
                         @error('otpCode')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -147,7 +147,7 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full rounded-3xl bg-black text-white py-4 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full rounded-3xl bg-primary text-primary-foreground py-4 px-6 font-medium tracking-wide hover:bg-primary/95 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/30 transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="verifyOtp"> VERIFY OTP </span>
                         <span wire:loading wire:target="verifyOtp"> Verifying... </span>

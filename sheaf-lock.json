@@ -1,0 +1,46 @@
+{
+    "files": {
+        "resources/js/globals/modals.js": [
+            "modal"
+        ],
+        "resources/js/utils.js": [
+            "modal"
+        ],
+        "resources/views/components/ui/tab/index.blade.php": [
+            "tabs"
+        ],
+        "resources/views/components/ui/tab/group.blade.php": [
+            "tabs"
+        ],
+        "resources/views/components/ui/tab/panel.blade.php": [
+            "tabs"
+        ],
+        "resources/js/components/select.js": [
+            "select"
+        ]
+    },
+    "helpers": {
+        "popup": [
+            "select"
+        ]
+    },
+    "internalDependencies": {
+        "icon": [
+            "button",
+            "dropdown",
+            "badge",
+            "input",
+            "select",
+            "alerts"
+        ],
+        "button": [
+            "badge"
+        ],
+        "text": [
+            "select"
+        ],
+        "separator": [
+            "otp"
+        ]
+    }
+}

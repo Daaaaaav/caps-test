@@ -1,0 +1,59 @@
+{
+    "project_hash": "b9f6fdec-9864-4852-bab3-ca4b9e079460",
+    "components": {
+        "button": {
+            "installationTime": 1779557093
+        },
+        "icon": {
+            "installationTime": 1779557269
+        },
+        "modal": {
+            "installationTime": 1779557271
+        },
+        "dropdown": {
+            "installationTime": 1779557272
+        },
+        "tabs": {
+            "installationTime": 1779557273
+        },
+        "badge": {
+            "installationTime": 1779557274
+        },
+        "avatar": {
+            "installationTime": 1779557274
+        },
+        "input": {
+            "installationTime": 1779557276
+        },
+        "select": {
+            "installationTime": 1779557277
+        },
+        "popup": {
+            "installationTime": 1779557277
+        },
+        "text": {
+            "installationTime": 1779557293
+        },
+        "card": {
+            "installationTime": 1779557294
+        },
+        "accordion": {
+            "installationTime": 1779557295
+        },
+        "alerts": {
+            "installationTime": 1779557296
+        },
+        "checkbox": {
+            "installationTime": 1779557298
+        },
+        "label": {
+            "installationTime": 1779557298
+        },
+        "otp": {
+            "installationTime": 1779557300
+        },
+        "separator": {
+            "installationTime": 1779557309
+        }
+    }
+}

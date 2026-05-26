@@ -1,14 +1,435 @@
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
-
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '..//*.blade.php';
 @source '..//*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+:root {
+    --background: oklch(0.985 0.008 145);       /* Warm champagne cream/linen background */
+    --foreground: oklch(0.22 0.04 180);         /* Velvet spruce indigo dark text */
+    --card: oklch(0.995 0.005 145);             /* Pure milky sage white card background */
+    --card-foreground: oklch(0.22 0.04 180);
+    --popover: oklch(0.995 0.005 145);
+    --popover-foreground: oklch(0.22 0.04 180);
+    --primary: oklch(0.42 0.065 165);           /* Premium Eucalyptus Mint green */
+    --primary-foreground: oklch(0.99 0.005 140);/* Crispy cream white */
+    --secondary: oklch(0.95 0.015 145);         /* Soft sage */
+    --secondary-foreground: oklch(0.22 0.04 180);
+    --muted: oklch(0.96 0.015 145);
+    --muted-foreground: oklch(0.52 0.06 145);   /* Sage green midtone */
+    --accent: oklch(0.76 0.08 55);              /* Curated Terracotta Rose gold */
+    --accent-foreground: oklch(0.22 0.04 180);
+    --destructive: oklch(0.55 0.18 28);          /* Elegant dark red */
+    --border: oklch(0.92 0.02 145);             /* Soft sage border */
+    --input: oklch(0.92 0.02 145);
+    --ring: oklch(0.42 0.065 165);
+    --radius: 1rem;                             /* Curvaceous organic rounding */
+    --sbw: 16rem;
+
+    --sidebar: #4E653D;                         /* Warm forest green background */
+    --sidebar-foreground: #D7C9B8;              /* Warm cream/sand text color */
+    --sidebar-primary: #CDDEA7;                 /* Active green text color */
+    --sidebar-accent: #4A2F24;                  /* Active state reddish-brown background */
+    --sidebar-accent-foreground: #CDDEA7;       /* Active state green text */
+    --sidebar-border: #354C2B;                  /* Soft dark green border */
+
+    --chart-1: oklch(0.42 0.065 165);
+    --chart-2: oklch(0.76 0.08 55);
+    --chart-3: oklch(0.55 0.18 28);
+    --chart-4: oklch(0.68 0.05 145);
+    --chart-5: oklch(0.92 0.02 145);
 }
 
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --font-sans: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* COMPILATION-LEVEL GLOBAL REDESIGN OVERRIDES: Maps standard Tailwind classes */
+    --color-gray-50: oklch(0.985 0.008 145);
+    --color-gray-100: oklch(0.96 0.015 145);
+    --color-gray-200: oklch(0.92 0.02 145);
+    --color-gray-300: oklch(0.84 0.035 145);
+    --color-gray-400: oklch(0.68 0.05 145);
+    --color-gray-500: oklch(0.52 0.06 145);
+    --color-gray-600: oklch(0.40 0.05 145);
+    --color-gray-700: oklch(0.28 0.04 145);
+    --color-gray-800: oklch(0.18 0.035 145);
+    --color-gray-900: oklch(0.12 0.03 145);
+
+    --color-zinc-50: oklch(0.985 0.008 145);
+    --color-zinc-100: oklch(0.96 0.015 145);
+    --color-zinc-200: oklch(0.92 0.02 145);
+    --color-zinc-300: oklch(0.84 0.035 145);
+    --color-zinc-400: oklch(0.68 0.05 145);
+    --color-zinc-500: oklch(0.52 0.06 145);
+    --color-zinc-600: oklch(0.40 0.05 145);
+    --color-zinc-700: oklch(0.28 0.04 145);
+    --color-zinc-800: oklch(0.18 0.035 145);
+    --color-zinc-900: oklch(0.12 0.03 145);
+
+    /* Clean natural black and white replacements */
+    --color-black: oklch(0.10 0.03 145);
+    --color-white: oklch(0.995 0.005 145);
+}
+
+@layer base {
+    * { 
+        @apply border-border outline-ring/50 transition-colors duration-200; 
+    }
+    body { 
+        @apply bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary; 
+        background-image: radial-gradient(at 0% 0%, oklch(0.96 0.015 145) 0px, transparent 50%), radial-gradient(at 100% 100%, oklch(0.97 0.01 145) 0px, transparent 50%);
+        background-attachment: fixed;
+    }
+    
+    /* Modern sleek organic scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--background);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: oklch(0.84 0.035 145);
+        border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: oklch(0.68 0.05 145);
+    }
+}
+
+/* Glassmorphism utility */
+.bg-glass {
+    background-color: rgba(254, 254, 253, 0.65);
+    backdrop-filter: blur(12px) saturate(110%);
+}
+
+.dark .bg-glass {
+    background-color: rgba(30, 42, 38, 0.7);
+    backdrop-filter: blur(12px) saturate(110%);
+}
+
+/* Elegant entrance animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   PREMIUM CUSTOM SIDEBAR THEME
+   - Background: #4E653D (Forest Green)
+   - Default Text color: #D7C9B8 (Warm Cream/Sand)
+   - Active/Clicked Item Background: #4A2F24 (Reddish-Brown)
+   - Active/Clicked Item Text: #354C2B (Green)
+   - Active/Clicked Item Shadow: #354C2B (Dark Green Shadow)
+   ========================================================================== */
+
+/* Sidebar Containers & Headers */
+[data-flux-sidebar],
+ui-sidebar,
+aside.bg-sidebar {
+    background-color: #4E653D !important;
+    --sidebar: #4E653D !important;
+    --color-sidebar: #4E653D !important;
+    --sidebar-border: #354C2B !important;
+    border-color: #354C2B !important;
+}
+
+flux-header.bg-sidebar,
+header.bg-sidebar,
+[data-flux-header] {
+    background-color: #4E653D !important;
+    --sidebar: #4E653D !important;
+    --color-sidebar: #4E653D !important;
+    border-color: #354C2B !important;
+}
+
+/* Sidebar Default Text & Icon colors */
+[data-flux-sidebar-brand],
+[data-flux-sidebar-brand] *,
+[data-flux-sidebar-search],
+[data-flux-sidebar-search] *,
+[data-flux-sidebar-group] button,
+[data-flux-sidebar-group] span,
+[data-flux-sidebar-group] div,
+[data-flux-sidebar-profile],
+[data-flux-sidebar-profile] *,
+[data-flux-sidebar] button,
+[data-flux-sidebar-item]:not([data-current]),
+[data-flux-sidebar-item]:not([data-current]) * {
+    color: #D7C9B8 !important;
+}
+
+[data-flux-sidebar-item]:not([data-current]) svg,
+[data-flux-sidebar-search] svg,
+[data-flux-sidebar] button svg {
+    color: #D7C9B8 !important;
+    stroke: #D7C9B8 !important;
+    fill: transparent !important;
+}
+
+/* Sidebar Item Hover State (very soft white overlay) */
+[data-flux-sidebar-item]:hover:not([data-current]) {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #D7C9B8 !important;
+}
+[data-flux-sidebar-item]:hover:not([data-current]) * {
+    color: #D7C9B8 !important;
+}
+[data-flux-sidebar-item]:hover:not([data-current]) svg {
+    stroke: #D7C9B8 !important;
+    fill: transparent !important;
+}
+
+/* Sidebar Active/Clicked Item State */
+[data-flux-sidebar-item][data-current],
+[data-flux-sidebar-item]:active,
+[data-flux-sidebar-item]:focus,
+aside.bg-sidebar a.bg-sidebar-accent {
+    color: #CDDEA7 !important;
+    background-color: #4A2F24 !important;
+    box-shadow: 0 4px 12px 0 rgba(53, 76, 43, 0.6), 0 2px 4px 0 rgba(53, 76, 43, 0.4) !important;
+    border-color: rgba(53, 76, 43, 0.15) !important;
+}
+
+[data-flux-sidebar-item][data-current] *,
+[data-flux-sidebar-item]:active *,
+[data-flux-sidebar-item]:focus * {
+    color: #CDDEA7 !important;
+}
+
+[data-flux-sidebar-item][data-current] svg,
+[data-flux-sidebar-item]:active svg,
+[data-flux-sidebar-item]:focus svg {
+    color: #CDDEA7 !important;
+    stroke: #CDDEA7 !important;
+    fill: transparent !important;
+}
+
+/* ==========================================================================
+   COLLAPSIBLE SIDEBAR OVERRIDES & ANIMATIONS
+   ========================================================================== */
+
+/* Smooth transitions for sidebar width and main margin-left */
+aside, 
+[data-flux-sidebar],
+ui-sidebar {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+main {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Collapsed Sidebar overrides */
+.sidebar-is-collapsed [data-flux-sidebar],
+.sidebar-is-collapsed ui-sidebar {
+    width: var(--sbw) !important;
+    max-width: var(--sbw) !important;
+    overflow-x: hidden !important;
+}
+
+/* Hide brand name, show logo only */
+.sidebar-is-collapsed [data-flux-sidebar-brand] > :not(img),
+.sidebar-is-collapsed [data-flux-sidebar-brand] > span:not(:first-child) {
+    display: none !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-brand] img {
+    margin-right: 0 !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-brand] {
+    justify-content: center !important;
+}
+
+/* Hide search entirely in collapsed mode */
+.sidebar-is-collapsed flux-sidebar-search,
+.sidebar-is-collapsed [data-flux-sidebar-search] {
+    display: none !important;
+}
+
+/* Sidebar Item: Hide text labels, center icon, make compact */
+.sidebar-is-collapsed [data-flux-sidebar-item] > :not(svg):not([data-flux-icon]) {
+    display: none !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-item] {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    height: 2.75rem !important;
+    width: 2.75rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 0.75rem !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-item] svg {
+    margin-right: 0 !important;
+}
+
+/* Sidebar Group Headings: Hide text headings, add a nice divider line */
+.sidebar-is-collapsed [data-flux-sidebar-group] > button,
+.sidebar-is-collapsed [data-flux-sidebar-group] > [role="button"],
+.sidebar-is-collapsed [data-flux-sidebar-group] > h3,
+.sidebar-is-collapsed [data-flux-sidebar-group] > [role="heading"] {
+    display: none !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-group] {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 0.75rem !important;
+    margin-top: 0.75rem !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-group]:first-of-type {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Profile Card: Hide name, center avatar */
+.sidebar-is-collapsed [data-flux-sidebar-profile] > :not(img):not([data-flux-avatar]) {
+    display: none !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-profile] {
+    justify-content: center !important;
+    padding: 0 !important;
+    height: 2.75rem !important;
+    width: 2.75rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+.sidebar-is-collapsed [data-flux-sidebar-profile] [data-flux-avatar] {
+    margin-right: 0 !important;
+}
+
+/* ==========================================================================
+   COLLAPSIBLE SIDEBAR ULTRA-PREMIUM DOCK CUSTOM STYLES
+   ========================================================================== */
+
+/* Collapsed view container animation */
+.sidebar-collapsed-container {
+    animation: fadeInCollSide 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInCollSide {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Collapsed Sidebar Item */
+.sidebar-collapsed-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    color: #D7C9B8;
+    background-color: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.sidebar-collapsed-item:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.05);
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-collapsed-item.active {
+    color: #CDDEA7 !important;
+    background-color: #4A2F24 !important;
+    border-color: rgba(53, 76, 43, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(53, 76, 43, 0.6), 0 2px 4px rgba(53, 76, 43, 0.4) !important;
+}
+
+/* Active dot indicator on the left side */
+.active-dot-indicator {
+    position: absolute;
+    left: -0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.25rem;
+    height: 0.8rem;
+    background-color: #CDDEA7;
+    border-radius: 9999px;
+    box-shadow: 0 0 8px #CDDEA7;
+    transition: all 0.3s ease;
+}
+
+/* Tooltip implementation */
+.sidebar-tooltip {
+    pointer-events: none;
+    position: absolute;
+    left: 3.25rem;
+    z-index: 50;
+    white-space: nowrap;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #CDDEA7;
+    background-color: #4A2F24;
+    border: 1px solid #354C2B;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: scale(0.95) translateX(-8px);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed-item:hover .sidebar-tooltip {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+}
+
+/* Soft separators */
+.sidebar-collapsed-divider {
+    height: 1px;
+    background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
+    width: 80%;
+    margin: 0.25rem auto;
+}

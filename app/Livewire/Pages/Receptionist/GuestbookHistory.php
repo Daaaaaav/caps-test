@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\Guestbook as GuestbookModel;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('GuestBook History')]
 class GuestbookHistory extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
 
@@ -36,6 +39,9 @@ class GuestbookHistory extends Component
 
     // Include soft-deleted rows in history list
     public bool $withTrashed = false;
+
+    // Filter by security / receptionist officer in sidebar
+    public ?string $petugasFilter = null;
 
     // Edit modal state
     public bool $showEdit = false;
@@ -193,6 +199,10 @@ class GuestbookHistory extends Component
             ->whereDate('date', now()->toDateString())
             ->whereNull('jam_out');
 
+        if ($this->petugasFilter) {
+            $q->where('petugas_penjaga', $this->petugasFilter);
+        }
+
         // Newest first
         $q->orderByDesc('created_at');
 
@@ -213,6 +223,10 @@ class GuestbookHistory extends Component
             $q->withTrashed();
         } else {
             $q->whereNull('deleted_at');
+        }
+
+        if ($this->petugasFilter) {
+            $q->where('petugas_penjaga', $this->petugasFilter);
         }
 
         if ($this->filter_date) {
@@ -391,11 +405,40 @@ class GuestbookHistory extends Component
         $this->resetValidation();
     }
 
+    /**
+     * Get unique officers/security guards who have recorded entries
+     */
+    public function getPetugasOptionsProperty(): array
+    {
+        return GuestbookModel::query()
+            ->where('company_id', $this->companyId())
+            ->whereNotNull('petugas_penjaga')
+            ->where('petugas_penjaga', '!=', '')
+            ->select('petugas_penjaga')
+            ->distinct()
+            ->orderBy('petugas_penjaga')
+            ->pluck('petugas_penjaga')
+            ->toArray();
+    }
+
+    public function selectPetugas(?string $petugas = null): void
+    {
+        $this->petugasFilter = $petugas ?: null;
+        $this->resetPage('entriesPage');
+        $this->resetPage('latestPage');
+    }
+
+    public function clearPetugasFilter(): void
+    {
+        $this->selectPetugas(null);
+    }
+
     public function render()
     {
         return view('livewire.pages.receptionist.guestbookhistory', [
             'latest' => $this->latest,
             'entries' => $this->entries,
+            'petugasOptions' => $this->petugasOptions,
         ]);
     }
 }

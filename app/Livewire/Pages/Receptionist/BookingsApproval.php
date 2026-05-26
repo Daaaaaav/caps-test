@@ -15,11 +15,14 @@ use App\Services\GoogleMeetService;
 use App\Services\ZoomService;
 use Carbon\Carbon;
 
+use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
+
 #[Layout('layouts.receptionist')]
 #[Title('Bookings Approval')]
 class BookingsApproval extends Component
 {
     use WithPagination;
+    use HasViewMode;
 
     protected string $paginationTheme = 'tailwind';
 
