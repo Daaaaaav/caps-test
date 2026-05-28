@@ -3,32 +3,32 @@
 
         {{-- Page header — simple greeting --}}
         <x-page-header
-            title="Dashboard"
-            subtitle="Overview of the last 7 days across all modules."
+            title="{{ __('app.dashboard') }}"
+            subtitle="{{ __('app.dashboard_subtitle') }}"
         />
 
         {{-- KPI Cards --}}
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-card
-                label="Room Bookings"
+                label="{{ __('app.room_bookings_label') }}"
                 :value="$weeklyRoomBookingsCount"
                 icon="heroicon-o-calendar-days"
                 href="{{ route('receptionist.schedule') }}"
             />
             <x-stat-card
-                label="Vehicle Bookings"
+                label="{{ __('app.vehicle_bookings_label') }}"
                 :value="$weeklyVehicleBookingsCount"
                 icon="heroicon-o-truck"
                 href="{{ route('receptionist.bookingvehicle') }}"
             />
             <x-stat-card
-                label="Guest Visits"
+                label="{{ __('app.guest_visits') }}"
                 :value="$weeklyGuestsCount"
                 icon="heroicon-o-user-group"
                 href="{{ route('receptionist.guestbook') }}"
             />
             <x-stat-card
-                label="Documents / Packages"
+                label="{{ __('app.documents_packages') }}"
                 :value="$weeklyDocsCount"
                 icon="heroicon-o-archive-box"
                 href="{{ route('receptionist.docpackform') }}"
@@ -44,11 +44,11 @@
                 {{-- Latest Room Bookings --}}
                 <div class="bg-card border border-border rounded-lg">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-border">
-                        <h3 class="text-sm font-semibold text-card-foreground">Recent Room Bookings</h3>
-                        <a href="{{ route('receptionist.bookinghistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
+                        <h3 class="text-sm font-semibold text-card-foreground">{{ __('app.recent_room_bookings') }}</h3>
+                        <a href="{{ route('receptionist.bookinghistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">{{ __('app.view_all') }}</a>
                     </div>
                     @if($latestBookingRooms->isEmpty())
-                        <x-empty-state icon="heroicon-o-calendar-days" title="No room bookings" description="No bookings found in the last 7 days." />
+                        <x-empty-state icon="heroicon-o-calendar-days" title="{{ __('app.no_room_bookings') }}" description="{{ __('app.no_bookings_7days') }}" />
                     @else
                         <div class="divide-y divide-border">
                             @foreach($latestBookingRooms as $br)
@@ -72,11 +72,11 @@
                 {{-- Latest Guest Entries --}}
                 <div class="bg-card border border-border rounded-lg">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-border">
-                        <h3 class="text-sm font-semibold text-card-foreground">Recent Guests</h3>
-                        <a href="{{ route('receptionist.guestbookhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
+                        <h3 class="text-sm font-semibold text-card-foreground">{{ __('app.recent_guests') }}</h3>
+                        <a href="{{ route('receptionist.guestbookhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">{{ __('app.view_all') }}</a>
                     </div>
                     @if($latestGuests->isEmpty())
-                        <x-empty-state icon="heroicon-o-user-group" title="No guests" description="No guest entries found recently." />
+                        <x-empty-state icon="heroicon-o-user-group" title="{{ __('app.no_guests') }}" description="{{ __('app.no_guest_entries') }}" />
                     @else
                         <div class="divide-y divide-border">
                             @foreach($latestGuests as $g)
@@ -104,7 +104,7 @@
                 {{-- Quick Actions --}}
                 <div class="bg-card border border-border rounded-lg">
                     <div class="px-4 py-3 border-b border-border">
-                        <h3 class="text-sm font-semibold text-card-foreground">Quick Actions</h3>
+                        <h3 class="text-sm font-semibold text-card-foreground">{{ __('app.quick_actions') }}</h3>
                     </div>
                     <div class="p-3 space-y-1.5">
                         <a href="{{ route('receptionist.guestbook') }}"
@@ -113,8 +113,8 @@
                                 <x-heroicon-o-user-plus class="w-4 h-4 text-foreground" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-foreground">New Guest Entry</p>
-                                <p class="text-xs text-muted-foreground">Register a visitor</p>
+                                <p class="text-sm font-medium text-foreground">{{ __('app.new_guest_entry') }}</p>
+                                <p class="text-xs text-muted-foreground">{{ __('app.register_visitor') }}</p>
                             </div>
                         </a>
                         <a href="{{ route('receptionist.schedule') }}"
@@ -123,8 +123,8 @@
                                 <x-heroicon-o-calendar-days class="w-4 h-4 text-foreground" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-foreground">Book a Room</p>
-                                <p class="text-xs text-muted-foreground">Schedule a meeting room</p>
+                                <p class="text-sm font-medium text-foreground">{{ __('app.book_a_room') }}</p>
+                                <p class="text-xs text-muted-foreground">{{ __('app.schedule_meeting_room') }}</p>
                             </div>
                         </a>
                         <a href="{{ route('receptionist.docpackform') }}"
@@ -133,8 +133,8 @@
                                 <x-heroicon-o-document-text class="w-4 h-4 text-foreground" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-foreground">DocPac Form</p>
-                                <p class="text-xs text-muted-foreground">Log a document or package</p>
+                                <p class="text-sm font-medium text-foreground">{{ __('app.docpac_form_action') }}</p>
+                                <p class="text-xs text-muted-foreground">{{ __('app.log_doc_package') }}</p>
                             </div>
                         </a>
                         <a href="{{ route('receptionist.bookingvehicle') }}"
@@ -143,8 +143,8 @@
                                 <x-heroicon-o-truck class="w-4 h-4 text-foreground" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-foreground">Book Vehicle</p>
-                                <p class="text-xs text-muted-foreground">Reserve a vehicle</p>
+                                <p class="text-sm font-medium text-foreground">{{ __('app.book_vehicle_action') }}</p>
+                                <p class="text-xs text-muted-foreground">{{ __('app.reserve_vehicle') }}</p>
                             </div>
                         </a>
                     </div>
@@ -153,11 +153,11 @@
                 {{-- Latest Documents & Packages --}}
                 <div class="bg-card border border-border rounded-lg">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-border">
-                        <h3 class="text-sm font-semibold text-card-foreground">Recent Docs / Packages</h3>
-                        <a href="{{ route('receptionist.docpackhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">View all →</a>
+                        <h3 class="text-sm font-semibold text-card-foreground">{{ __('app.recent_docs_packages') }}</h3>
+                        <a href="{{ route('receptionist.docpackhistory') }}" class="text-xs text-muted-foreground hover:text-foreground transition-colors">{{ __('app.view_all') }}</a>
                     </div>
                     @if($latestDocs->isEmpty())
-                        <x-empty-state icon="heroicon-o-archive-box" title="No documents" description="No documents or packages recorded." />
+                        <x-empty-state icon="heroicon-o-archive-box" title="{{ __('app.no_documents') }}" description="{{ __('app.no_docs_recorded') }}" />
                     @else
                         <div class="divide-y divide-border">
                             @foreach($latestDocs as $d)

@@ -132,22 +132,48 @@
 
             <div class="sidebar-collapsed-divider"></div>
 
-            <!-- Profile Dropdown -->
-            <flux:dropdown position="top" align="start" class="w-full flex justify-center">
-                <button class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none">
-                    <flux:sidebar.profile avatar="" name="" class="p-0 pointer-events-none" />
+            <!-- Profile Dropdown (collapsed) -->
+            <div x-data="{ open: false }" class="relative w-full flex justify-center">
+                <button
+                    @click.stop="open = !open"
+                    class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none"
+                >
+                    <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white">
+                        {{ strtoupper(substr($fullName, 0, 1)) }}
+                    </div>
                     <div class="sidebar-tooltip">{{ $fullName }}</div>
                 </button>
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
-                    </flux:menu.radio.group>
-                    <flux:menu.separator />
-                    <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit" form="logout-form">
+
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 translate-y-1"
+                    @click.outside="open = false"
+                    class="absolute bottom-full left-0 mb-2 w-48 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                    style="display: none;"
+                >
+                    <div class="px-3 py-2.5 border-b border-white/10">
+                        <p class="text-xs font-semibold text-white truncate">{{ $fullName }}</p>
+                        <p class="text-[10px] text-white/40 mt-0.5">Admin</p>
+                    </div>
+                    <button
+                        type="submit"
+                        form="logout-form"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
                         Logout
-                    </flux:menu.item>
-                </flux:menu>
-            </flux:dropdown>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -164,68 +190,88 @@
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
 
-        <flux:sidebar.search placeholder="Search..." />
+        {{-- Search Input --}}
+        <div x-data="{ search: '' }" class="px-3 pt-2 pb-1">
+            <div class="relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    x-model="search"
+                    type="text"
+                    placeholder="Search..."
+                    class="w-full h-9 pl-9 pr-3 rounded-lg bg-white/10 border border-white/10 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
+                />
+            </div>
 
-        <flux:sidebar.nav>
-            <flux:sidebar.item
-                icon="home"
-                href="{{ route('admin.dashboard') }}"
-                :current="request()->routeIs('admin.dashboard')"
-            >
-                Home
-            </flux:sidebar.item>
-
-            <flux:sidebar.item
-                icon="calendar-days"
-                href="{{ route('admin.room.monitoring') }}"
-                :current="request()->routeIs('admin.room.monitoring')"
-            >
-                Booking room
-            </flux:sidebar.item>
-
-            <flux:sidebar.item
-                icon="calendar-days"
-                href="{{ route('admin.information') }}"
-                :current="request()->routeIs('admin.information')" 
-            >
-                Information
-            </flux:sidebar.item>
-
-            <flux:sidebar.item
-                icon="inbox"
-                href="{{ route('admin.ticket') }}"
-                :current="request()->routeIs('admin.ticket')"
-            >
-                Ticket
-            </flux:sidebar.item>
-
-            <flux:sidebar.item
-                icon="users"
-                href="{{ route('admin.usermanagement') }}"
-                :current="request()->routeIs('admin.usermanagement')"
-            >
-                User Management
-            </flux:sidebar.item>
-
-            {{-- MENU KHUSUS IT: WiFi Management --}}
-            @if(auth()->user()->department && auth()->user()->department->department_name === 'IT')
+            <flux:sidebar.nav>
                 <flux:sidebar.item
-                    icon="wifi" 
-                    href="{{ route('admin.wifimanagement') }}"
-                    :current="request()->routeIs('admin.wifimanagement')"
+                    icon="home"
+                    href="{{ route('admin.dashboard') }}"
+                    :current="request()->routeIs('admin.dashboard')"
+                    x-show="!search || 'home'.includes(search.toLowerCase())"
                 >
-                    WiFi Management
+                    Home
                 </flux:sidebar.item>
-            @endif
 
-            <flux:sidebar.item
-                icon="chart-bar"
-                href="{{ route('admin.agentreport') }}"
-                :current="request()->routeIs('admin.agentreport')"
-            >
-                Agent Report
-            </flux:sidebar.item>
-        </flux:sidebar.nav>
+                <flux:sidebar.item
+                    icon="calendar-days"
+                    href="{{ route('admin.room.monitoring') }}"
+                    :current="request()->routeIs('admin.room.monitoring')"
+                    x-show="!search || 'booking room'.includes(search.toLowerCase())"
+                >
+                    Booking room
+                </flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="calendar-days"
+                    href="{{ route('admin.information') }}"
+                    :current="request()->routeIs('admin.information')"
+                    x-show="!search || 'information'.includes(search.toLowerCase())"
+                >
+                    Information
+                </flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="inbox"
+                    href="{{ route('admin.ticket') }}"
+                    :current="request()->routeIs('admin.ticket')"
+                    x-show="!search || 'ticket'.includes(search.toLowerCase())"
+                >
+                    Ticket
+                </flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="users"
+                    href="{{ route('admin.usermanagement') }}"
+                    :current="request()->routeIs('admin.usermanagement')"
+                    x-show="!search || 'user management'.includes(search.toLowerCase())"
+                >
+                    User Management
+                </flux:sidebar.item>
+
+                {{-- MENU KHUSUS IT: WiFi Management --}}
+                @if(auth()->user()->department && auth()->user()->department->department_name === 'IT')
+                    <flux:sidebar.item
+                        icon="wifi"
+                        href="{{ route('admin.wifimanagement') }}"
+                        :current="request()->routeIs('admin.wifimanagement')"
+                        x-show="!search || 'wifi management'.includes(search.toLowerCase())"
+                    >
+                        WiFi Management
+                    </flux:sidebar.item>
+                @endif
+
+                <flux:sidebar.item
+                    icon="chart-bar"
+                    href="{{ route('admin.agentreport') }}"
+                    :current="request()->routeIs('admin.agentreport')"
+                    x-show="!search || 'agent report'.includes(search.toLowerCase())"
+                >
+                    Agent Report
+                </flux:sidebar.item>
+            </flux:sidebar.nav>
+        </div>
 
         <flux:sidebar.spacer />
 
@@ -244,30 +290,55 @@
             </flux:sidebar.item>
         </flux:sidebar.nav>
 
-        {{-- Profil + menu (desktop) --}}
-        <flux:dropdown position="top" align="start" class="max-lg:hidden">
-            <flux:sidebar.profile avatar="" name="{{ $fullName }}" />
+        {{-- Profil + menu (desktop, expanded) --}}
+        <div x-data="{ open: false }" class="relative max-lg:hidden px-2 pb-2">
+            <button
+                @click.stop="open = !open"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/8 transition-colors group focus:outline-none"
+            >
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {{ strtoupper(substr($fullName, 0, 1)) }}
+                </div>
+                <div class="flex-1 text-left min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">{{ $fullName }}</p>
+                    <p class="text-xs text-white/40">Admin</p>
+                </div>
+                <svg class="w-4 h-4 text-white/40 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                </svg>
+            </button>
 
-            <flux:menu>
-                <flux:menu.radio.group>
-                    <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
-                </flux:menu.radio.group>
-
-                <flux:menu.separator />
-
-                <flux:menu.item
-                    icon="arrow-right-start-on-rectangle"
-                    as="button"
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-1"
+                @click.outside="open = false"
+                class="absolute bottom-full left-2 right-2 mb-1 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                style="display: none;"
+            >
+                <div class="px-3 py-2.5 border-b border-white/10">
+                    <p class="text-xs font-semibold text-white truncate">{{ $fullName }}</p>
+                    <p class="text-[10px] text-white/40 mt-0.5">Admin</p>
+                </div>
+                <button
                     type="submit"
                     form="logout-form"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                 >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
                     Logout
-                </flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
+                </button>
+            </div>
+        </div>
     </div>
 </flux:sidebar>
 
-<form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
-    @csrf
-</form>
+{{-- logout-form is defined in the parent layout --}}

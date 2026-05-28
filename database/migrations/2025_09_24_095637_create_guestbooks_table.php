@@ -10,6 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        Schema::dropIfExists('guestbooks');
         Schema::create('guestbooks', function (Blueprint $table) {
             $table->bigIncrements('guestbook_id');
             $table->foreignId('company_id')->constrained('companies', 'company_id')->cascadeOnDelete();

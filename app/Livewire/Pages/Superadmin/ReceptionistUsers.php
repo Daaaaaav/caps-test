@@ -236,6 +236,18 @@ class ReceptionistUsers extends Component
 
             $user = User::where('user_id', $id)->firstOrFail();
 
+            // Prevent deleting yourself
+            if ($user->user_id === Auth::id()) {
+                $this->dispatch(
+                    'toast',
+                    type: 'error',
+                    title: 'Error',
+                    message: 'You cannot delete your own account.',
+                    duration: 4000
+                );
+                return;
+            }
+
             $user->delete();
 
             $this->dispatch(

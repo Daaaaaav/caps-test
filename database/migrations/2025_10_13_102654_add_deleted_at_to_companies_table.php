@@ -15,9 +15,11 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->dropIndex(['deleted_at']);
-            $table->dropSoftDeletes();
-        });
+        if (\DB::table('information_schema.STATISTICS')->where('TABLE_SCHEMA', \DB::getDatabaseName())->where('TABLE_NAME', 'companies')->where('INDEX_NAME', 'companies_deleted_at_index')->exists()) {
+            \DB::statement('ALTER TABLE `companies` DROP INDEX `companies_deleted_at_index`');
+        }
+        if (\DB::table('information_schema.COLUMNS')->where('TABLE_SCHEMA', \DB::getDatabaseName())->where('TABLE_NAME', 'companies')->where('COLUMN_NAME', 'deleted_at')->exists()) {
+            \DB::statement('ALTER TABLE `companies` DROP COLUMN `deleted_at`');
+        }
     }
 };

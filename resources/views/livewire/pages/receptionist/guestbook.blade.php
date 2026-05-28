@@ -31,8 +31,8 @@
                             <x-heroicon-o-book-open class="w-6 h-6 text-[#CDDEA7]" />
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Guestbook</h2>
-                            <p class="text-xs text-[#CDDEA7]/80">Form Entri Kunjungan & Tamu Hari Ini.</p>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.guestbook_title') }}</h2>
+                            <p class="text-xs text-[#CDDEA7]/80">{{ __('app.guestbook_subtitle') }}</p>
                         </div>
                     </div>
 
@@ -40,7 +40,7 @@
                         <a href="{{ route('receptionist.guestbookhistory') }}"
                            class="px-4 py-2 text-xs font-bold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-calendar class="w-4 h-4"/>
-                            <span>Guestbook History</span>
+                            <span>{{ __('app.guestbook_history') }}</span>
                         </a>
                     </div>
                 </div>

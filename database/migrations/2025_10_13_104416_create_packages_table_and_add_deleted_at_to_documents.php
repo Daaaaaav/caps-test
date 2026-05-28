@@ -43,7 +43,6 @@ return new class extends Migration {
         if (Schema::hasTable('documents') && Schema::hasColumn('documents', 'deleted_at')) {
             Schema::table('documents', function (Blueprint $table) {
                 if (Schema::hasColumn('documents', 'deleted_at')) {
-                    $table->dropIndex('documents_deleted_at_index');
                     $table->dropSoftDeletes();
                 }
             });

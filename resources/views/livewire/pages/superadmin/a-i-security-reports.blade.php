@@ -1,22 +1,22 @@
-<div class="min-h-screen bg-gray-50" @if($autoRefresh) wire:poll.5s @endif>
+<div class="min-h-screen bg-[#f5f7f2]" @if($autoRefresh) wire:poll.5s @endif>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {{-- HEADER --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Wazuh Security Reports</h1>
-                <p class="text-sm text-gray-500">Live alerts from the Wazuh manager log</p>
+                <h1 class="text-2xl font-semibold text-[#2d3a24]">{{ __('app.security_reports_title') }}</h1>
+                <p class="text-sm text-[#7a8f6a]">{{ __('app.security_reports_sub') }}</p>
             </div>
             <button wire:click="toggleAutoRefresh" 
-                class="px-5 py-2.5 rounded-xl shadow-sm text-sm font-medium transition {{ $autoRefresh ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                {{ $autoRefresh ? '● Live' : '○ Paused' }}
+                class="px-5 py-2.5 rounded-xl shadow-sm text-sm font-medium transition {{ $autoRefresh ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
+                {{ $autoRefresh ? __('app.live') : __('app.paused_btn') }}
             </button>
         </div>
 
         {{-- STATS --}}
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($stats as $stat)
-                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
-                    <p class="text-sm font-medium text-gray-500">{{ $stat['label'] }}</p>
+                <div class="bg-white border border-[#d4dfc8] rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
+                    <p class="text-sm font-medium text-[#7a8f6a]">{{ $stat['label'] }}</p>
                     <h2 class="text-3xl font-bold mt-2 {{ [
                         'blue' => 'text-blue-600',
                         'red' => 'text-red-600',
@@ -28,39 +28,39 @@
         </section>
 
         {{-- SOURCE STATUS --}}
-        <section class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <section class="bg-white border border-[#d4dfc8] rounded-2xl p-5 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500">Data source</p>
-                <p class="text-sm text-gray-900">
+                <p class="text-sm font-medium text-[#7a8f6a]">{{ __('app.data_source') }}</p>
+                <p class="text-sm text-[#2d3a24]">
                     {{ $source_label }}
                     @if(isset($source) && $source)
-                        <span class="text-gray-500">• {{ $source }}</span>
+                        <span class="text-[#7a8f6a]">• {{ $source }}</span>
                     @endif
                 </p>
             </div>
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-[#7a8f6a]">
                 @if(isset($last_updated) && $last_updated)
-                    Last updated {{ $last_updated }}
+                    {{ __('app.last_updated') }} {{ $last_updated }}
                 @else
-                    Source unavailable
+                    {{ __('app.source_unavailable') }}
                 @endif
             </div>
         </section>
 
         {{-- SIEM CONNECTION --}}
-        <section class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <section class="bg-white border border-[#d4dfc8] rounded-2xl p-5 shadow-sm">
 
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-500">
-                        SIEM Connection
+                    <p class="text-sm font-medium text-[#7a8f6a]">
+                        {{ __('app.siem_connection') }}
                     </p>
 
-                    <p class="text-sm text-gray-900 mt-1">
+                    <p class="text-sm text-[#2d3a24] mt-1">
                         {{ $source_label }}
 
                         @if($source_host)
-                            <span class="text-gray-500">
+                            <span class="text-[#7a8f6a]">
                                 • {{ $source_host }}
                             </span>
                         @endif
@@ -70,11 +70,11 @@
                 <div>
                     @if($available)
                         <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                            Connected
+                            {{ __('app.connected') }}
                         </span>
                     @else
                         <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">
-                            Offline
+                            {{ __('app.offline') }}
                         </span>
                     @endif
                 </div>
@@ -83,13 +83,13 @@
             {{-- DEBUG ENDPOINTS --}}
             @if(!empty($api_endpoints))
                 <div class="mt-5">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
-                        Available API Endpoints
+                    <p class="text-xs font-semibold uppercase tracking-wide text-[#9aaa8a] mb-2">
+                        {{ __('app.available_endpoints') }}
                     </p>
 
                     <div class="flex flex-wrap gap-2">
                         @foreach($api_endpoints as $endpoint)
-                            <span class="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-mono">
+                            <span class="px-3 py-1 rounded-lg bg-[#eef1e8] text-[#4E653D] text-xs font-mono">
                                 {{ $endpoint }}
                             </span>
                         @endforeach
@@ -102,27 +102,27 @@
         {{-- FILTER BUTTONS --}}
         <div class="flex flex-wrap gap-3">
             <button wire:click="setSeverity('all')"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'all' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                All
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'all' ? 'bg-[#4A2F24] text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
+                {{ __('app.all') }}
             </button>
             <button wire:click="setSeverity('high')"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'high' ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'high' ? 'bg-red-600 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
                 🔴 High
             </button>
             <button wire:click="setSeverity('medium')"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'medium' ? 'bg-yellow-500 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'medium' ? 'bg-yellow-500 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
                 🟡 Medium
             </button>
             <button wire:click="setSeverity('low')"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'low' ? 'bg-green-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'low' ? 'bg-green-600 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
                 🟢 Low
             </button>
         </div>
 
         {{-- ALERTS LIST --}}
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
             @forelse($alerts as $alert)
-                <div class="border-b border-gray-200 last:border-b-0 p-5 hover:bg-gray-50 transition">
+                <div class="border-b border-[#d4dfc8] last:border-b-0 p-5 hover:bg-[#f0f4eb] transition">
                     <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                         <div class="flex items-start gap-4">
                             <span class="px-3 py-1 rounded-full text-xs font-medium {{ [
@@ -134,35 +134,35 @@
                             </span>
                             <div class="flex-1 min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <p class="font-semibold text-gray-900">{{ $alert['title'] }}</p>
+                                    <p class="font-semibold text-[#2d3a24]">{{ $alert['title'] }}</p>
                                     @if($alert['rule_id'])
-                                        <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Rule {{ $alert['rule_id'] }}</span>
+                                        <span class="text-xs px-2 py-1 rounded-full bg-[#eef1e8] text-[#5a6e4a]">Rule {{ $alert['rule_id'] }}</span>
                                     @endif
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1 break-words">{{ $alert['message'] }}</p>
-                                <div class="mt-3 flex flex-wrap gap-2 text-xs text-gray-500">
+                                <p class="text-sm text-[#5a6e4a] mt-1 break-words">{{ $alert['message'] }}</p>
+                                <div class="mt-3 flex flex-wrap gap-2 text-xs text-[#7a8f6a]">
                                     @foreach($alert['details'] as $detail)
-                                        <span class="px-2 py-1 rounded-full bg-gray-100">{{ $detail }}</span>
+                                        <span class="px-2 py-1 rounded-full bg-[#eef1e8]">{{ $detail }}</span>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
-                        <div class="text-sm text-gray-500 lg:text-right">
+                        <div class="text-sm text-[#7a8f6a] lg:text-right">
                             <div>{{ $alert['timestamp'] ?? 'Live entry' }}</div>
                             <div class="text-xs mt-1 uppercase tracking-wide">{{ $alert['severity'] }} severity</div>
                         </div>
                     </div>
                     <details class="mt-4">
-                        <summary class="cursor-pointer text-sm text-blue-600 hover:text-blue-700">Show raw log</summary>
-                        <pre class="mt-3 overflow-x-auto rounded-xl bg-gray-950 text-gray-100 text-xs leading-6 p-4 whitespace-pre-wrap">{{ $alert['raw'] }}</pre>
+                        <summary class="cursor-pointer text-sm text-[#4E653D] hover:text-[#354C2B]">{{ __('app.show_raw_log') }}</summary>
+                        <pre class="mt-3 overflow-x-auto rounded-xl bg-[#2d3a24] text-[#CDDEA7] text-xs leading-6 p-4 whitespace-pre-wrap">{{ $alert['raw'] }}</pre>
                     </details>
                 </div>
             @empty
-                <div class="p-8 text-center text-gray-500">
+                <div class="p-8 text-center text-[#7a8f6a]">
                     @if($available)
-                        No alerts for this severity level
+                        {{ __('app.no_alerts') }}
                     @else
-                        No readable Wazuh alert source was found
+                        {{ __('app.no_wazuh_source') }}
                     @endif
                 </div>
             @endforelse

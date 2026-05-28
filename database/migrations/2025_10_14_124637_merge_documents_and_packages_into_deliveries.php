@@ -275,6 +275,6 @@ return new class extends Migration
         }
 
         // (Opsional) Biarkan tabel storages tetap ada; kalau mau dibalik juga, hilangkan komentar:
-        // Schema::dropIfExists('storages');
+        Schema::dropIfExists('storages');
     }
 };

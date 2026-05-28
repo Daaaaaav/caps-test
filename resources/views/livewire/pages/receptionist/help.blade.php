@@ -14,9 +14,9 @@
                             <x-heroicon-o-question-mark-circle class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold text-[#CDDEA7]">Help & Support</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold text-[#CDDEA7]">{{ __('app.help_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80 mt-1">
-                                Find answers to common questions about using the system.
+                                {{ __('app.help_find_answers') }}
                             </p>
                         </div>
                     </div>
@@ -26,11 +26,11 @@
 
         {{-- ===== SEARCH ===== --}}
         <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search Questions</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.search_questions') }}</label>
             <div class="relative">
                 <input type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search questions..."
+                    placeholder="{{ __('app.search_questions') }}..."
                     class="w-full h-10 pl-9 pr-9 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 bg-white transition text-sm">
                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                 @if($search)
@@ -73,9 +73,9 @@
         @else
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm px-6 py-12 text-center">
                 <x-heroicon-o-magnifying-glass class="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p class="text-gray-500 text-sm">No results found for "<span class="font-medium text-gray-950">{{ $search }}</span>".</p>
+                <p class="text-gray-500 text-sm">{{ __('app.no_results_for') }} "<span class="font-medium text-gray-950">{{ $search }}</span>".</p>
                 <button wire:click="$set('search', '')" class="mt-3 text-sm text-[#4E653D] font-medium hover:text-[#354C2B] underline hover:no-underline transition">
-                    Clear search
+                    {{ __('app.clear_search') }}
                 </button>
             </div>
         @endif
@@ -87,15 +87,15 @@
                 <div class="absolute bottom-0 -left-4 w-16 h-16 bg-[#CDDEA7] rounded-full blur-lg"></div>
             </div>
             <div class="relative z-10">
-                <h3 class="text-base font-semibold text-white mb-1">Still need help?</h3>
+                <h3 class="text-base font-semibold text-white mb-1">{{ __('app.still_need_help') }}</h3>
                 <p class="text-sm text-[#CDDEA7]/80 mb-4">
-                    If you can't find an answer above, reach out to your system administrator.
+                    {{ __('app.still_need_help_sub') }}
                 </p>
                 <div class="flex flex-wrap gap-3 text-sm">
                     <a href="mailto:admin@kebunraya.id"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-[#CDDEA7] text-[#4A2F24] rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition shadow-sm">
                         <x-heroicon-o-envelope class="w-4 h-4 shrink-0" />
-                        <span>Email Admin</span>
+                        <span>{{ __('app.email_admin') }}</span>
                     </a>
                 </div>
             </div>

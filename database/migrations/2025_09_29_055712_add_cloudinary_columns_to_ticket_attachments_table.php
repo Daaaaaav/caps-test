@@ -42,7 +42,7 @@ return new class extends Migration {
                 $table->dropColumn('cloudinary_public_id');
             }
             if (Schema::hasColumn('ticket_attachments', 'uploaded_by')) {
-                $table->dropIndex(['uploaded_by']);
+                $table->dropIndex('ticket_attachments_uploaded_by_index');
                 $table->dropColumn('uploaded_by');
             }
         });

@@ -22,9 +22,9 @@
                             <x-heroicon-o-cog-6-tooth class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold text-[#CDDEA7]">Settings</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold text-[#CDDEA7]">{{ __('app.settings_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80 mt-1">
-                                Manage your account profile and security preferences.
+                                {{ __('app.settings_manage_sub') }}
                             </p>
                         </div>
                     </div>
@@ -59,27 +59,27 @@
                     <x-heroicon-o-user class="w-5 h-5 shrink-0" />
                 </div>
                 <div>
-                    <h2 class="text-sm font-semibold text-gray-900">Profile Information</h2>
-                    <p class="text-xs text-gray-500 mt-0.5">Update your display name, email, and phone number.</p>
+                    <h2 class="text-sm font-semibold text-gray-900">{{ __('app.profile_information') }}</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ __('app.profile_info_sub') }}</p>
                 </div>
             </div>
 
             <form wire:submit.prevent="updateProfile" class="p-6 space-y-4">
                 <div>
-                    <label class="{{ $label }}">Full Name</label>
-                    <input type="text" wire:model="name" class="{{ $input }}" placeholder="Your full name">
+                    <label class="{{ $label }}">{{ __('app.full_name_label') }}</label>
+                    <input type="text" wire:model="name" class="{{ $input }}" placeholder="{{ __('app.full_name_ph') }}">
                     @error('name') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="{{ $label }}">Email Address</label>
+                    <label class="{{ $label }}">{{ __('app.email_address') }}</label>
                     <input type="email" wire:model="email" class="{{ $input }}" placeholder="you@example.com">
                     @error('email') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
                     <label class="{{ $label }}">
-                        Phone Number <span class="text-gray-400 font-normal">(optional)</span>
+                        {{ __('app.phone_optional_label') }}
                     </label>
                     <input type="text" wire:model="phone" class="{{ $input }}" placeholder="e.g. 08123456789">
                     @error('phone') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
@@ -87,7 +87,7 @@
 
                 <div class="pt-2">
                     <button type="submit" class="{{ $btnPrimary }}">
-                        Save Profile
+                        {{ __('app.save_profile') }}
                     </button>
                 </div>
             </form>
@@ -115,29 +115,29 @@
             @if($showPasswordSection)
                 <form wire:submit.prevent="updatePassword" class="p-6 space-y-4">
                     <div>
-                        <label class="{{ $label }}">Current Password</label>
+                        <label class="{{ $label }}">{{ __('app.current_password') }}</label>
                         <input type="password" wire:model="currentPassword" class="{{ $input }}">
                         @error('currentPassword') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">New Password</label>
+                        <label class="{{ $label }}">{{ __('app.new_password') }}</label>
                         <input type="password" wire:model="newPassword" class="{{ $input }}">
                         @error('newPassword') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Confirm New Password</label>
+                        <label class="{{ $label }}">{{ __('app.confirm_new_password') }}</label>
                         <input type="password" wire:model="confirmPassword" class="{{ $input }}">
                         @error('confirmPassword') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="pt-2 flex gap-3">
                         <button type="submit" class="{{ $btnPrimary }}">
-                            Update Password
+                            {{ __('app.update_password') }}
                         </button>
                         <button type="button" wire:click="$set('showPasswordSection', false)" class="{{ $btnSecondary }}">
-                            Cancel
+                            {{ __('app.cancel') }}
                         </button>
                     </div>
                 </form>

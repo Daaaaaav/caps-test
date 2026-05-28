@@ -42,7 +42,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('booking_rooms', function (Blueprint $table) {
-            $table->dropIndex(['booking_rooms_booking_type_online_provider_index']);
+            $table->dropIndex('booking_rooms_booking_type_online_provider_index');
             $table->dropColumn([
                 'booking_type',
                 'online_provider',

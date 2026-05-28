@@ -16,7 +16,7 @@
                     class="mx-auto mb-6 h-20 hover:scale-105 transition-transform duration-300" />
                 <h2 class="text-gray-800 text-lg font-light tracking-wide mb-2">KEBUN RAYA</h2>
                 <p class="text-gray-500 text-sm font-medium tracking-wider">
-                    {{ $showOtpInput ? 'VERIFY OTP CODE' : 'WELCOME TO LOGIN' }}
+                    {{ $showOtpInput ? __('app.verify_otp_title') : __('app.welcome_login') }}
                 </p>
                 <div class="mt-4 w-16 h-0.5 bg-gray-800 mx-auto"></div>
             </div>
@@ -48,22 +48,22 @@
                     }
                 }" x-on:submit.prevent="submitLogin()" class="space-y-8">
                     <div class="group">
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-3">Email Address</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-3">{{ __('app.email_address') }}</label>
                         <input type="email" id="email" wire:model.defer="email" autocomplete="email"
                             class="w-full px-0 py-3 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                            placeholder="Enter your email address">
+                            placeholder="{{ __('app.enter_email') }}">
                         @error('email')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div class="group">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-3">Password</label>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-3">{{ __('app.password') }}</label>
                         <div class="relative">
                             <input x-bind:type="showPassword ? 'text' : 'password'" id="password"
                                 wire:model.defer="password" autocomplete="current-password"
                                 class="w-full px-0 py-3 pr-10 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                                placeholder="Enter your password">
+                                placeholder="{{ __('app.enter_password') }}">
                             <button type="button" x-on:click="showPassword = !showPassword"
                                 class="absolute inset-y-0 right-0 flex items-center text-gray-400 hover:text-gray-800 transition-colors duration-200">
                                 <svg x-show="!showPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,11 +87,11 @@
                         <label class="inline-flex items-center gap-2 text-sm text-gray-600 select-none cursor-pointer">
                             <input type="checkbox" wire:model.defer="remember"
                                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary bg-transparent">
-                            <span>Remember me</span>
+                            <span>{{ __('app.remember_me') }}</span>
                         </label>
 
                         <a href="#" class="text-gray-500 hover:text-primary transition-colors duration-200 text-sm font-medium">
-                            Forgot password?
+                            {{ __('app.forgot_password') }}
                         </a>
                     </div>
 
@@ -113,8 +113,8 @@
                     <button type="submit"
                         class="w-full rounded-3xl mt-6 bg-primary text-primary-foreground py-4 px-6 font-medium tracking-wide hover:bg-primary/95 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/30 transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="login"> SIGN IN </span>
-                        <span wire:loading wire:target="login"> Processing... </span>
+                        <span wire:loading.remove wire:target="login"> {{ __('app.sign_in') }} </span>
+                        <span wire:loading wire:target="login"> {{ __('app.processing') }} </span>
                     </button>
                 </form>
             @else
@@ -127,13 +127,13 @@
                             </svg>
                         </div>
                         <p class="text-sm text-gray-600">
-                            We've sent a 6-digit code to<br>
+                            {{ __('app.otp_sent_to') }}<br>
                             <span class="font-semibold text-gray-900">{{ $email }}</span>
                         </p>
                     </div>
 
                     <div class="group">
-                        <label for="otpCode" class="block text-sm font-medium text-gray-700 mb-3">Enter OTP Code</label>
+                        <label for="otpCode" class="block text-sm font-medium text-gray-700 mb-3">{{ __('app.enter_otp') }}</label>
                         <input type="text" id="otpCode" wire:model.defer="otpCode" maxlength="6" 
                             class="w-full px-0 py-3 text-center text-2xl tracking-widest text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-primary focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
                             placeholder="000000" autofocus>
@@ -143,26 +143,26 @@
                     </div>
 
                     <div class="text-center text-sm text-gray-600">
-                        Code expires in <span class="font-semibold text-gray-900">{{ floor($otpExpiresIn / 60) }}:{{ str_pad($otpExpiresIn % 60, 2, '0', STR_PAD_LEFT) }}</span>
+                        {{ __('app.otp_expires_in') }} <span class="font-semibold text-gray-900">{{ floor($otpExpiresIn / 60) }}:{{ str_pad($otpExpiresIn % 60, 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
 
                     <button type="submit"
                         class="w-full rounded-3xl bg-primary text-primary-foreground py-4 px-6 font-medium tracking-wide hover:bg-primary/95 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/30 transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="verifyOtp"> VERIFY OTP </span>
-                        <span wire:loading wire:target="verifyOtp"> Verifying... </span>
+                        <span wire:loading.remove wire:target="verifyOtp"> {{ __('app.verify_otp') }} </span>
+                        <span wire:loading wire:target="verifyOtp"> {{ __('app.verifying') }} </span>
                     </button>
 
                     <div class="flex items-center justify-between text-sm">
                         <button type="button" wire:click="resendOtp"
                             class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200"
                             wire:loading.attr="disabled">
-                            Resend Code
+                            {{ __('app.resend_code') }}
                         </button>
 
                         <button type="button" wire:click="cancelOtp"
                             class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
-                            Back to Login
+                            {{ __('app.back_to_login') }}
                         </button>
                     </div>
                 </form>

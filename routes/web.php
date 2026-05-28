@@ -66,6 +66,19 @@ use App\Services\GoogleMeetService;
 
 /*
 |--------------------------------------------------------------------------
+| Language Toggle
+|--------------------------------------------------------------------------
+*/
+Route::get('/lang/{locale}', function (string $locale) {
+    if (!in_array($locale, ['en', 'id'])) {
+        abort(400);
+    }
+    session(['locale' => $locale]);
+    return redirect()->back();
+})->name('lang.switch');
+
+/*
+|--------------------------------------------------------------------------
 | Root: redirect to login
 |--------------------------------------------------------------------------
 */

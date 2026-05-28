@@ -19,8 +19,12 @@ return new class extends Migration {
         Schema::table('information', function (Blueprint $table) {
             $table->dropForeign(['department_id']);
             $table->dropColumn('department_id');
-            $table->dropIndex(['deleted_at']);
-            $table->dropSoftDeletes();
         });
+        if (\DB::table('information_schema.STATISTICS')->where('TABLE_SCHEMA', \DB::getDatabaseName())->where('TABLE_NAME', 'information')->where('INDEX_NAME', 'information_deleted_at_index')->exists()) {
+            \DB::statement('ALTER TABLE `information` DROP INDEX `information_deleted_at_index`');
+        }
+        if (\DB::table('information_schema.COLUMNS')->where('TABLE_SCHEMA', \DB::getDatabaseName())->where('TABLE_NAME', 'information')->where('COLUMN_NAME', 'deleted_at')->exists()) {
+            \DB::statement('ALTER TABLE `information` DROP COLUMN `deleted_at`');
+        }
     }
 };

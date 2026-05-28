@@ -16,35 +16,35 @@
 
                 {{-- Full Name --}}
                 <div class="group">
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.full_name_label') }}</label>
                     <input type="text" id="name" name="name" wire:model.defer="full_name" required
                         class="w-full px-0 py-2 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                        placeholder="Enter your full name">
+                        placeholder="{{ __('app.full_name_ph') }}">
                     @error('full_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Email --}}
                 <div class="group">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.email_address') }}</label>
                     <input type="email" id="email" name="email" wire:model.defer="email" required autocomplete="email"
                         class="w-full px-0 py-2 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                        placeholder="Enter your email address">
+                        placeholder="{{ __('app.enter_email') }}">
                     @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Phone Number --}}
                 <div class="group">
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.phone') }}</label>
                     <input type="tel" id="phone" name="phone" wire:model.defer="phone_number" {{-- kalau ingin wajib:
                         tambahkan required --}}
                         class="w-full px-0 py-2 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                        placeholder="Enter your phone number">
+                        placeholder="{{ __('app.phone_placeholder') }}">
                     @error('phone_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Company --}}
                 <div class="group">
-                    <label for="company" class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                    <label for="company" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.institution') }}</label>
                     <select id="company" name="company" wire:model.live="company_id"
                         class="w-full px-0 py-2 bg-transparent border-0 border-b-2 border-gray-200 text-gray-900 focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300">
                         <option value="">— Select company —</option>
@@ -57,7 +57,7 @@
 
                 {{-- Department (filtered by company) --}}
                 <div class="group">
-                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.department') }}</label>
                     <select id="department" name="department" wire:model.defer="department_id"
                         @disabled(empty($this->departments))
                         class="w-full px-0 py-2 bg-transparent border-0 border-b-2 border-gray-200 text-gray-900 focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 disabled:text-gray-400 disabled:cursor-not-allowed">
@@ -71,12 +71,12 @@
 
                 {{-- Password --}}
                 <div class="group">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.password') }}</label>
                     <div class="relative">
                         <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
                             wire:model.defer="password" required autocomplete="new-password"
                             class="w-full px-0 py-2 pr-10 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                            placeholder="Enter your password">
+                            placeholder="{{ __('app.enter_password') }}">
                         <button type="button" @click="showPassword = !showPassword"
                             class="absolute inset-y-0 right-0 flex items-center text-gray-400 hover:text-gray-800 transition-colors duration-200">
                             {{-- svg tetap --}}
@@ -99,14 +99,13 @@
 
                 {{-- Confirm Password --}}
                 <div class="group">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm
-                        Password</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.confirm_new_password') }}</label>
                     <div class="relative">
                         <input :type="showPasswordConfirmation ? 'text' : 'password'" id="password_confirmation"
                             name="password_confirmation" wire:model.defer="password_confirmation" required
                             autocomplete="new-password"
                             class="w-full px-0 py-2 pr-10 text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-gray-800 focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
-                            placeholder="Confirm your password">
+                            placeholder="{{ __('app.enter_password') }}">
                         <button type="button" @click="showPasswordConfirmation = !showPasswordConfirmation"
                             class="absolute inset-y-0 right-0 flex items-center text-gray-400 hover:text-gray-800 transition-colors duration-200">
                             {{-- svg tetap --}}
@@ -129,8 +128,8 @@
 
                 <button type="submit" wire:loading.attr="disabled"
                     class="w-full mt-6 rounded-2xl bg-black text-white py-3 px-6 font-medium tracking-wide hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transition-all duration-300">
-                    <span wire:loading.remove>CREATE ACCOUNT</span>
-                    <span wire:loading>Processing...</span>
+                    <span wire:loading.remove>{{ __('app.create') }} ACCOUNT</span>
+                    <span wire:loading>{{ __('app.processing') }}</span>
                 </button>
 
                 <div class="flex justify-center items-center mt-6 pt-4 border-t border-gray-100">

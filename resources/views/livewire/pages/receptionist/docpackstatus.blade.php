@@ -53,7 +53,7 @@
                             <x-heroicon-o-archive-box class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Documents & Packages — Status</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.docpac_status_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">Pantau item pending & tersimpan sebelum delivered/taken.</p>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                             class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
                             wire:click="openFilterModal">
                         <x-heroicon-o-funnel class="w-4 h-4"/>
-                        <span>Filter</span>
+                        <span>{{ __('app.filter') }}</span>
                     </button>
                 </div>
             </div>
@@ -76,8 +76,8 @@
                 {{-- Header: title + tabs + type scope --}}
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900">Items List</h3>
-                        <p class="text-xs text-gray-500">Daftar dokumen & paket yang diterima.</p>
+                        <h3 class="text-base font-semibold text-gray-900">{{ __('app.items_list') }}</h3>
+                        <p class="text-xs text-gray-500">{{ __('app.items_list_sub') }}</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3">
@@ -161,7 +161,7 @@
                         @if(!$departmentId && !$userId)
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
                                 <x-heroicon-o-funnel class="w-3.5 h-3.5"/>
-                                <span>No advanced filter</span>
+                                <span>{{ __('app.no_advanced_filter') }}</span>
                             </span>
                         @endif
                     </div>
@@ -171,7 +171,7 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 bg-gray-50/30">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
                                     placeholder="Cari nama item, pengirim…" wire:model.live="q">
@@ -404,16 +404,16 @@
                                 <thead>
                                     <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                         <th class="px-6 py-3.5">#</th>
-                                        <th class="px-6 py-3.5">Item Name</th>
-                                        <th class="px-6 py-3.5">Type</th>
-                                        <th class="px-6 py-3.5">Sender</th>
-                                        <th class="px-6 py-3.5">Receiver</th>
+                                        <th class="px-6 py-3.5">{{ __('app.item_name') }}</th>
+                                        <th class="px-6 py-3.5">{{ __('app.type') }}</th>
+                                        <th class="px-6 py-3.5">{{ __('app.sender') }}</th>
+                                        <th class="px-6 py-3.5">{{ __('app.receiver') }}</th>
                                         @if($activeTab === 'pending')
-                                            <th class="px-6 py-3.5">Received Date</th>
+                                            <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                         @else
                                             <th class="px-6 py-3.5">Direction</th>
                                         @endif
-                                        <th class="px-6 py-3.5 text-right">Actions</th>
+                                        <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -546,7 +546,7 @@
                 {{-- Filter by Department & User --}}
                 <section class="{{ $card }}">
                     <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">Advanced Filters</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">{{ __('app.advanced_filters') }}</h3>
                         <p class="text-[11px] text-gray-500 mt-0.5">Filter berdasarkan department & user.</p>
                     </div>
 
@@ -598,7 +598,7 @@
             <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
-                        <h3 class="text-sm font-semibold tracking-tight text-foreground">Advanced Filters</h3>
+                        <h3 class="text-sm font-semibold tracking-tight text-foreground">{{ __('app.advanced_filters') }}</h3>
                         <p class="text-[11px] text-muted-foreground mt-0.5">Filter berdasarkan department & user.</p>
                     </div>
                     <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
@@ -661,13 +661,13 @@
                         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <x-heroicon-o-pencil class="w-4 h-4 text-primary" />
                         </div>
-                        <h3 class="font-bold text-foreground text-base tracking-tight">Edit Item Details</h3>
+                        <h3 class="font-bold text-foreground text-base tracking-tight">{{ __('app.edit') }}</h3>
                     </div>
                     <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="$set('showEdit', false)">✕</button>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Item Name</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.item_name') }}</label>
                         <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.item_name">
                         @error('edit.item_name') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
@@ -688,7 +688,7 @@
                     <button type="button" wire:click="$set('showEdit', false)"
                         class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
                         <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                        <span>Batal</span>
+                        <span>cancel</span>
                     </button>
                     <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
                         class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">

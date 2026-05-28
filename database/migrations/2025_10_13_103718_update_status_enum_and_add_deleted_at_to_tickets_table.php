@@ -19,10 +19,11 @@ return new class extends Migration {
     public function down(): void
     {
         DB::statement("ALTER TABLE tickets MODIFY status ENUM('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'DELETED') DEFAULT 'OPEN'");
-
-        Schema::table('tickets', function (Blueprint $table) {
-            $table->dropIndex(['deleted_at']);
-            $table->dropSoftDeletes();
-        });
+        if (DB::table('information_schema.STATISTICS')->where('TABLE_SCHEMA', DB::getDatabaseName())->where('TABLE_NAME', 'tickets')->where('INDEX_NAME', 'tickets_deleted_at_index')->exists()) {
+            DB::statement('ALTER TABLE `tickets` DROP INDEX `tickets_deleted_at_index`');
+        }
+        if (DB::table('information_schema.COLUMNS')->where('TABLE_SCHEMA', DB::getDatabaseName())->where('TABLE_NAME', 'tickets')->where('COLUMN_NAME', 'deleted_at')->exists()) {
+            DB::statement('ALTER TABLE `tickets` DROP COLUMN `deleted_at`');
+        }
     }
 };

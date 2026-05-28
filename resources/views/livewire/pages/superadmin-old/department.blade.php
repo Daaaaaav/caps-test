@@ -199,7 +199,7 @@
                         <button type="button"
                             class="px-4 h-10 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 hover:border-gray-400 transition"
                             wire:click="closeEdit">
-                            Batal
+                            cancel
                         </button>
                         <button type="submit"
                             wire:loading.attr="disabled"

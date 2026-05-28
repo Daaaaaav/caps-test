@@ -267,7 +267,7 @@
                     <button type="button"
                         class="px-4 h-10 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100"
                         wire:click="closeEditModal">
-                        Batal
+                        cancel
                     </button>
                     <button type="submit" wire:loading.attr="disabled" wire:target="update"
                         class="inline-flex items-center gap-2 px-5 h-10 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-black disabled:opacity-60">

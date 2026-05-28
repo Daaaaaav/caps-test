@@ -62,7 +62,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Vehicle History</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.vehicle_history_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">
                                 {{ $statusTab === 'rejected'
                                     ? 'Riwayat peminjaman yang ditolak (Rejected).'
@@ -75,7 +75,7 @@
                     <label class="inline-flex items-center gap-2 text-sm text-[#CDDEA7]/90 cursor-pointer">
                         <input type="checkbox" wire:model.live="includeDeleted"
                             class="w-4 h-4 rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 text-[#CDDEA7] focus:ring-2 focus:ring-[#CDDEA7]/20 cursor-pointer">
-                        <span>Include Deleted</span>
+                        <span>{{ __('app.include_deleted') }}</span>
                     </label>
                 </div>
             </div>
@@ -144,7 +144,7 @@
                             </span>
                         @else
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
-                                No vehicle filter
+                                {{ __('app.no_vehicle_filter') }}
                             </span>
                         @endif
                     </div>
@@ -154,7 +154,7 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
                                     placeholder="Search purpose, destination, borrower…"
@@ -279,7 +279,7 @@
                                             {{-- Rejected Note --}}
                                             @if($isRejected && !empty($b->notes))
                                                 <div class="mt-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-lg p-2">
-                                                    <span class="font-medium">Reject Reason:</span> {{ $b->notes }}
+                                                    <span class="font-medium">{{ __('app.reject_reason') }}:</span> {{ $b->notes }}
                                                 </div>
                                             @endif
                                             
@@ -314,12 +314,12 @@
                                 <thead>
                                     <tr class="border-b border-gray-200 bg-gray-50/50">
                                         <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">#</th>
-                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">Borrower</th>
-                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">Vehicle</th>
-                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">Purpose / Destination</th>
-                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">Dates & Times</th>
-                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">Status</th>
-                                        <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500">Actions</th>
+                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.borrower') }}</th>
+                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.vehicle') }}</th>
+                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.purpose') }} / {{ __('app.destination') }}</th>
+                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.date') }} & {{ __('app.time') }}</th>
+                                        <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.status') }}</th>
+                                        <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500">{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -359,7 +359,7 @@
                                                     @endif
                                                 </div>
                                                 @if($isRejected && !empty($b->notes))
-                                                    <span class="block text-[11px] text-rose-600 max-w-[180px] truncate mt-0.5" title="{{ $b->notes }}">Reason: {{ $b->notes }}</span>
+                                                    <span class="block text-[11px] text-rose-600 max-w-[180px] truncate mt-0.5" title="{{ $b->notes }}">{{ __('app.reason') }}: {{ $b->notes }}</span>
                                                 @endif
                                             </td>
                                             <td class="h-12 px-4 text-right">
@@ -402,7 +402,7 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">Filter by Vehicle</h3>
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Klik kendaraan untuk filter.</p>
                     </div>
 
@@ -411,10 +411,10 @@
                             class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                             <span class="flex items-center gap-2">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">All</span>
-                                <span>All Vehicles</span>
+                                <span>{{ __('app.all_vehicles') }}</span>
                             </span>
                             @if(is_null($vehicleFilter))
-                                <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -435,7 +435,7 @@
                                         <span class="truncate">{{ $vLabel }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @empty
@@ -445,7 +445,7 @@
                     </div>
 
                     <div class="px-4 pt-3 pb-4 border-t border-gray-200 bg-gray-50">
-                        <h4 class="text-xs font-semibold text-gray-900 mb-2">Quick Stats</h4>
+                        <h4 class="text-xs font-semibold text-gray-900 mb-2">{{ __('app.analytics') }}</h4>
                         <div class="space-y-2 text-xs">
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">Total Vehicles</span>

@@ -52,7 +52,7 @@
                             <x-heroicon-o-clock class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Booking History</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.booking_history_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">
                                 Lihat dan kelola riwayat booking yang sudah selesai atau ditolak.
                             </p>
@@ -65,7 +65,7 @@
                             <input type="checkbox"
                                    wire:model.live="withTrashed"
                                    class="rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 focus:ring-[#CDDEA7]/40 text-[#CDDEA7]">
-                            <span>Show deleted records</span>
+                            <span>{{ __('app.show_deleted') }}</span>
                         </label>
  
                         {{-- MOBILE FILTER BUTTON --}}
@@ -73,7 +73,7 @@
                                 class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
                                 wire:click="openFilterModal">
                             <x-heroicon-o-funnel class="w-4 h-4"/>
-                            <span>Filter</span>
+                            <span>{{ __('app.filter') }}</span>
                         </button>
                     </div>
                 </div>
@@ -88,9 +88,9 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">History</h3>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('app.history') }}</h3>
                             <p class="text-xs text-gray-500">
-                                Riwayat booking berdasarkan status.
+                                {{ __('app.history_subtitle') }}
                             </p>
                         </div>
 
@@ -151,7 +151,7 @@
                             @else
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
                                     <x-heroicon-o-funnel class="w-3.5 h-3.5"/>
-                                    <span>No room filter</span>
+                                    <span>{{ __('app.no_room_filter') }}</span>
                                 </span>
                             @endif
                         </div>
@@ -189,7 +189,7 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text"
                                        class="{{ $input }} pl-9"
@@ -344,7 +344,7 @@
                                                     {{-- 4. BOTTOM LEFT: Requester Info & Notes --}}
                                                     <div class="text-[12px] text-gray-600 space-y-2">
                                                         @if($requesterName)
-                                                            <p>Requested by <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
+                                                            <p>{{ __('app.requested_by') }} <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
                                                         @endif
                                                         @if($requesterDept)
                                                             <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px] border border-gray-200">
@@ -353,7 +353,7 @@
                                                         @endif
                                                         @if($row->notes)
                                                             <div class="mt-2 text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-2">
-                                                                <span class="font-medium">Notes:</span> {{ $row->notes }}
+                                                                <span class="font-medium">{{ __('app.notes') }}:</span> {{ $row->notes }}
                                                             </div>
                                                         @endif
                                                     </div>
@@ -402,12 +402,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                                 <th class="px-6 py-3.5">#</th>
-                                                <th class="px-6 py-3.5">Title</th>
-                                                <th class="px-6 py-3.5">Room / Platform</th>
-                                                <th class="px-6 py-3.5">Date</th>
-                                                <th class="px-6 py-3.5">Time</th>
-                                                <th class="px-6 py-3.5">Requester</th>
-                                                <th class="px-6 py-3.5 text-right">Actions</th>
+                                                <th class="px-6 py-3.5">{{ __('app.title_col') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.room_platform') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
+                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -433,7 +433,7 @@
                                                     <td class="px-6 py-4">
                                                         <div class="font-semibold text-gray-900">{{ $row->meeting_title ?? '—' }}</div>
                                                         @if($row->deleted_at)
-                                                            <span class="inline-flex items-center text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-medium mt-1">Deleted</span>
+                                                            <span class="inline-flex items-center text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-medium mt-1">{{ __('app.deleted') }}</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4">
@@ -618,7 +618,7 @@
                                                     {{-- 4. BOTTOM LEFT: Requester Info & Reject Reason --}}
                                                     <div class="text-[12px] text-gray-600 space-y-2">
                                                         @if($requesterName)
-                                                            <p>Requested by <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
+                                                            <p>{{ __('app.requested_by') }} <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
                                                         @endif
                                                         @if($requesterDept)
                                                             <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px] border border-gray-200">
@@ -676,12 +676,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                                 <th class="px-6 py-3.5">#</th>
-                                                <th class="px-6 py-3.5">Title</th>
-                                                <th class="px-6 py-3.5">Room / Platform</th>
-                                                <th class="px-6 py-3.5">Date</th>
-                                                <th class="px-6 py-3.5">Time</th>
-                                                <th class="px-6 py-3.5">Reason</th>
-                                                <th class="px-6 py-3.5 text-right">Actions</th>
+                                                <th class="px-6 py-3.5">{{ __('app.title_col') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.room_platform') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.reason') }}</th>
+                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -700,7 +700,7 @@
                                                     <td class="px-6 py-4">
                                                         <div class="font-semibold text-gray-900">{{ $row->meeting_title ?? '—' }}</div>
                                                         @if($row->deleted_at)
-                                                            <span class="inline-flex items-center text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-medium mt-1">Deleted</span>
+                                                            <span class="inline-flex items-center text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-medium mt-1">{{ __('app.deleted') }}</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4">
@@ -846,7 +846,7 @@
                     <div class="p-6 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Type</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.type') }}</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.booking_type">
                                     <option value="bookingroom">Booking Room</option>
                                     <option value="meeting">Meeting</option>
@@ -856,8 +856,8 @@
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Status</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.status">
-                                    <option value="completed">Done</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="completed">{{ __('app.done') }}</option>
+                                    <option value="rejected">{{ __('app.rejected') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -872,15 +872,15 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Date</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.date') }}</label>
                                 <input type="date" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.date">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Start Time</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.start') }}</label>
                                 <input type="time" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.start_time">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">End Time</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.end') }}</label>
                                 <input type="time" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.end_time">
                             </div>
                         </div>
@@ -913,7 +913,7 @@
 
                         @if(($form['status'] ?? null) === 'rejected')
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Reject Reason <span class="text-destructive">*</span></label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason') }} <span class="text-destructive">*</span></label>
                                 <textarea
                                     class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                                     rows="3"
@@ -926,7 +926,7 @@
                         @endif
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Notes</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.notes') }}</label>
                             <textarea class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                                       rows="3"
                                       wire:model.live="form.notes"></textarea>
@@ -940,7 +940,7 @@
                                 wire:loading.attr="disabled"
                                 class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
                             <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                            <span>Batal</span>
+                            <span>{{ __('app.cancel') }}</span>
                         </button>
                         <button type="button"
                                 wire:click="save"

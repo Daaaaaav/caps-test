@@ -52,7 +52,7 @@
             <div class="relative z-10 p-6 sm:px-8">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div class="space-y-1">
-                        <h2 class="text-lg sm:text-xl font-semibold">Bookings Approval (Receptionist)</h2>
+                        <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.bookings_approval_title') }}</h2>
                         <p class="text-sm text-[#CDDEA7]/80">
                             Kelola permintaan booking ruangan (online/offline): approve, reject (wajib isi alasan), atau reschedule.
                         </p>
@@ -64,7 +64,7 @@
                             class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
                             wire:click="openFilterModal">
                             <x-heroicon-o-funnel class="w-4 h-4"/>
-                            <span>Filter</span>
+                            <span>{{ __('app.filter') }}</span>
                         </button>
                     </div>
                 </div>
@@ -79,9 +79,9 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Approval Queue</h3>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('app.approval_queue') }}</h3>
                             <p class="text-xs text-gray-500">
-                                Kelola booking yang menunggu persetujuan atau sedang berlangsung.
+                                {{ __('app.approval_queue_subtitle') }}
                             </p>
                         </div>
 
@@ -136,7 +136,7 @@
                             @else
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
                                     <x-heroicon-o-funnel class="w-3.5 h-3.5"/>
-                                    <span>No room filter</span>
+                                    <span>{{ __('app.no_room_filter') }}</span>
                                 </span>
                             @endif
                         </div>
@@ -162,10 +162,10 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
-                                    placeholder="Cari judul meeting…"
+                                    placeholder="{{ __('app.search') }}..."
                                     wire:model.debounce.500ms="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
@@ -359,12 +359,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                                 <th class="px-6 py-3.5">#</th>
-                                                <th class="px-6 py-3.5">Title</th>
-                                                <th class="px-6 py-3.5">Room / Platform</th>
-                                                <th class="px-6 py-3.5">Date</th>
-                                                <th class="px-6 py-3.5">Time</th>
-                                                <th class="px-6 py-3.5">Requester</th>
-                                                <th class="px-6 py-3.5 text-right">Actions</th>
+                                                <th class="px-6 py-3.5">{{ __('app.title_col') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.room_platform') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
+                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -528,7 +528,7 @@
                                                     {{-- BOTTOM LEFT: Requester Info --}}
                                                     <div class="text-[12px] text-gray-600">
                                                         @if($requesterName)
-                                                            <p class="mb-1">Requested by <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
+                                                            <p class="mb-1">{{ __('app.requested_by') }} <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
                                                         @endif
                                                         @if($requesterDept)
                                                             <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px] border border-gray-200">
@@ -587,12 +587,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                                 <th class="px-6 py-3.5">#</th>
-                                                <th class="px-6 py-3.5">Title</th>
-                                                <th class="px-6 py-3.5">Room / Platform</th>
-                                                <th class="px-6 py-3.5">Date</th>
-                                                <th class="px-6 py-3.5">Time</th>
-                                                <th class="px-6 py-3.5">Requester</th>
-                                                <th class="px-6 py-3.5 text-right">Actions</th>
+                                                <th class="px-6 py-3.5">{{ __('app.title_col') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.room_platform') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
+                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -753,7 +753,7 @@
                     <div class="p-6 space-y-4">
                         <p class="text-xs text-muted-foreground">Silakan berikan alasan penolakan. Field ini wajib diisi.</p>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Alasan Penolakan <span class="text-destructive">*</span></label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
                             <textarea wire:model.live="rejectReason"
                                 rows="4"
                                 class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" 
@@ -769,13 +769,13 @@
                     <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
                         <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5" wire:click="closeReject" wire:loading.attr="disabled" wire:target="confirmReject">
                             <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                            <span>Batal</span>
+                            <span>{{ __('app.cancel') }}</span>
                         </button>
                         <button type="submit"
                             class="h-9 px-4 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold hover:bg-destructive/95 transition shadow-sm inline-flex items-center gap-1.5"
                             wire:loading.attr="disabled" wire:target="confirmReject">
                             <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
-                            <span>Konfirmasi Tolak</span>
+                            <span>{{ __('app.reject') }}</span>
                         </button>
                     </div>
                 </form>
@@ -832,7 +832,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Alasan Reschedule <span class="text-destructive">*</span></label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
                             <textarea rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" wire:model.live="rescheduleReason" required></textarea>
                             @error('rescheduleReason') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -840,7 +840,7 @@
 
                     <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
                         <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition" wire:click="closeReschedule" wire:loading.attr="disabled" wire:target="submitReschedule">
-                            Batal
+                            cancel
                         </button>
                         <button type="submit" class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm" wire:loading.attr="disabled" wire:target="submitReschedule">
                             Simpan Reschedule
@@ -1099,7 +1099,7 @@
                         <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-1">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
                                 <x-heroicon-o-exclamation-triangle class="w-3.5 h-3.5" />
-                                <span>Catatan Penolakan/Reschedule</span>
+                                <span>{{ __('app.reject_reason') }}</span>
                             </div>
                             <p class="text-xs text-amber-800 leading-relaxed whitespace-pre-wrap">{{ $detail->book_reject }}</p>
                         </div>
@@ -1121,7 +1121,7 @@
                     <button wire:click="closeDetailModal" type="button"
                         class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
                         <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
-                        <span>Tutup</span>
+                        <span>{{ __('app.close') }}</span>
                     </button>
                 </div>
             </div>

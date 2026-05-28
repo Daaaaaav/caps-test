@@ -1,10 +1,10 @@
 <flux:sidebar sticky collapsible="mobile" 
     @mouseenter="sidebarCollapsed = false"
     @mouseleave="sidebarCollapsed = true"
-    class="fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] w-full max-w-[19rem] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30">
+    class="bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30">
     
-    <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true) -->
-    <div x-show="sidebarCollapsed" class="sidebar-collapsed-container flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">
+    <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true, desktop only) -->
+    <div x-show="sidebarCollapsed" class="sidebar-collapsed-container max-lg:hidden flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">
         <!-- Logo Area -->
         <div class="h-10 flex items-center justify-center mb-3 relative group">
             <img src="{{ $brandLogo }}" alt="Brand Logo" class="h-7 w-7 object-contain rounded-lg img-white drop-shadow-[0_0_8px_rgba(205,222,167,0.4)] transition-transform duration-300 hover:rotate-12" style="{{ $invertStyle }}" />
@@ -152,22 +152,49 @@
 
             <div class="sidebar-collapsed-divider"></div>
 
-            <!-- Profile Dropdown -->
-            <flux:dropdown position="top" align="start" class="w-full flex justify-center">
-                <button class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none">
-                    <flux:sidebar.profile avatar="" name="" class="p-0 pointer-events-none" />
+            <!-- Profile Dropdown (collapsed) -->
+            <div x-data="{ open: false }" class="relative w-full flex justify-center">
+                <button
+                    @click.stop="open = !open"
+                    class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none"
+                >
+                    <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white">
+                        {{ strtoupper(substr($fullName, 0, 1)) }}
+                    </div>
                     <div class="sidebar-tooltip">{{ $fullName }}</div>
                 </button>
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
-                    </flux:menu.radio.group>
-                    <flux:menu.separator />
-                    <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit" form="logout-form">
+
+                <!-- Logout popup anchored above the button -->
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 translate-y-1"
+                    @click.outside="open = false"
+                    class="absolute bottom-full left-0 mb-2 w-48 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                    style="display: none;"
+                >
+                    <div class="px-3 py-2.5 border-b border-white/10">
+                        <p class="text-xs font-semibold text-white truncate">{{ $fullName }}</p>
+                        <p class="text-[10px] text-white/40 mt-0.5">Superadmin</p>
+                    </div>
+                    <button
+                        type="submit"
+                        form="logout-form"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
                         Logout
-                    </flux:menu.item>
-                </flux:menu>
-            </flux:dropdown>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -185,62 +212,88 @@
         </flux:sidebar.header>
 
         {{-- NAVIGATION --}}
-        <flux:sidebar.nav>
-            {{-- ===== CORE ===== --}}
-            <flux:sidebar.item icon="home" href="{{ route('superadmin.dashboard') }}"
-                :current="request()->routeIs('superadmin.dashboard')">
-                Dashboard
-            </flux:sidebar.item>
+        <div x-data="{ search: '' }" class="px-3 pt-2 pb-1">
+            <div class="relative mb-1">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    x-model="search"
+                    type="text"
+                    placeholder="Search..."
+                    class="w-full h-9 pl-9 pr-3 rounded-lg bg-white/10 border border-white/10 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
+                />
+            </div>
 
-            {{-- ===== USER MANAGEMENT ===== --}}
-            <flux:sidebar.group expandable heading="User Management">
-                <flux:sidebar.item icon="users" href="{{ route('superadmin.receptionists') }}"
-                    :current="request()->routeIs('superadmin.receptionists')">
-                    Receptionists
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-
-            {{-- ===== ANALYTICS ===== --}}
-            <flux:sidebar.group expandable heading="Analytics">
-                <flux:sidebar.item icon="chart-bar" href="{{ route('superadmin.room') }}"
-                    :current="request()->routeIs('superadmin.room')">
-                    Room Bookings
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="truck" href="{{ route('superadmin.vehicle') }}"
-                    :current="request()->routeIs('superadmin.vehicle')">
-                    Vehicle Bookings
+            <flux:sidebar.nav>
+                {{-- ===== CORE ===== --}}
+                <flux:sidebar.item icon="home" href="{{ route('superadmin.dashboard') }}"
+                    :current="request()->routeIs('superadmin.dashboard')"
+                    x-show="!search || 'dashboard'.includes(search.toLowerCase())">
+                    {{ __('app.dashboard') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="cube" href="{{ route('superadmin.delivery') }}"
-                    :current="request()->routeIs('superadmin.delivery')">
-                    Deliveries
-                </flux:sidebar.item>
+                {{-- ===== USER MANAGEMENT ===== --}}
+                <flux:sidebar.group expandable heading="{{ __('app.user_management') }}"
+                    x-show="!search || ['user management','receptionists'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item icon="users" href="{{ route('superadmin.receptionists') }}"
+                        :current="request()->routeIs('superadmin.receptionists')"
+                        x-show="!search || 'receptionists'.includes(search.toLowerCase())">
+                        {{ __('app.receptionists') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-                <flux:sidebar.item icon="book-open" href="{{ route('superadmin.guestbook') }}"
-                    :current="request()->routeIs('superadmin.guestbook')">
-                    Guestbook
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+                {{-- ===== ANALYTICS ===== --}}
+                <flux:sidebar.group expandable heading="{{ __('app.analytics') }}"
+                    x-show="!search || ['analytics','room bookings','vehicle bookings','deliveries','guestbook'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item icon="chart-bar" href="{{ route('superadmin.room') }}"
+                        :current="request()->routeIs('superadmin.room')"
+                        x-show="!search || 'room bookings'.includes(search.toLowerCase())">
+                        {{ __('app.room_bookings') }}
+                    </flux:sidebar.item>
 
-            {{-- ===== AI & SECURITY SYSTEM ===== --}}
-            <flux:sidebar.group expandable heading="AI & Security System">
-                <flux:sidebar.item icon="cpu-chip" href="{{ route('superadmin.lstm-predictions') }}"
-                    :current="request()->routeIs('superadmin.lstm-predictions')">
-                    Visitor Predictions
-                </flux:sidebar.item>
+                    <flux:sidebar.item icon="truck" href="{{ route('superadmin.vehicle') }}"
+                        :current="request()->routeIs('superadmin.vehicle')"
+                        x-show="!search || 'vehicle bookings'.includes(search.toLowerCase())">
+                        {{ __('app.vehicle_bookings') }}
+                    </flux:sidebar.item>
 
-                <flux:sidebar.item icon="chart-bar-square" href="{{ route('superadmin.occupancy') }}"
-                    :current="request()->routeIs('superadmin.occupancy')">
-                    Occupancy Forecast
-                </flux:sidebar.item>
+                    <flux:sidebar.item icon="cube" href="{{ route('superadmin.delivery') }}"
+                        :current="request()->routeIs('superadmin.delivery')"
+                        x-show="!search || 'deliveries'.includes(search.toLowerCase())">
+                        {{ __('app.deliveries') }}
+                    </flux:sidebar.item>
 
-                <flux:sidebar.item icon="shield-check" href="{{ route('superadmin.ai-security') }}"
-                    :current="request()->routeIs('superadmin.ai-security')">
-                    Security Reports
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
+                    <flux:sidebar.item icon="book-open" href="{{ route('superadmin.guestbook') }}"
+                        :current="request()->routeIs('superadmin.guestbook')"
+                        x-show="!search || 'guestbook'.includes(search.toLowerCase())">
+                        {{ __('app.guestbook') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                {{-- ===== AI & SECURITY SYSTEM ===== --}}
+                <flux:sidebar.group expandable heading="{!! __('app.ai_security') !!}"
+                    x-show="!search || ['ai','security','visitor predictions','occupancy forecast','security reports'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item icon="cpu-chip" href="{{ route('superadmin.lstm-predictions') }}"
+                        :current="request()->routeIs('superadmin.lstm-predictions')"
+                        x-show="!search || 'visitor predictions'.includes(search.toLowerCase())">
+                        {{ __('app.visitor_predictions') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="chart-bar-square" href="{{ route('superadmin.occupancy') }}"
+                        :current="request()->routeIs('superadmin.occupancy')"
+                        x-show="!search || 'occupancy forecast'.includes(search.toLowerCase())">
+                        {{ __('app.occupancy_forecast') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="shield-check" href="{{ route('superadmin.ai-security') }}"
+                        :current="request()->routeIs('superadmin.ai-security')"
+                        x-show="!search || 'security reports'.includes(search.toLowerCase())">
+                        {{ __('app.security_reports') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+            </flux:sidebar.nav>
+        </div>
 
         <flux:sidebar.spacer />
 
@@ -248,12 +301,12 @@
         <flux:sidebar.nav>
             <flux:sidebar.item icon="cog-6-tooth" href="{{ route('superadmin.settings') }}"
                 :current="request()->routeIs('superadmin.settings')">
-                Settings
+                {{ __('app.settings') }}
             </flux:sidebar.item>
 
             <flux:sidebar.item icon="information-circle" href="{{ route('superadmin.help') }}"
                 :current="request()->routeIs('superadmin.help')">
-                Help
+                {{ __('app.help') }}
             </flux:sidebar.item>
 
             {{-- Logout for MOBILE --}}
@@ -263,26 +316,60 @@
                 as="button"
                 type="submit"
                 form="logout-form">
-                Logout
+                {{ __('app.logout') }}
             </flux:sidebar.item>
         </flux:sidebar.nav>
 
-        {{-- PROFILE --}}
-        <flux:dropdown position="top" align="start" class="max-lg:hidden">
-            <flux:sidebar.profile avatar="" name="{{ $fullName }}" />
-            <flux:menu>
-                <flux:menu.radio.group>
-                    <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
-                </flux:menu.radio.group>
-                <flux:menu.separator />
-                <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit" form="logout-form">
+        {{-- PROFILE (expanded, desktop) --}}
+        <div x-data="{ open: false }" class="relative max-lg:hidden px-2 pb-2">
+            <button
+                @click.stop="open = !open"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/8 transition-colors group focus:outline-none"
+            >
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {{ strtoupper(substr($fullName, 0, 1)) }}
+                </div>
+                <div class="flex-1 text-left min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">{{ $fullName }}</p>
+                    <p class="text-xs text-white/40">Superadmin</p>
+                </div>
+                <svg class="w-4 h-4 text-white/40 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                </svg>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-1"
+                @click.outside="open = false"
+                class="absolute bottom-full left-2 right-2 mb-1 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                style="display: none;"
+            >
+                <div class="px-3 py-2.5 border-b border-white/10">
+                    <p class="text-xs font-semibold text-white truncate">{{ $fullName }}</p>
+                    <p class="text-[10px] text-white/40 mt-0.5">Superadmin</p>
+                </div>
+                <button
+                    type="submit"
+                    form="logout-form"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
                     Logout
-                </flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
+                </button>
+            </div>
+        </div>
     </div>
 </flux:sidebar>
 
-<form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
-    @csrf
-</form>
+{{-- logout-form is defined in the parent layout --}}

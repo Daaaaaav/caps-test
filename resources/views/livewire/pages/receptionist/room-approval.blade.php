@@ -19,7 +19,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg sm:text-xl font-semibold">Room Approval</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.room_approval_title') }}</h2>
                     <p class="text-sm text-[#CDDEA7]/80">Setujui permintaan booking & pantau rapat berjalan.</p>
                 </div>
             </div>
@@ -51,8 +51,8 @@
                 <div class="flex items-center gap-3">
                     <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900">Pending Approval</h3>
-                        <p class="text-xs text-gray-500">Permintaan menunggu persetujuan receptionist.</p>
+                        <h3 class="text-base font-semibold text-gray-900">{{ __('app.pending_approval') }}</h3>
+                        <p class="text-xs text-gray-500">{{ __('app.pending_approval_sub') }}</p>
                     </div>
                 </div>
             </div>
@@ -116,7 +116,7 @@
                                         
                                         {{-- 4. BOTTOM LEFT --}}
                                         <div class="text-[12px] text-gray-600 space-y-1">
-                                            <p>Participants: <span class="font-medium text-gray-800">{{ $m['participants'] }}</span></p>
+                                            <p>{{ __('app.participants') }}: <span class="font-medium text-gray-800">{{ $m['participants'] }}</span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -126,11 +126,11 @@
                                     <div class="flex justify-end gap-3 items-center">
                                         <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition"
                                                  wire:click="askReject({{ $id }})" wire:loading.attr="disabled">
-                                            Reject
+                                            {{ __('app.reject') }}
                                         </button>
                                         <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm"
                                                  wire:click="approve({{ $id }})" wire:loading.attr="disabled">
-                                            Approve
+                                            {{ __('app.approve') }}
                                         </button>
                                     </div>
                                     
@@ -142,7 +142,7 @@
                                             <div class="flex justify-end gap-2">
                                                 <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
                                                         wire:click="$set('rejectId', null)">
-                                                    Batal
+                                                    cancel
                                                 </button>
                                                 <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:ring-2 focus:ring-rose-500/20 transition shadow-sm"
                                                         wire:click="reject">
@@ -164,12 +164,12 @@
                             <thead>
                                 <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                     <th class="px-6 py-3.5">#</th>
-                                    <th class="px-6 py-3.5">Meeting Title</th>
-                                    <th class="px-6 py-3.5">Room</th>
-                                    <th class="px-6 py-3.5">Date</th>
-                                    <th class="px-6 py-3.5">Time</th>
-                                    <th class="px-6 py-3.5">Participants</th>
-                                    <th class="px-6 py-3.5 text-right">Actions</th>
+                                    <th class="px-6 py-3.5">{{ __('app.meeting_title_col') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.room') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.participants') }}</th>
+                                    <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -206,7 +206,7 @@
                                                     <div class="flex justify-end gap-2">
                                                         <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
                                                                 wire:click="$set('rejectId', null)">
-                                                            Batal
+                                                            cancel
                                                         </button>
                                                         <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition shadow-sm"
                                                                 wire:click="reject">
@@ -241,8 +241,8 @@
                 <div class="flex items-center gap-3">
                     <div class="w-2 h-2 bg-amber-600 rounded-full"></div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900">Ongoing</h3>
-                        <p class="text-xs text-gray-500">Rapat sedang berlangsung (sudah disetujui).</p>
+                        <h3 class="text-base font-semibold text-gray-900">{{ __('app.ongoing_meetings') }}</h3>
+                        <p class="text-xs text-gray-500">{{ __('app.ongoing_meetings_sub') }}</p>
                     </div>
                 </div>
             </div>
@@ -306,7 +306,7 @@
                                         
                                         {{-- 4. BOTTOM LEFT --}}
                                         <div class="text-[12px] text-gray-600 space-y-1">
-                                            <p>Participants: <span class="font-medium text-gray-800">{{ $m['participants'] }}</span></p>
+                                            <p>{{ __('app.participants') }}: <span class="font-medium text-gray-800">{{ $m['participants'] }}</span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -322,11 +322,11 @@
                             <thead>
                                 <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                     <th class="px-6 py-3.5">#</th>
-                                    <th class="px-6 py-3.5">Meeting Title</th>
-                                    <th class="px-6 py-3.5">Room</th>
-                                    <th class="px-6 py-3.5">Date</th>
-                                    <th class="px-6 py-3.5">Time</th>
-                                    <th class="px-6 py-3.5">Participants</th>
+                                    <th class="px-6 py-3.5">{{ __('app.meeting_title_col') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.room') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                    <th class="px-6 py-3.5">{{ __('app.participants') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">

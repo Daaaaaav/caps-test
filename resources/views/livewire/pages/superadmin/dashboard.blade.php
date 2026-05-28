@@ -2,11 +2,11 @@
     <main class="px-4 sm:px-6 py-6 space-y-6">
 
         {{-- Page header --}}
-        <x-page-header title="Superadmin Analytics" subtitle="Interactive system insights for {{ $selectedYear }}">
+        <x-page-header title="{{ __('app.superadmin_analytics') }}" subtitle="{{ __('app.interactive_insights') }} {{ $selectedYear }}">
             <x-slot:actions>
                 <button wire:click="setFilter('all')"
                     class="px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground rounded-md border border-border hover:bg-accent transition-colors">
-                    Reset View
+                    {{ __('app.reset_view') }}
                 </button>
             </x-slot:actions>
         </x-page-header>
@@ -15,12 +15,12 @@
         <div class="bg-card border border-border rounded-lg p-4">
             <div class="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                    <p class="text-sm font-medium text-muted-foreground">Select Year</p>
-                    <p class="text-xs text-muted-foreground/70">Viewing data for {{ $selectedYear }}</p>
+                    <p class="text-sm font-medium text-muted-foreground">{{ __('app.select_year') }}</p>
+                    <p class="text-xs text-muted-foreground/70">{{ __('app.viewing_data_for') }} {{ $selectedYear }}</p>
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     @if(empty($availableYears))
-                        <span class="text-sm text-muted-foreground">No data available</span>
+                        <span class="text-sm text-muted-foreground">{{ __('app.no_data_available') }}</span>
                     @else
                         @foreach($availableYears as $year)
                             <button wire:click="setYear({{ $year }})"
@@ -55,7 +55,7 @@
                         </span>
                     </div>
                     <h2 class="text-2xl font-semibold mt-3 text-card-foreground tracking-tight">{{ number_format($s['value']) }}</h2>
-                    <p class="mt-2 text-xs text-muted-foreground/60">Click to filter chart</p>
+                    <p class="mt-2 text-xs text-muted-foreground/60">{{ __('app.click_filter_chart') }}</p>
                 </div>
             @endforeach
         </section>
@@ -63,7 +63,7 @@
         {{-- Chart --}}
         <div class="bg-card border border-border p-6 rounded-lg">
             <h3 class="text-sm font-semibold text-card-foreground mb-4">
-                Booking Trends — {{ $selectedYear }}
+                {{ __('app.booking_trends') }} — {{ $selectedYear }}
             </h3>
             <div wire:ignore style="position: relative; height: 400px;">
                 <canvas id="chart"></canvas>
@@ -76,10 +76,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     const CHART_COLORS = {
-        'Room Bookings':    { border: '#2563eb', bg: 'rgba(37, 99, 235, 0.08)' },
-        'Vehicle Bookings': { border: '#059669', bg: 'rgba(5, 150, 105, 0.08)' },
+        'Room Bookings':    { border: '#4E653D', bg: 'rgba(78, 101, 61, 0.1)' },
+        'Vehicle Bookings': { border: '#4A2F24', bg: 'rgba(74, 47, 36, 0.1)' },
     };
-    const FALLBACK_COLORS = ['#7c3aed', '#db2777'];
+    const FALLBACK_COLORS = ['#354C2B', '#CDDEA7'];
 
     function applyDatasetStyles(datasets) {
         return datasets.map((ds, i) => {

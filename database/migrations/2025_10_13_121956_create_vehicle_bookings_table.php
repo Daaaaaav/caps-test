@@ -57,7 +57,7 @@ return new class extends Migration
             // 'returned' -> (User kembalikan mobil, harus upload foto 'after')
             // 'completed' -> (User sudah upload foto 'after', selesai)
             // 'rejected' -> (Admin tolak)
-            // 'cancelled' -> (User batalkan)
+            // 'cancelled' -> (User cancelkan)
             // SQL lama kamu: enum('pending','approved','in_use','returned','rejected','cancelled')
             $table->enum('status', [
                 'pending', 

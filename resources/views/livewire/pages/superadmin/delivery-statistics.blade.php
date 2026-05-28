@@ -1,24 +1,24 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-[#f5f7f2]">
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {{-- HEADER --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Delivery Statistics</h1>
-                <p class="text-sm text-gray-500">Track package and document delivery trends</p>
+                <h1 class="text-2xl font-semibold text-[#2d3a24]">{{ __('app.delivery_stats_title') }}</h1>
+                <p class="text-sm text-[#7a8f6a]">{{ __('app.delivery_stats_sub') }}</p>
             </div>
             <div class="flex gap-2">
                 <button wire:click="setTimeRange('7days')"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '7days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                    7 Days
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '7days' ? 'bg-[#4A2F24] text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
+                    {{ __('app.7_days') }}
                 </button>
                 <button wire:click="setTimeRange('30days')"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '30days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                    30 Days
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '30days' ? 'bg-[#4A2F24] text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
+                    {{ __('app.30_days') }}
                 </button>
                 <button wire:click="setTimeRange('90days')"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '90days' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
-                    90 Days
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $timeRange === '90days' ? 'bg-[#4A2F24] text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
+                    {{ __('app.90_days') }}
                 </button>
             </div>
         </div>
@@ -28,26 +28,26 @@
             @foreach($stats as $stat)
                 @php
                     $colors = [
-                        'blue'   => 'text-gray-900',
+                        'blue'   => 'text-[#2d3a24]',
                         'yellow' => 'text-yellow-600',
-                        'purple' => 'text-gray-600',
+                        'purple' => 'text-[#5a6e4a]',
                         'green'  => 'text-green-600',
                     ];
                 @endphp
-                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
-                    <p class="text-sm font-medium text-gray-500">{{ $stat['label'] }}</p>
-                    <h2 class="text-3xl font-bold mt-2 {{ $colors[$stat['color']] ?? 'text-gray-900' }}">{{ $stat['value'] }}</h2>
+                <div class="bg-white border border-[#d4dfc8] rounded-2xl p-5 shadow-sm hover:shadow-lg transition">
+                    <p class="text-sm font-medium text-[#7a8f6a]">{{ $stat['label'] }}</p>
+                    <h2 class="text-3xl font-bold mt-2 {{ $colors[$stat['color']] ?? 'text-[#2d3a24]' }}">{{ $stat['value'] }}</h2>
                 </div>
             @endforeach
         </section>
 
         {{-- CHART --}}
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+        <div class="bg-white border border-[#d4dfc8] p-6 rounded-2xl shadow-sm">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Daily Delivery Trend</h3>
+                <h3 class="text-lg font-semibold text-[#2d3a24]">{{ __('app.daily_delivery_trend') }}</h3>
                 <button wire:click="toggleList"
-                    class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium transition">
-                    {{ $showList ? 'Hide List' : 'Show List' }}
+                    class="px-4 py-2 bg-[#4A2F24] text-white rounded-lg hover:bg-[#3d2720] text-sm font-medium transition">
+                    {{ $showList ? __('app.hide_list') : __('app.show_list') }}
                 </button>
             </div>
             <div wire:ignore style="position: relative; height: 400px;">
@@ -57,42 +57,42 @@
 
         {{-- DELIVERY LIST --}}
         @if($showList)
-            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b bg-gray-50">
-                    <h3 class="font-semibold text-gray-900">Recent Deliveries</h3>
+            <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b bg-[#f0f4eb]">
+                    <h3 class="font-semibold text-[#2d3a24]">{{ __('app.recent_deliveries') }}</h3>
                 </div>
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs border-b">
+                    <thead class="bg-[#f0f4eb] text-[#7a8f6a] uppercase text-xs border-b">
                         <tr>
                             <th class="px-6 py-3 text-left font-medium">ID</th>
-                            <th class="px-6 py-3 text-left font-medium">Recipient</th>
-                            <th class="px-6 py-3 text-left font-medium">Status</th>
-                            <th class="px-6 py-3 text-left font-medium">Date</th>
+                            <th class="px-6 py-3 text-left font-medium">{{ __('app.recipient') }}</th>
+                            <th class="px-6 py-3 text-left font-medium">{{ __('app.status') }}</th>
+                            <th class="px-6 py-3 text-left font-medium">{{ __('app.date') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-[#d4dfc8]">
                         @forelse($deliveries as $delivery)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-gray-900">#{{ $delivery->delivery_id }}</td>
-                                <td class="px-6 py-4 text-gray-900 font-medium">{{ $delivery->nama_penerima ?? 'N/A' }}</td>
+                            <tr class="hover:bg-[#f0f4eb]">
+                                <td class="px-6 py-4 text-[#2d3a24]">#{{ $delivery->delivery_id }}</td>
+                                <td class="px-6 py-4 text-[#2d3a24] font-medium">{{ $delivery->nama_penerima ?? 'N/A' }}</td>
                                 <td class="px-6 py-4">
                                     @php
                                         $s = $delivery->status ?? 'pending';
                                         $statusColors = [
                                             'pending' => 'bg-yellow-100 text-yellow-700',
-                                            'stored'  => 'bg-gray-100 text-gray-700',
+                                            'stored'  => 'bg-[#eef1e8] text-[#4E653D]',
                                             'done'    => 'bg-green-100 text-green-700',
                                         ];
                                     @endphp
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusColors[$s] ?? 'bg-gray-100 text-gray-700' }}">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusColors[$s] ?? 'bg-[#eef1e8] text-[#4E653D]' }}">
                                         {{ ucfirst($s) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>
+                                <td class="px-6 py-4 text-[#5a6e4a]">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">No deliveries found</td>
+                                <td colspan="4" class="px-6 py-8 text-center text-[#7a8f6a]">{{ __('app.no_deliveries_found') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -120,7 +120,7 @@
                 datasets: [{
                     label: 'Deliveries',
                     data: data,
-                    backgroundColor: '#4b5563',
+                    backgroundColor: '#4E653D',
                     borderRadius: 6,
                 }]
             },

@@ -51,7 +51,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Vehicle Status</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.vehicle_status_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">Kelola peminjaman: Pending / Approved / On Progress / Returned.</p>
                         </div>
                     </div>
@@ -60,7 +60,7 @@
                         <label class="inline-flex items-center gap-2 text-sm text-[#CDDEA7]/90 cursor-pointer">
                             <input type="checkbox" wire:model.live="includeDeleted"
                                    class="rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 focus:ring-[#CDDEA7]/40 text-[#CDDEA7] cursor-pointer">
-                            <span>Include Deleted</span>
+                            <span>{{ __('app.include_deleted') }}</span>
                         </label>
 
                         {{-- MOBILE FILTER BUTTON --}}
@@ -68,7 +68,7 @@
                                 class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
                                 wire:click="openFilterModal">
                             <x-heroicon-o-funnel class="w-4 h-4"/>
-                            <span>Filter</span>
+                            <span>{{ __('app.filter') }}</span>
                         </button>
                     </div>
                 </div>
@@ -81,8 +81,8 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Vehicle Bookings</h3>
-                            <p class="text-xs text-gray-500">Daftar peminjaman kendaraan.</p>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('app.vehicle_bookings_list') }}</h3>
+                            <p class="text-xs text-gray-500">{{ __('app.vehicle_bookings_sub') }}</p>
                         </div>
 
                         {{-- Tabs + View Mode Toggle --}}
@@ -136,7 +136,7 @@
                             @else
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
                                     <x-heroicon-o-funnel class="w-3.5 h-3.5"/>
-                                    <span>No vehicle filter</span>
+                                    <span>{{ __('app.no_vehicle_filter') }}</span>
                                 </span>
                             @endif
                         </div>
@@ -147,9 +147,9 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 bg-gray-50/30">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
-                                <input type="text" class="{{ $input }} pl-9" placeholder="Search purpose, destination, borrower…"
+                                <input type="text" class="{{ $input }} pl-9" placeholder="{{ __('app.search') }}..."
                                        wire:model.live.debounce.400ms="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
@@ -275,14 +275,14 @@
                                                     </div>
                                                     <div class="flex items-center gap-1 text-[10px] text-gray-500">
                                                         <x-heroicon-o-document-plus class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span>Created: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</span>
+                                                        <span>{{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</span>
                                                     </div>
                                                 </div>
 
                                                 {{-- Rejected Note --}}
                                                 @if($b->reject_note && $b->status === 'rejected')
                                                     <div class="mt-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-lg p-2">
-                                                        <span class="font-medium">Rejected Reason:</span> {{ $b->reject_note }}
+                                                        <span class="font-medium">{{ __('app.reject_reason') }}:</span> {{ $b->reject_note }}
                                                     </div>
                                                 @endif
                                             </div>
@@ -326,7 +326,7 @@
                                             <div class="flex items-center gap-2">
                                                 @if($afterC === 0)
                                                     <span class="text-[11px] text-gray-500">
-                                                        Wait for after photos
+                                                        {{ __('app.wait_after_photos') }}
                                                     </span>
                                                 @endif
                                                 <button type="button"
@@ -355,13 +355,13 @@
                                     <thead>
                                         <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
                                             <th class="px-6 py-3.5">#</th>
-                                            <th class="px-6 py-3.5">Vehicle</th>
-                                            <th class="px-6 py-3.5">Borrower</th>
-                                            <th class="px-6 py-3.5">Purpose</th>
-                                            <th class="px-6 py-3.5">Date</th>
-                                            <th class="px-6 py-3.5">Time</th>
+                                            <th class="px-6 py-3.5">{{ __('app.vehicle') }}</th>
+                                            <th class="px-6 py-3.5">{{ __('app.borrower') }}</th>
+                                            <th class="px-6 py-3.5">{{ __('app.purpose') }}</th>
+                                            <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                            <th class="px-6 py-3.5">{{ __('app.time') }}</th>
                                             <th class="px-6 py-3.5">Photos</th>
-                                            <th class="px-6 py-3.5 text-right">Actions</th>
+                                            <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -388,8 +388,8 @@
                                                 <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_at) }}–{{ fmtTime($b->end_at) }}</td>
                                                 <td class="px-6 py-4 text-xs text-gray-500">
                                                     <span class="inline-flex gap-1.5">
-                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">Before: {{ $beforeC }}</span>
-                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">After: {{ $afterC }}</span>
+                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">{{ __('app.borrow_date') }}: {{ $beforeC }}</span>
+                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">{{ __('app.return_date') }}: {{ $afterC }}</span>
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
@@ -446,7 +446,7 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">Filter by Vehicle</h3>
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Klik kendaraan untuk mem-filter.</p>
                     </div>
 
@@ -456,10 +456,10 @@
                                 class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                             <span class="flex items-center gap-2">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">All</span>
-                                <span>All Vehicles</span>
+                                <span>{{ __('app.all_vehicles') }}</span>
                             </span>
                             @if(is_null($vehicleFilter))
-                                <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -479,7 +479,7 @@
                                         <span class="truncate">{{ $vLabel }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @empty
@@ -498,7 +498,7 @@
                 <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                     <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                         <div>
-                            <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter by Vehicle</h3>
+                            <h3 class="text-sm font-semibold tracking-tight text-foreground">{{ __('app.filter_by_vehicle') }}</h3>
                             <p class="text-[11px] text-muted-foreground mt-0.5">Filter riwayat peminjaman berdasarkan kendaraan.</p>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
@@ -512,10 +512,10 @@
                                     {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                             <span class="flex items-center gap-2">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">All</span>
-                                <span>All Vehicles</span>
+                                <span>{{ __('app.all_vehicles') }}</span>
                             </span>
                             @if(is_null($vehicleFilter))
-                                <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -535,7 +535,7 @@
                                         <span class="truncate">{{ $vLabel }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @endforeach
@@ -684,7 +684,7 @@
                             wire:click="closeDetailModal"
                             class="h-9 px-4 rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 transition inline-flex items-center gap-1.5">
                         <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
-                        <span>Tutup</span>
+                        <span>{{ __('app.close') }}</span>
                     </button>
                 </div>
             </div>
@@ -738,7 +738,7 @@
                         </p>
                         
                         <div>
-                            <label for="reject-note" class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Alasan Penolakan <span class="text-destructive">*</span></label>
+                            <label for="reject-note" class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
                             <textarea id="reject-note"
                                       wire:model.defer="rejectNote"
                                       rows="4"
@@ -757,7 +757,7 @@
                                 wire:click="cancelReject"
                                 class="h-9 px-4 rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 transition inline-flex items-center gap-1.5">
                             <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                            <span>Batal</span>
+                            <span>cancel</span>
                         </button>
                         <button type="submit"
                                 wire:loading.attr="disabled"

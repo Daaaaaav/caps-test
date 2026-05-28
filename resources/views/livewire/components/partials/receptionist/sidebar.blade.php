@@ -3,16 +3,10 @@
     collapsible="mobile"
     @mouseenter="sidebarCollapsed = false"
     @mouseleave="sidebarCollapsed = true"
-    class="
-        fixed inset-y-0 left-0 z-40
-        bg-sidebar border-r border-sidebar-border
-        lg:w-[var(--sbw)] w-full max-w-[19rem]
-        overflow-y-auto overflow-x-hidden
-        box-border shadow-2xl shadow-black/30
-    "
+    class="bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30"
 >
-    <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true) -->
-    <div x-show="sidebarCollapsed" class="sidebar-collapsed-container flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">
+    <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true, desktop only) -->
+    <div x-show="sidebarCollapsed" class="sidebar-collapsed-container max-lg:hidden flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">
         <!-- Logo Area -->
         <div class="h-10 flex items-center justify-center mb-3 relative group">
             <img src="{{ $brandLogo }}" alt="Brand Logo" class="h-7 w-7 object-contain rounded-lg img-white drop-shadow-[0_0_8px_rgba(205,222,167,0.4)] transition-transform duration-300 hover:rotate-12" style="{{ $invertStyle }}" />
@@ -55,7 +49,7 @@
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
-                <div class="sidebar-tooltip">Booking Approval</div>
+                <div class="sidebar-tooltip">Room Book Approval</div>
             </a>
 
             @php $histActive = request()->routeIs('receptionist.bookinghistory'); @endphp
@@ -67,7 +61,7 @@
                     <line x1="12" y1="7" x2="12" y2="12"/>
                     <line x1="12" y1="12" x2="16" y2="14"/>
                 </svg>
-                <div class="sidebar-tooltip">Booking History</div>
+                <div class="sidebar-tooltip"> Room Book History</div>
             </a>
 
             <div class="sidebar-collapsed-divider"></div>
@@ -198,22 +192,48 @@
 
             <div class="sidebar-collapsed-divider"></div>
 
-            <!-- Profile / Logout Dropdown -->
-            <flux:dropdown position="top" align="start" class="w-full flex justify-center">
-                <button class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none">
-                    <flux:sidebar.profile avatar="" name="" class="p-0 pointer-events-none" />
+            <!-- Profile / Logout Dropdown (collapsed) -->
+            <div x-data="{ open: false }" class="relative w-full flex justify-center">
+                <button
+                    @click.stop="open = !open"
+                    class="sidebar-collapsed-item group hover:bg-white/10 transition-colors focus:outline-none"
+                >
+                    <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white">
+                        {{ strtoupper(substr($fullName ?? 'U', 0, 1)) }}
+                    </div>
                     <div class="sidebar-tooltip">{{ $fullName ?? 'User' }}</div>
                 </button>
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <flux:menu.radio checked>{{ $fullName ?? 'User' }}</flux:menu.radio>
-                    </flux:menu.radio.group>
-                    <flux:menu.separator />
-                    <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit" form="logout-form">
+
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 translate-y-1"
+                    @click.outside="open = false"
+                    class="absolute bottom-full left-0 mb-2 w-48 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                    style="display: none;"
+                >
+                    <div class="px-3 py-2.5 border-b border-white/10">
+                        <p class="text-xs font-semibold text-white truncate">{{ $fullName ?? 'User' }}</p>
+                        <p class="text-[10px] text-white/40 mt-0.5">Receptionist</p>
+                    </div>
+                    <button
+                        type="submit"
+                        form="logout-form"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
                         Logout
-                    </flux:menu.item>
-                </flux:menu>
-            </flux:dropdown>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -229,118 +249,147 @@
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
 
-        <flux:sidebar.search placeholder="Search modules..." />
+        {{-- Search Input --}}
+        <div x-data="{ search: '' }" class="px-3 pt-2 pb-1">
+            <div class="relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    x-model="search"
+                    type="text"
+                    placeholder="{{ __('app.search_modules') }}"
+                    class="w-full h-9 pl-9 pr-3 rounded-lg bg-white/10 border border-white/10 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
+                />
+            </div>
 
-        <flux:sidebar.nav>
-            {{-- ------- Home ------- --}}
-            <flux:sidebar.item
-                icon="home"
-                href="{{ route('receptionist.dashboard') }}"
-                :current="request()->routeIs('receptionist.dashboard')"
-            >
-                Home
-            </flux:sidebar.item>
-
-            {{-- ------- Room Management ------- --}}
-            <flux:sidebar.group expandable heading="Room Management" class="grid">
+            <flux:sidebar.nav>
+                {{-- ------- Home ------- --}}
                 <flux:sidebar.item
-                    icon="calendar-days"
-                    href="{{ route('receptionist.schedule') }}"
-                    :current="request()->routeIs('receptionist.schedule')"
+                    icon="home"
+                    href="{{ route('receptionist.dashboard') }}"
+                    :current="request()->routeIs('receptionist.dashboard')"
+                    x-show="!search || 'home'.includes(search.toLowerCase())"
                 >
-                    Booking Room
+                    {{ __('app.home') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item
-                    icon="check-circle"
-                    href="{{ route('receptionist.bookings') }}"
-                    :current="request()->routeIs('receptionist.bookings')"
-                >
-                    Booking Approval
-                </flux:sidebar.item>
+                {{-- ------- Room Management ------- --}}
+                <flux:sidebar.group expandable heading="{{ __('app.room_management') }}" class="grid"
+                    x-show="!search || ['room management','booking room','room book approval','booking history'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item
+                        icon="calendar-days"
+                        href="{{ route('receptionist.schedule') }}"
+                        :current="request()->routeIs('receptionist.schedule')"
+                        x-show="!search || 'booking room'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.booking_room') }}
+                    </flux:sidebar.item>
 
-                <flux:sidebar.item
-                    icon="clock"
-                    href="{{ route('receptionist.bookinghistory') }}"
-                    :current="request()->routeIs('receptionist.bookinghistory')"
-                >
-                    Booking History
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+                    <flux:sidebar.item
+                        icon="check-circle"
+                        href="{{ route('receptionist.bookings') }}"
+                        :current="request()->routeIs('receptionist.bookings')"
+                        x-show="!search || 'room book approval'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.room_book_approval') }}
+                    </flux:sidebar.item>
 
-            {{-- ------- Vehicle Management ------- --}}
-            <flux:sidebar.group expandable heading="Vehicle Management" class="grid">
-                <flux:sidebar.item
-                    icon="truck"
-                    href="{{ route('receptionist.bookingvehicle') }}"
-                    :current="request()->routeIs('receptionist.bookingvehicle')"
-                >
-                    Book Vehicle
-                </flux:sidebar.item>
+                    <flux:sidebar.item
+                        icon="clock"
+                        href="{{ route('receptionist.bookinghistory') }}"
+                        :current="request()->routeIs('receptionist.bookinghistory')"
+                        x-show="!search || 'booking history'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.booking_history') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-                <flux:sidebar.item
-                    icon="truck"
-                    href="{{ route('receptionist.vehiclestatus') }}"
-                    :current="request()->routeIs('receptionist.vehiclestatus')"
-                >
-                    Vehicle Status
-                </flux:sidebar.item>
+                {{-- ------- Vehicle Management ------- --}}
+                <flux:sidebar.group expandable heading="{{ __('app.vehicle_management') }}" class="grid"
+                    x-show="!search || ['vehicle management','book vehicle','vehicle status','vehicle history'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item
+                        icon="truck"
+                        href="{{ route('receptionist.bookingvehicle') }}"
+                        :current="request()->routeIs('receptionist.bookingvehicle')"
+                        x-show="!search || 'book vehicle'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.vehicle_book') }}
+                    </flux:sidebar.item>
 
-                <flux:sidebar.item
-                    icon="clock"
-                    href="{{ route('receptionist.vehicleshistory') }}"
-                    :current="request()->routeIs('receptionist.vehicleshistory')"
-                >
-                    Vehicle History
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+                    <flux:sidebar.item
+                        icon="truck"
+                        href="{{ route('receptionist.vehiclestatus') }}"
+                        :current="request()->routeIs('receptionist.vehiclestatus')"
+                        x-show="!search || 'vehicle status'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.vehicle_status_menu') }}
+                    </flux:sidebar.item>
 
-            {{-- ------- Guest Management ------- --}}
-            <flux:sidebar.group expandable heading="Guest Management" class="grid">
-                <flux:sidebar.item
-                    icon="inbox"
-                    href="{{ route('receptionist.guestbook') }}"
-                    :current="request()->routeIs('receptionist.guestbook*')"
-                >
-                    GuestBook
-                </flux:sidebar.item>
+                    <flux:sidebar.item
+                        icon="clock"
+                        href="{{ route('receptionist.vehicleshistory') }}"
+                        :current="request()->routeIs('receptionist.vehicleshistory')"
+                        x-show="!search || 'vehicle history'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.vehicle_history') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-                <flux:sidebar.item
-                    icon="clock"
-                    href="{{ route('receptionist.guestbookhistory') }}"
-                    :current="request()->routeIs('receptionist.guestbookhistory*')"
-                >
-                    GuestBook History
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+                {{-- ------- Guest Management ------- --}}
+                <flux:sidebar.group expandable heading="{{ __('app.guest_management') }}" class="grid"
+                    x-show="!search || ['guest management','guestbook','guestbook history'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item
+                        icon="inbox"
+                        href="{{ route('receptionist.guestbook') }}"
+                        :current="request()->routeIs('receptionist.guestbook*')"
+                        x-show="!search || 'guestbook'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.guestbook') }}
+                    </flux:sidebar.item>
 
-            {{-- ------- DocPac Management ------- --}}
-            <flux:sidebar.group expandable heading="DocPac Management" class="grid">
-                <flux:sidebar.item
-                    icon="gift"
-                    href="{{ route('receptionist.docpackform') }}"
-                    :current="request()->routeIs('receptionist.docpackform')"
-                >
-                    DocPac Form
-                </flux:sidebar.item>
+                    <flux:sidebar.item
+                        icon="clock"
+                        href="{{ route('receptionist.guestbookhistory') }}"
+                        :current="request()->routeIs('receptionist.guestbookhistory*')"
+                        x-show="!search || 'guestbook history'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.guestbook_history') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-                <flux:sidebar.item
-                    icon="clock"
-                    href="{{ route('receptionist.docpackstatus') }}"
-                    :current="request()->routeIs('receptionist.docpackstatus')"
-                >
-                    DocPac Status
-                </flux:sidebar.item>
+                {{-- ------- DocPac Management ------- --}}
+                <flux:sidebar.group expandable heading="{{ __('app.docpac_management') }}" class="grid"
+                    x-show="!search || ['docpac management','docpac form','docpac status','docpac history'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item
+                        icon="gift"
+                        href="{{ route('receptionist.docpackform') }}"
+                        :current="request()->routeIs('receptionist.docpackform')"
+                        x-show="!search || 'docpac form'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.docpac_form') }}
+                    </flux:sidebar.item>
 
-                <flux:sidebar.item
-                    icon="clock"
-                    href="{{ route('receptionist.docpackhistory') }}"
-                    :current="request()->routeIs('receptionist.docpackhistory')"
-                >
-                    DocPac History
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
+                    <flux:sidebar.item
+                        icon="clock"
+                        href="{{ route('receptionist.docpackstatus') }}"
+                        :current="request()->routeIs('receptionist.docpackstatus')"
+                        x-show="!search || 'docpac status'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.docpac_status') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="clock"
+                        href="{{ route('receptionist.docpackhistory') }}"
+                        :current="request()->routeIs('receptionist.docpackhistory')"
+                        x-show="!search || 'docpac history'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.docpac_history') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+            </flux:sidebar.nav>
+        </div>
 
         <flux:sidebar.spacer />
 
@@ -351,7 +400,7 @@
                 href="{{ route('receptionist.settings') }}"
                 :current="request()->routeIs('receptionist.settings')"
             >
-                Settings
+                {{ __('app.settings') }}
             </flux:sidebar.item>
 
             <flux:sidebar.item
@@ -359,7 +408,7 @@
                 href="{{ route('receptionist.help') }}"
                 :current="request()->routeIs('receptionist.help')"
             >
-                Help
+                {{ __('app.help') }}
             </flux:sidebar.item>
 
             {{-- Logout for MOBILE uses shared form="logout-form" --}}
@@ -370,39 +419,60 @@
                 type="submit"
                 form="logout-form"
             >
-                Logout
+                {{ __('app.logout') }}
             </flux:sidebar.item>
         </flux:sidebar.nav>
 
-        {{-- DESKTOP DROPDOWN --}}
-        <flux:dropdown position="top" align="start" class="max-lg:hidden">
-            <flux:sidebar.profile avatar="" name="{{ $fullName ?? 'User' }}" />
+        {{-- DESKTOP DROPDOWN (expanded) --}}
+        <div x-data="{ open: false }" class="relative max-lg:hidden px-2 pb-2">
+            <button
+                @click.stop="open = !open"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/8 transition-colors group focus:outline-none"
+            >
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {{ strtoupper(substr($fullName ?? 'U', 0, 1)) }}
+                </div>
+                <div class="flex-1 text-left min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">{{ $fullName ?? 'User' }}</p>
+                    <p class="text-xs text-white/40">Receptionist</p>
+                </div>
+                <svg class="w-4 h-4 text-white/40 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                </svg>
+            </button>
 
-            <flux:menu>
-                <flux:menu.radio.group>
-                    <flux:menu.radio checked>{{ $fullName ?? 'User' }}</flux:menu.radio>
-                </flux:menu.radio.group>
-
-                <flux:menu.separator />
-
-                {{-- Logout for DESKTOP uses same form --}}
-                <flux:menu.item
-                    icon="arrow-right-start-on-rectangle"
-                    as="button"
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-1"
+                @click.outside="open = false"
+                class="absolute bottom-full left-2 right-2 mb-1 rounded-xl bg-[#2a1f1a] border border-white/10 shadow-2xl shadow-black/40 z-[9999] overflow-hidden"
+                style="display: none;"
+            >
+                <div class="px-3 py-2.5 border-b border-white/10">
+                    <p class="text-xs font-semibold text-white truncate">{{ $fullName ?? 'User' }}</p>
+                    <p class="text-[10px] text-white/40 mt-0.5">Receptionist</p>
+                </div>
+                <button
                     type="submit"
                     form="logout-form"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                 >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
                     Logout
-                </flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
+                </button>
+            </div>
+        </div>
     </div>
 </flux:sidebar>
-
-{{-- Shared logout form --}}
-<form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
-    @csrf
-</form>
 
 <style>
     .img-white {

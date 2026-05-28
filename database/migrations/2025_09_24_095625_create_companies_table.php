@@ -25,6 +25,9 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        Schema::dropIfExists('storages'); // orphaned table that references companies
         Schema::dropIfExists('companies');
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 };

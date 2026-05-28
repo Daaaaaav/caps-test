@@ -66,10 +66,8 @@
                             <x-heroicon-o-book-open class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Guestbook History</h2>
-                            <p class="text-sm text-[#CDDEA7]/80">
-                                Lihat dan kelola riwayat kunjungan tamu yang sudah selesai atau masih aktif.
-                            </p>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.guestbook_history_title') }}</h2>
+                            <p class="text-sm text-[#CDDEA7]/80">{{ __('app.guestbook_history_subtitle') }}</p>
                         </div>
                     </div>
 
@@ -79,7 +77,7 @@
                             <input type="checkbox"
                                    wire:model.live="withTrashed"
                                    class="rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 focus:ring-[#CDDEA7]/40 text-[#CDDEA7]">
-                            <span>Show deleted records</span>
+                            <span>{{ __('app.show_deleted') }}</span>
                         </label>
                     </div>
                 </div>
@@ -94,9 +92,9 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">List Kunjungan</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ __('app.visit_list') }}</h3>
                             <p class="text-xs text-gray-500">
-                                Riwayat kunjungan tamu berdasarkan filter.
+                                {{ __('app.visit_history_subtitle') }}
                             </p>
                         </div>
 
@@ -156,7 +154,7 @@
                             @else
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
                                     <x-heroicon-o-funnel class="w-3.5 h-3.5 text-gray-400"/>
-                                    <span>Semua Petugas</span>
+                                    <span>{{ __('app.all_officers') }}</span>
                                 </span>
                             @endif
                         </div>
@@ -167,7 +165,7 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="{{ $label }}">Search</label>
+                            <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text"
                                        class="{{ $input }} pl-9"
@@ -304,7 +302,7 @@
                                                             Restore
                                                         </button>
                                                         <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dibatalkan!')"
+                                                                onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dicancelkan!')"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 focus:outline-none transition">
                                                             Permanen
@@ -329,7 +327,7 @@
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Masuk / Keluar</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Petugas</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200">
@@ -397,7 +395,7 @@
                                                                     <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                                                                 </button>
                                                                 <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                        onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dibatalkan!')"
+                                                                        onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dicancelkan!')"
                                                                         wire:loading.attr="disabled"
                                                                         wire:target="destroyForever({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-100 transition-colors"
@@ -516,7 +514,7 @@
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jam Masuk</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Petugas</th>
-                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200">
@@ -597,7 +595,7 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200 bg-gray-50/50">
-                        <h3 class="text-sm font-semibold text-gray-900">Filter by Officer</h3>
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.all_officers') }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Klik salah satu petugas untuk mem-filter daftar history.</p>
                     </div>
 
@@ -611,10 +609,10 @@
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200 text-[10px] bg-white font-mono text-gray-500">
                                     ALL
                                 </span>
-                                <span>Semua Petugas</span>
+                                <span>{{ __('app.all_officers') }}</span>
                             </span>
                             @if(is_null($petugasFilter))
-                                <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">Active</span>
+                                <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -632,7 +630,7 @@
                                     <span class="truncate pr-1">{{ $p }}</span>
                                 </span>
                                 @if($active)
-                                    <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">Active</span>
+                                    <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">{{ __('app.active') }}</span>
                                 @endif
                             </button>
                         @empty
@@ -725,7 +723,7 @@
                                 <button type="button"
                                         class="h-9 px-4 rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition text-xs font-semibold"
                                         wire:click="closeEdit">
-                                    Batal
+                                    cancel
                                 </button>
                                 <button type="submit"
                                         class="h-9 px-4 rounded-lg bg-[#4E653D] text-white text-xs font-semibold hover:bg-[#354C2B] transition shadow-sm flex items-center gap-1.5"

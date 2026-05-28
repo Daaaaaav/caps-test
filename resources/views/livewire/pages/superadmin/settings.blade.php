@@ -1,10 +1,10 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-[#f5f7f2]">
     <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {{-- ===== HEADER ===== --}}
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Settings</h1>
-            <p class="text-sm text-gray-500 mt-1">Manage your account profile and security preferences.</p>
+            <h1 class="text-2xl font-semibold text-[#2d3a24]">{{ __('app.settings_title') }}</h1>
+            <p class="text-sm text-[#7a8f6a] mt-1">{{ __('app.settings_manage_sub') }}</p>
         </div>
 
         {{-- ===== ALERTS ===== --}}
@@ -28,21 +28,21 @@
         @endif
 
         {{-- ===== PROFILE CARD ===== --}}
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                <h2 class="text-base font-semibold text-gray-800">Profile Information</h2>
-                <p class="text-xs text-gray-500 mt-0.5">Update your display name, email, and phone number.</p>
+        <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-[#e4edd8] bg-[#f0f4eb]">
+                <h2 class="text-base font-semibold text-[#2d3a24]">{{ __('app.profile_information') }}</h2>
+                <p class="text-xs text-[#7a8f6a] mt-0.5">{{ __('app.profile_info_sub') }}</p>
             </div>
 
             <form wire:submit.prevent="updateProfile" class="px-6 py-6 space-y-5">
 
                 {{-- Name --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <label class="block text-sm font-medium text-[#4E653D] mb-1">{{ __('app.full_name_label') }}</label>
                     <input type="text" wire:model="name"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                               focus:ring-2 focus:ring-gray-500 focus:outline-none transition"
-                        placeholder="Your full name">
+                        class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                               focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition"
+                        placeholder="{{ __('app.full_name_ph') }}">
                     @error('name')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -50,10 +50,10 @@
 
                 {{-- Email --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label class="block text-sm font-medium text-[#4E653D] mb-1">{{ __('app.email_address') }}</label>
                     <input type="email" wire:model="email"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                               focus:ring-2 focus:ring-gray-500 focus:outline-none transition"
+                        class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                               focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition"
                         placeholder="you@example.com">
                     @error('email')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -62,13 +62,12 @@
 
                 {{-- Phone --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
-                        <span class="text-gray-400 font-normal">(optional)</span>
+                    <label class="block text-sm font-medium text-[#4E653D] mb-1">
+                        {{ __('app.phone_optional_label') }}
                     </label>
                     <input type="text" wire:model="phone"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                               focus:ring-2 focus:ring-gray-500 focus:outline-none transition"
+                        class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                               focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition"
                         placeholder="e.g. 08123456789">
                     @error('phone')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -77,24 +76,24 @@
 
                 <div class="pt-2">
                     <button type="submit"
-                        class="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl
-                               hover:bg-gray-800 transition shadow-sm">
-                        Save Profile
+                        class="px-6 py-2.5 bg-[#4A2F24] text-white text-sm font-medium rounded-xl
+                               hover:bg-[#3d2720] transition shadow-sm">
+                        {{ __('app.save_profile') }}
                     </button>
                 </div>
             </form>
         </div>
 
         {{-- ===== PASSWORD CARD ===== --}}
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
             <button wire:click="$toggle('showPasswordSection')"
-                class="w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50
-                       hover:bg-gray-100 transition text-left">
+                class="w-full flex items-center justify-between px-6 py-4 border-b border-[#e4edd8] bg-[#f0f4eb]
+                       hover:bg-[#eef1e8] transition text-left">
                 <div>
-                    <h2 class="text-base font-semibold text-gray-800">Change Password</h2>
-                    <p class="text-xs text-gray-500 mt-0.5">Update your login password.</p>
+                    <h2 class="text-base font-semibold text-[#2d3a24]">{{ __('app.change_password') }}</h2>
+                    <p class="text-xs text-[#7a8f6a] mt-0.5">{{ __('app.change_password_sub') }}</p>
                 </div>
-                <svg class="w-5 h-5 text-gray-400 transition-transform {{ $showPasswordSection ? 'rotate-180' : '' }}"
+                <svg class="w-5 h-5 text-[#9aaa8a] transition-transform {{ $showPasswordSection ? 'rotate-180' : '' }}"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -105,10 +104,10 @@
 
                     {{-- Current Password --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                        <label class="block text-sm font-medium text-[#4E653D] mb-1">{{ __('app.current_password') }}</label>
                         <input type="password" wire:model="currentPassword"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                                   focus:ring-2 focus:ring-gray-500 focus:outline-none transition">
+                            class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                                   focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition">
                         @error('currentPassword')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -116,10 +115,10 @@
 
                     {{-- New Password --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <label class="block text-sm font-medium text-[#4E653D] mb-1">{{ __('app.new_password') }}</label>
                         <input type="password" wire:model="newPassword"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                                   focus:ring-2 focus:ring-gray-500 focus:outline-none transition">
+                            class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                                   focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition">
                         @error('newPassword')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -127,10 +126,10 @@
 
                     {{-- Confirm Password --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                        <label class="block text-sm font-medium text-[#4E653D] mb-1">{{ __('app.confirm_new_password') }}</label>
                         <input type="password" wire:model="confirmPassword"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900
-                                   focus:ring-2 focus:ring-gray-500 focus:outline-none transition">
+                            class="w-full px-4 py-2.5 border border-[#c4d4b4] rounded-xl text-[#2d3a24]
+                                   focus:ring-2 focus:ring-[#4E653D] focus:outline-none transition">
                         @error('confirmPassword')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -138,14 +137,14 @@
 
                     <div class="pt-2 flex gap-3">
                         <button type="submit"
-                            class="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl
-                                   hover:bg-gray-800 transition shadow-sm">
-                            Update Password
+                            class="px-6 py-2.5 bg-[#4A2F24] text-white text-sm font-medium rounded-xl
+                                   hover:bg-[#3d2720] transition shadow-sm">
+                            {{ __('app.update_password') }}
                         </button>
                         <button type="button" wire:click="$set('showPasswordSection', false)"
-                            class="px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl
-                                   hover:bg-gray-200 transition">
-                            Cancel
+                            class="px-6 py-2.5 bg-[#eef1e8] text-[#4E653D] text-sm font-medium rounded-xl
+                                   hover:bg-[#dde4d4] transition">
+                            {{ __('app.cancel') }}
                         </button>
                     </div>
                 </form>

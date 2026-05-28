@@ -48,13 +48,13 @@
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('create-ticket') }}" class="px-3.5 py-2 text-sm font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('create-ticket') ? 'bg-primary text-white shadow-lg shadow-primary/15' : '' }}">
-                        Create Ticket
+                        {{ __('app.create_ticket') }}
                     </a>
                     <a href="{{ route('book-room') }}" class="px-3.5 py-2 text-sm font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('book-room') ? 'bg-primary text-white shadow-lg shadow-primary/15' : '' }}">
-                        Book Room
+                        {{ __('app.book_room') }}
                     </a>
                     <a href="{{ route('book-vehicle') }}" class="px-3.5 py-2 text-sm font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('book-vehicle') ? 'bg-primary text-white shadow-lg shadow-primary/15' : '' }}">
-                        Book Vehicle
+                        {{ __('app.book_vehicle') }}
                     </a>
 
                     {{-- Status Dropdown --}}
@@ -62,20 +62,20 @@
                     <div class="relative" data-exclusive-dropdown>
                         <button type="button" data-dropdown-toggle class="px-3.5 py-2 text-sm font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 flex items-center gap-1.5 transition-all duration-300" aria-haspopup="true" aria-expanded="false">
                             <x-heroicon-o-chart-bar class="w-4 h-4" /> 
-                            Status
+                            {{ __('app.status') }}
                             <span class="ml-1 px-1.5 py-0.5 text-xs font-bold text-white bg-accent rounded-full leading-none shadow-sm" data-count="{{ $totalUnreadCount }}">{{ $totalUnreadCount }}</span>
                             <x-heroicon-o-chevron-down class="w-4 h-4 transition-transform duration-300" data-dropdown-arrow />
                         </button>
                         <div data-dropdown-menu class="dropdown-menu absolute right-0 mt-2 w-52 bg-sidebar/95 backdrop-blur-md rounded-2xl shadow-2xl border border-sidebar-border/60 py-2 z-50">
                             <a href="{{ route('ticketstatus') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                                <x-heroicon-o-ticket class="w-4 h-4" /> Ticket Status
+                                <x-heroicon-o-ticket class="w-4 h-4" /> {{ __('app.ticket_status') }}
                                 <span class="ml-auto px-1.5 py-0.5 text-xs font-bold text-white bg-accent rounded-full leading-none shadow-sm" data-count="{{ $totalUnreadCount }}">{{ $totalUnreadCount }}</span>
                             </a>
                             <a href="{{ route('bookingstatus') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                                <x-heroicon-o-calendar class="w-4 h-4" /> Meeting Status
+                                <x-heroicon-o-calendar class="w-4 h-4" /> {{ __('app.meeting_status') }}
                             </a>
                             <a href="{{ route('vehiclestatus') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                                <x-heroicon-o-truck class="w-4 h-4" /> Vehicle Status
+                                <x-heroicon-o-truck class="w-4 h-4" /> {{ __('app.vehicle_status') }}
                             </a>
                         </div>
                     </div>
@@ -87,9 +87,35 @@
 
                     @guest
                     <a href="{{ route('login') }}" class="ml-3 bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-lg hover:shadow-primary/15 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2">
-                        <x-heroicon-o-arrow-right-on-rectangle class="w-4 h-4" /> Login
+                        <x-heroicon-o-arrow-right-on-rectangle class="w-4 h-4" /> {{ __('app.login') }}
                     </a>
                     @endguest
+
+                    {{-- Language Toggle (Desktop) --}}
+                    <div class="relative ml-2" x-data="{ open: false }">
+                        @php $isEn = app()->getLocale() === 'en'; @endphp
+                        <button @click.stop="open = !open" type="button"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 text-sidebar-foreground hover:text-white hover:bg-primary/10 border border-sidebar-border/40">
+                            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <span>{{ $isEn ? 'EN' : 'ID' }}</span>
+                            <svg class="w-3 h-3 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div x-show="open" x-transition @click.outside="open = false"
+                            class="absolute right-0 top-full mt-1.5 w-36 rounded-xl bg-sidebar/95 backdrop-blur-md border border-sidebar-border/60 shadow-2xl z-[9999] overflow-hidden"
+                            style="display:none;">
+                            <a href="{{ route('lang.switch', 'en') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors {{ $isEn ? 'text-white bg-primary/10 font-semibold' : 'text-sidebar-foreground hover:text-white hover:bg-primary/10' }}">
+                                <span>🇬🇧</span><span>{{ __('app.english') }}</span>
+                                @if($isEn)<svg class="w-3.5 h-3.5 ml-auto text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>@endif
+                            </a>
+                            <a href="{{ route('lang.switch', 'id') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors {{ !$isEn ? 'text-white bg-primary/10 font-semibold' : 'text-sidebar-foreground hover:text-white hover:bg-primary/10' }}">
+                                <span>🇮🇩</span><span>{{ __('app.indonesian') }}</span>
+                                @if(!$isEn)<svg class="w-3.5 h-3.5 ml-auto text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>@endif
+                            </a>
+                        </div>
+                    </div>
 
                     @auth
                     {{-- Profile Dropdown --}}
@@ -112,20 +138,20 @@
                                 @endif
                             </div>
                             <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors mt-2">
-                                <x-heroicon-o-user-circle class="w-5 h-5" /> My Profile
+                                <x-heroicon-o-user-circle class="w-5 h-5" /> {{ __('app.my_profile') }}
                             </a>
                             
                             @php $role = auth()->user()->role->name; @endphp
 
                             @if($role === 'Superadmin')
                             <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                                <x-heroicon-o-shield-check class="w-5 h-5" /> Superadmin DB
+                                <x-heroicon-o-shield-check class="w-5 h-5" /> {{ __('app.superadmin_db') }}
                             </a>
                             @endif
 
                             @if(in_array($role, ['Superadmin', 'Receptionist']))
                             <a href="{{ route('receptionist.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                                <x-heroicon-o-clipboard-document-list class="w-5 h-5" /> Receptionist DB
+                                <x-heroicon-o-clipboard-document-list class="w-5 h-5" /> {{ __('app.receptionist_db') }}
                             </a>
                             @endif
 
@@ -133,7 +159,7 @@
                             <form method="POST" action="{{ route('logout') }}" class="px-2">
                                 @csrf
                                 <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:text-rose-300 hover:bg-rose-950/20 rounded-xl transition-colors">
-                                    <x-heroicon-o-arrow-left-on-rectangle class="w-5 h-5" /> Logout
+                                    <x-heroicon-o-arrow-left-on-rectangle class="w-5 h-5" /> {{ __('app.logout') }}
                                 </button>
                             </form>
                         </div>
@@ -178,13 +204,13 @@
 
                 {{-- Mobile Nav Links --}}
                 <a href="{{ route('create-ticket') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('create-ticket') ? 'bg-primary text-white' : '' }}">
-                    <x-heroicon-o-ticket class="w-5 h-5" /> Create Ticket
+                    <x-heroicon-o-ticket class="w-5 h-5" /> {{ __('app.create_ticket') }}
                 </a>
                 <a href="{{ route('book-room') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('book-room') ? 'bg-primary text-white' : '' }}">
-                    <x-heroicon-o-building-office class="w-5 h-5" /> Book Room
+                    <x-heroicon-o-building-office class="w-5 h-5" /> {{ __('app.book_room') }}
                 </a>
                 <a href="{{ route('book-vehicle') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-all duration-300 {{ request()->routeIs('book-vehicle') ? 'bg-primary text-white' : '' }}">
-                    <x-heroicon-o-truck class="w-5 h-5" /> Book Vehicle
+                    <x-heroicon-o-truck class="w-5 h-5" /> {{ __('app.book_vehicle') }}
                 </a>
 
                 {{-- Mobile Status Dropdown --}}
@@ -192,21 +218,21 @@
                 <div data-mobile-dropdown>
                     <button type="button" data-mobile-toggle class="w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
                         <span class="flex items-center gap-3">
-                            <x-heroicon-o-chart-bar class="w-5 h-5" /> Status
+                            <x-heroicon-o-chart-bar class="w-5 h-5" /> {{ __('app.status') }}
                             <span class="ml-1 px-1.5 py-0.5 text-xs font-bold text-white bg-accent rounded-full leading-none shadow-sm" data-count="{{ $totalUnreadCount }}">{{ $totalUnreadCount }}</span>
                         </span>
                         <x-heroicon-o-chevron-down data-mobile-arrow class="w-5 h-5 transition-transform duration-300" />
                     </button>
                     <div data-mobile-content class="mobile-dropdown-content pl-4">
                         <a href="{{ route('ticketstatus') }}" class="flex items-center justify-between px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:text-white hover:bg-primary/10 rounded-xl transition-colors mt-1">
-                            <span class="flex items-center gap-3"><x-heroicon-o-ticket class="w-4 h-4" /> Ticket Status</span>
+                            <span class="flex items-center gap-3"><x-heroicon-o-ticket class="w-4 h-4" /> {{ __('app.ticket_status') }}</span>
                             <span class="px-1.5 py-0.5 text-xs font-bold text-white bg-accent rounded-full leading-none shadow-sm" data-count="{{ $totalUnreadCount }}">{{ $totalUnreadCount }}</span>
                         </a>
                         <a href="{{ route('bookingstatus') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:text-white hover:bg-primary/10 rounded-xl transition-colors mt-1">
-                            <x-heroicon-o-calendar class="w-4 h-4" /> Meeting Status
+                            <x-heroicon-o-calendar class="w-4 h-4" /> {{ __('app.meeting_status') }}
                         </a>
                         <a href="{{ route('vehiclestatus') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:text-white hover:bg-primary/10 rounded-xl transition-colors mt-1">
-                            <x-heroicon-o-truck class="w-4 h-4" /> Vehicle Status
+                            <x-heroicon-o-truck class="w-4 h-4" /> {{ __('app.vehicle_status') }}
                         </a>
                     </div>
                 </div>
@@ -216,13 +242,13 @@
 
                 @auth
                 <div class="border-t border-sidebar-border/40 pt-3 mt-3 space-y-1">
-                    <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors"><x-heroicon-o-user-circle class="w-5 h-5" /> My Profile</a>
+                    <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors"><x-heroicon-o-user-circle class="w-5 h-5" /> {{ __('app.my_profile') }}</a>
                     
                     @php $role = auth()->user()->role->name; @endphp
 
                     @if($role === 'Superadmin')
                     <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                        <x-heroicon-o-shield-check class="w-5 h-5" /> Superadmin DB
+                        <x-heroicon-o-shield-check class="w-5 h-5" /> {{ __('app.superadmin_db') }}
                     </a>
                     @endif
 
@@ -234,22 +260,38 @@
 
                     @if(in_array($role, ['Superadmin', 'Receptionist']))
                     <a href="{{ route('receptionist.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-sidebar-foreground hover:text-white hover:bg-primary/10 transition-colors">
-                        <x-heroicon-o-clipboard-document-list class="w-5 h-5" /> Receptionist DB
+                        <x-heroicon-o-clipboard-document-list class="w-5 h-5" /> {{ __('app.receptionist_db') }}
                     </a>
                     @endif
 
                     <form method="POST" action="{{ route('logout') }}" class="mt-2">
                         @csrf
-                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-white hover:text-rose-300 hover:bg-rose-950/20 transition-colors"><x-heroicon-o-arrow-left-on-rectangle class="w-5 h-5" /> Logout</button>
+                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl text-white hover:text-rose-300 hover:bg-rose-950/20 transition-colors"><x-heroicon-o-arrow-left-on-rectangle class="w-5 h-5" /> {{ __('app.logout') }}</button>
                     </form>
                 </div>
                 @endauth
 
                 @guest
                 <div class="border-t border-sidebar-border/40 pt-3 mt-3">
-                    <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 text-base font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/95 transition-all"><x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" /> Login / Register</a>
+                    <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 text-base font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/95 transition-all"><x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" /> {{ __('app.login_register') }}</a>
                 </div>
                 @endguest
+
+                {{-- Language Toggle (Mobile) --}}
+                <div class="border-t border-sidebar-border/40 pt-3 mt-3">
+                    @php $isEnMobile = app()->getLocale() === 'en'; @endphp
+                    <p class="px-4 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-2">{{ __('app.language') }}</p>
+                    <div class="flex gap-2 px-4">
+                        <a href="{{ route('lang.switch', 'en') }}"
+                           class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all {{ $isEnMobile ? 'bg-primary text-white' : 'text-sidebar-foreground hover:bg-primary/10' }}">
+                            <span>🇬🇧</span> {{ __('app.english') }}
+                        </a>
+                        <a href="{{ route('lang.switch', 'id') }}"
+                           class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all {{ !$isEnMobile ? 'bg-primary text-white' : 'text-sidebar-foreground hover:bg-primary/10' }}">
+                            <span>🇮🇩</span> {{ __('app.indonesian') }}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>

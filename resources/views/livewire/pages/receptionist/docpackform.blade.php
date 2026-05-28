@@ -30,8 +30,8 @@
                         <x-heroicon-o-archive-box class="w-6 h-6 text-[#CDDEA7]" />
                     </div>
                     <div>
-                        <h2 class="text-lg sm:text-xl font-semibold">Doc/Pack Form</h2>
-                        <p class="text-sm text-[#CDDEA7]/80">Input paket/dokumen dengan alur masuk/keluar</p>
+                        <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.docpac_form_title') }}</h2>
+                        <p class="text-sm text-[#CDDEA7]/80">{{ __('app.docpac_form_sub') }}</p>
                     </div>
                 </div>
             </div>
@@ -43,8 +43,8 @@
                 <div class="flex items-center gap-3">
                     <div class="w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></div>
                     <div>
-                        <h3 class="text-sm font-semibold text-foreground">Tambah Data</h3>
-                        <p class="text-xs text-muted-foreground mt-0.5">Lengkapi detail paket/dokumen</p>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __('app.add_data') }}</h3>
+                        <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.add_data_sub') }}</p>
                     </div>
                 </div>
             </div>

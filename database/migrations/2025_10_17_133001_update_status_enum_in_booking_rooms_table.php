@@ -14,6 +14,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Remap any values not present in the smaller enum before shrinking it
+        DB::statement("UPDATE booking_rooms SET status = 'approved' WHERE status = 'completed'");
+
         DB::statement("ALTER TABLE booking_rooms 
             MODIFY COLUMN status ENUM('pending', 'approved', 'rejected') 
             NOT NULL DEFAULT 'pending'");

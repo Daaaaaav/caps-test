@@ -30,8 +30,8 @@
                         <x-heroicon-o-calendar-days class="w-6 h-6 text-[#CDDEA7]" />
                     </div>
                     <div>
-                        <h2 class="text-lg sm:text-xl font-semibold">Meeting Schedule</h2>
-                        <p class="text-xs text-[#CDDEA7]/80">Form Booking Ruangan & Online Meeting.</p>
+                        <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.meeting_schedule_title') }}</h2>
+                        <p class="text-xs text-[#CDDEA7]/80">{{ __('app.meeting_schedule_sub') }}</p>
                     </div>
                 </div>
             </div>
@@ -46,8 +46,8 @@
                         <x-heroicon-o-calendar class="w-4.5 h-4.5 text-primary" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-foreground">Tambah Booking Room (Offline)</h3>
-                        <p class="text-xs text-muted-foreground mt-0.5">Saat disimpan akan masuk <b>Pending</b> (menunggu approval).</p>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __('app.add_booking_offline') }}</h3>
+                        <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.add_booking_offline_sub') }}</p>
                     </div>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 {{ $showOfflineForm ? 'rotate-180' : '' }}"
@@ -60,8 +60,8 @@
                 <form class="p-6 space-y-6" wire:submit.prevent="saveOffline">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="md:col-span-3">
-                        <label class="{{ $label }}">Meeting Title</label>
-                        <input type="text" wire:model.defer="form.meeting_title" class="{{ $input }}" placeholder="Contoh: Weekly Sync">
+                        <label class="{{ $label }}">{{ __('app.title_col') }}</label>
+                        <input type="text" wire:model.defer="form.meeting_title" class="{{ $input }}" placeholder="{{ __('app.title_col') }}">
                         @error('form.meeting_title') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
@@ -167,8 +167,8 @@
                 {{-- Conditional display: Show notes if the string 'Other' is in the requirements array --}}
                 @if (in_array('Other', $form['requirements'] ?? [], true))
                     <div class="mt-4 bg-primary/5 border border-primary/20 rounded-2xl p-5">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Special Notes</label>
-                        <textarea wire:model.defer="form.notes" rows="3" placeholder="Please specify your other requirement…"
+                        <label class="{{ $label }}">{{ __('app.special_notes') }}</label>
+                        <textarea wire:model.defer="form.notes" rows="3" placeholder="{{ __('app.special_notes') }}..."
                             class="w-full px-3.5 py-2.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"></textarea>
                         @error('form.notes') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
@@ -189,7 +189,7 @@
                 <div class="pt-5 border-t border-border bg-muted/5 -mx-6 -mb-6 p-6 flex items-center justify-end">
                     <button type="submit" class="inline-flex items-center gap-2 {{ $btnBlk }}" wire:loading.attr="disabled">
                         <x-heroicon-o-check class="w-4 h-4" />
-                        <span>Simpan Data Booking Room</span>
+                        <span>{{ __('app.save_booking') }}</span>
                     </button>
                 </div>
             </form>
@@ -205,8 +205,8 @@
                         <x-heroicon-o-video-camera class="w-4.5 h-4.5 text-primary" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-foreground">Create Online Meeting</h3>
-                        <p class="text-xs text-muted-foreground mt-0.5">Form terpisah untuk meeting online. Status approval di halaman lain.</p>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __('app.create_online_meeting') }}</h3>
+                        <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.create_online_sub') }}</p>
                     </div>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 {{ $showOnlineForm ? 'rotate-180' : '' }}"
@@ -219,8 +219,8 @@
                 <form class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6" wire:submit.prevent="saveOnline">
                 <div class="space-y-4">
                     <div>
-                        <label class="{{ $label }}">Meeting Title</label>
-                        <input type="text" wire:model.defer="online_meeting_title" class="{{ $input }}" placeholder="Contoh: Standup harian">
+                        <label class="{{ $label }}">{{ __('app.title_col') }}</label>
+                        <input type="text" wire:model.defer="online_meeting_title" class="{{ $input }}" placeholder="{{ __('app.title_col') }}">
                         @error('online_meeting_title') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
@@ -241,7 +241,7 @@
                         <div class="flex items-end">
                             @if($online_platform === 'google_meet')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold {{ $googleConnected ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-500' }}">
-                                    {{ $googleConnected ? 'Google connected' : 'Google NOT connected' }}
+                                    {{ $googleConnected ? __('app.google_connected') : __('app.google_not_connected') }}
                                 </span>
                             @endif
                         </div>
@@ -250,7 +250,7 @@
                     {{-- Department with SEARCH (ONLINE) --}}
                     <div>
                         <label class="{{ $label }}">Department</label>
-                        <input type="text" wire:model.live="deptQueryOnline" class="{{ $input }} mb-2.5" placeholder="Search department…">
+                        <input type="text" wire:model.live="deptQueryOnline" class="{{ $input }} mb-2.5" placeholder="{{ __('app.search_department') }}">
                         <div class="relative">
                             <select wire:model.live="online_department_id" class="{{ $input }} appearance-none pr-8">
                                 <option value="">— Select Department (Optional) —</option>
@@ -289,17 +289,17 @@
                 <div class="space-y-4 flex flex-col justify-between">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="{{ $label }}">Date</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <input type="date" wire:model.defer="online_date" class="{{ $input }}">
                             @error('online_date') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label class="{{ $label }}">Start</label>
+                            <label class="{{ $label }}">{{ __('app.start') }}</label>
                             <input type="time" wire:model.defer="online_start_time" class="{{ $input }}">
                             @error('online_start_time') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label class="{{ $label }}">End</label>
+                            <label class="{{ $label }}">{{ __('app.end') }}</label>
                             <input type="time" wire:model.defer="online_end_time" class="{{ $input }}">
                             @error('online_end_time') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -320,7 +320,7 @@
                     <div class="pt-5 flex items-center justify-end">
                         <button type="submit" class="inline-flex items-center gap-2 {{ $btnBlk }}" wire:loading.attr="disabled">
                             <x-heroicon-o-link class="w-4 h-4" />
-                            <span>Submit Online Meeting</span>
+                            <span>{{ __('app.submit_online') }}</span>
                         </button>
                     </div>
                 </div>

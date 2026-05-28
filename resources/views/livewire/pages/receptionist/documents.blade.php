@@ -452,7 +452,7 @@
 
                 <div class="bg-muted/10 border-t border-border p-6 flex items-center justify-end gap-2.5">
                     <button type="button" wire:click="closeEdit"
-                        class="px-4 h-10 rounded-lg border border-border text-muted-foreground text-xs font-semibold hover:text-foreground hover:bg-muted transition">Batal</button>
+                        class="px-4 h-10 rounded-lg border border-border text-muted-foreground text-xs font-semibold hover:text-foreground hover:bg-muted transition">cancel</button>
                     <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
                         class="inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 relative overflow-hidden">
                         <span wire:loading.remove wire:target="saveEdit" class="flex items-center gap-1.5">
