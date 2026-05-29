@@ -304,7 +304,7 @@
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium text-gray-700">
-                                                                    Room: {{ optional($row->room)->room_name ?? '—' }}
+                                                                    {{ __('app.room') }}: {{ optional($row->room)->room_name ?? '—' }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)
@@ -578,7 +578,7 @@
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium text-gray-700">
-                                                                    Room: {{ optional($row->room)->room_name ?? '—' }}
+                                                                    {{ __('app.room') }}: {{ optional($row->room)->room_name ?? '—' }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)

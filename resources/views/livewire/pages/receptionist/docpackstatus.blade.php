@@ -252,13 +252,13 @@
                                                         @if($row->nama_pengirim)
                                                             <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                                <span class="truncate">From: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
+                                                                <span class="truncate">{{ __('app.sender') }}: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
                                                             </div>
                                                         @endif
                                                         @if($row->nama_penerima)
                                                             <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                                <span class="truncate">To: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
+                                                                <span class="truncate">{{ __('app.receiver') }}: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
                                                             </div>
                                                         @endif
                                                     </div>
@@ -350,13 +350,13 @@
                                                         @if($row->nama_pengirim)
                                                             <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                                <span class="truncate">From: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
+                                                                <span class="truncate">{{ __('app.sender') }}: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
                                                             </div>
                                                         @endif
                                                         @if($row->nama_penerima)
                                                             <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                                <span class="truncate">To: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
+                                                                <span class="truncate">{{ __('app.receiver') }}: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
                                                             </div>
                                                         @endif
                                                     </div>

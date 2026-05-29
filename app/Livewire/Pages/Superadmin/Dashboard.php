@@ -60,28 +60,28 @@ class Dashboard extends Component
             $stats = [
                 [
                     'key'       => 'all',
-                    'label'     => 'All Activity',
+                    'label'     => __('app.all'),
                     'value'     => $totalRooms + $totalVehicles,
                     'trend'     => abs($allTrend),
                     'direction' => $allTrend >= 0 ? 'up' : 'down',
                 ],
                 [
                     'key'       => 'room',
-                    'label'     => 'Room Bookings',
+                    'label'     => __('app.room_bookings_label'),
                     'value'     => $totalRooms,
                     'trend'     => abs($roomTrendKpi),
                     'direction' => $roomTrendKpi >= 0 ? 'up' : 'down',
                 ],
                 [
                     'key'       => 'vehicle',
-                    'label'     => 'Vehicle Bookings',
+                    'label'     => __('app.vehicle_bookings_label'),
                     'value'     => $totalVehicles,
                     'trend'     => abs($vehTrendKpi),
                     'direction' => $vehTrendKpi >= 0 ? 'up' : 'down',
                 ],
                 [
                     'key'       => 'users',
-                    'label'     => 'Receptionists',
+                    'label'     => __('app.receptionists'),
                     'value'     => $totalUsers,
                     'trend'     => 0,
                     'direction' => 'up',

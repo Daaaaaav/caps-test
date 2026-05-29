@@ -31,9 +31,9 @@
                             <x-heroicon-o-truck class="w-6 h-6 text-[#CDDEA7]"/>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-semibold">Vehicle Booking</h2>
+                            <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.vehicle_booking_title') }}</h2>
                             <p class="text-xs text-[#CDDEA7]/80 max-w-xl">
-                                Isi form di bawah untuk mengajukan peminjaman kendaraan atas nama user/departemen tertentu.
+                                {{ __('app.vehicle_booking_subtitle') }}
                             </p>
                         </div>
                     </div>
@@ -42,12 +42,12 @@
                         <a href="{{ route('receptionist.roomapproval') }}"
                            class="px-3.5 py-2 text-xs font-semibold text-[#CDDEA7]/80 hover:text-[#CDDEA7] hover:bg-[#CDDEA7]/5 border-r border-[#CDDEA7]/20 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-calendar-days class="w-4 h-4"/>
-                            <span>Room Booking</span>
+                            <span>{{ __('app.booking_room') }}</span>
                         </a>
                         <a href="{{ route('receptionist.vehiclestatus') }}"
                            class="px-3.5 py-2 text-xs font-semibold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-truck class="w-4 h-4"/>
-                            <span>Vehicle Status</span>
+                            <span>{{ __('app.vehicle_status_menu') }}</span>
                         </a>
                     </div>
                 </div>
@@ -126,13 +126,13 @@
                                     @if(!$department_id)
                                         <option value="">Pilih departemen terlebih dahulu</option>
                                     @else
-                                        <option value="">— Select User —</option>
+                                        <option value="">{{ __('app.select_user') }}</option>
                                         @forelse($users as $u)
                                             <option value="{{ $u->user_id }}">
                                                 {{ $u->full_name }} — {{ $u->email }}
                                             </option>
                                         @empty
-                                            <option value="">— No users found —</option>
+                                            <option value="">{{ __('app.no_users_found') }}</option>
                                         @endforelse
                                     @endif
                                 </select>
@@ -341,7 +341,7 @@
                     <div class="pt-4 border-t border-border bg-muted/5 -mx-6 -mb-6 p-6 flex items-center justify-end">
                         <button type="submit" class="{{ $btnBlk }}">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Submit Booking</span>
+                            <span>{{ __('app.submit_booking') }}</span>
                         </button>
                     </div>
                 </form>

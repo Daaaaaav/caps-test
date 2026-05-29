@@ -130,7 +130,7 @@
                                 @php $activeRoom = collect($roomsOptions)->firstWhere('id', $roomFilterId); @endphp
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                     <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
-                                    <span>Room: {{ $activeRoom['label'] ?? 'Unknown' }}</span>
+                                    <span>{{ __('app.room') }}: {{ $activeRoom['label'] ?? __('app.no_data') }}</span>
                                     <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">×</button>
                                 </span>
                             @else
@@ -280,7 +280,7 @@
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium {{ $b->room?->room_name ? 'text-gray-700' : 'text-rose-600' }}">
-                                                                    Room: {{ $b->room?->room_name ?? 'Not selected' }}
+                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? __('app.not_selected') }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)
@@ -306,7 +306,7 @@
                                                     
                                                     {{-- 5. Created Timestamp (Placed here to be near Requester info) --}}
                                                     <div class="text-[10px] text-gray-500 mt-2">
-                                                        Created: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
+                                                        {{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
                                                     </div>
 
                                                     {{-- Reject Note (if any) --}}
@@ -514,7 +514,7 @@
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium text-gray-700">
-                                                                    Room: {{ $b->room?->room_name ?? '—' }}
+                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? '—' }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)
@@ -573,7 +573,7 @@
                                                     </div>
 
                                                     <span class="inline-block text-[10px] px-2 py-0.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-200">
-                                                        Created: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
+                                                        {{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -680,7 +680,7 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">Filter by Room</h3>
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Klik salah satu ruangan untuk mem-filter daftar approval.</p>
                     </div>
 
@@ -694,10 +694,10 @@
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">
                                     All
                                 </span>
-                                <span>All Rooms</span>
+                                <span>{{ __('app.all') }}</span>
                             </span>
                             @if(is_null($roomFilterId))
-                                <span class="text[10px] uppercase tracking-wide opacity-80">Active</span>
+                                <span class="text[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -715,7 +715,7 @@
                                         <span class="truncate">{{ $r['label'] }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @empty
@@ -876,10 +876,10 @@
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-border/60 text-[10px] font-bold">
                                     All
                                 </span>
-                                <span>All Rooms</span>
+                                <span>{{ __('app.all') }}</span>
                             </span>
                             @if(is_null($roomFilterId))
-                                <span class="text-[10px] uppercase font-bold tracking-wide">Active</span>
+                                <span class="text-[10px] uppercase font-bold tracking-wide">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -899,7 +899,7 @@
                                         <span class="truncate font-medium">{{ $r['label'] }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase font-bold tracking-wide">Active</span>
+                                        <span class="text-[10px] uppercase font-bold tracking-wide">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @empty
