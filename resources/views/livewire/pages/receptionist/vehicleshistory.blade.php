@@ -65,8 +65,8 @@
                             <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.vehicle_history_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">
                                 {{ $statusTab === 'rejected'
-                                    ? 'Riwayat peminjaman yang ditolak (Rejected).'
-                                    : 'Riwayat peminjaman kendaraan yang sudah Completed (Done).' }}
+                                    ? __('app.vehicle_history_sub_rej')
+                                    : __('app.vehicle_history_sub_done') }}
                             </p>
                         </div>
                     </div>
@@ -94,8 +94,8 @@
                             <h3 class="text-base font-semibold text-gray-900">Vehicle History</h3>
                             <p class="text-xs text-gray-500">
                                 {{ $statusTab === 'rejected'
-                                    ? 'Riwayat peminjaman kendaraan yang ditolak (Rejected).'
-                                    : 'Riwayat peminjaman kendaraan yang telah selesai (Done / Completed).' }}
+                                    ? __('app.vehicle_history_sub_rej')
+                                    : __('app.vehicle_history_sub_done') }}
                             </p>
                         </div>
 
@@ -167,16 +167,16 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <input type="date" wire:model.live="selectedDate" class="{{ $input }}">
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort') }}</label>
                             <select wire:model.live="sortFilter" class="{{ $input }}">
-                                <option value="recent">Default (terbaru)</option>
-                                <option value="oldest">Terlama dulu</option>
-                                <option value="nearest">Paling dekat sekarang</option>
+                                <option value="recent">{{ __('app.sort_default') }}</option>
+                                <option value="oldest">{{ __('app.sort_oldest_first') }}</option>
+                                <option value="nearest">{{ __('app.sort_nearest') }}</option>
                             </select>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                 {{-- LIST BODY – 2 column bento style --}}
                 @if($bookings->isEmpty())
                     <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                        Belum ada riwayat untuk filter ini.
+                        {{ __('app.no_history_filter') }}
                     </div>
                 @else
                 <div class="px-4 sm:px-6 py-5">
@@ -269,10 +269,10 @@
                                             {{-- 4. BOTTOM LEFT: Borrower & Notes/Timestamp --}}
                                             <div class="text-[12px] text-gray-600 space-y-1">
                                                 @if(!empty($b->borrower_name))
-                                                    <p>Borrower: <span class="font-medium text-gray-800">{{ $b->borrower_name }}</span></p>
+                                                    <p>{{ __('app.borrower_label') }}: <span class="font-medium text-gray-800">{{ $b->borrower_name }}</span></p>
                                                 @endif
                                                 <span class="inline-block text-[10px] text-gray-500 mt-1">
-                                                    Created: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
+                                                    {{ __('app.created_label') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
                                                 </span>
                                             </div>
 
@@ -403,7 +403,7 @@
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">Klik kendaraan untuk filter.</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('app.click_to_filter') }}</p>
                     </div>
 
                     <div class="px-4 py-3 max-h-64 overflow-y-auto">
@@ -439,7 +439,7 @@
                                     @endif
                                 </button>
                             @empty
-                                <p class="text-xs text-gray-500">Tidak ada kendaraan.</p>
+                                <p class="text-xs text-gray-500">{{ __('app.no_vehicle_data_filter') }}</p>
                             @endforelse
                         </div>
                     </div>

@@ -54,7 +54,7 @@
                         </div>
                         <div>
                             <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.docpac_status_title') }}</h2>
-                            <p class="text-sm text-[#CDDEA7]/80">Pantau item pending & tersimpan sebelum delivered/taken.</p>
+                        <p class="text-sm text-[#CDDEA7]/80">{{ __('app.docpac_status_sub') }}</p>
                         </div>
                     </div>
 
@@ -142,7 +142,7 @@
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                 <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
                                 <span>Dept: {{ $activeDeptLabel }}</span>
-                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('departmentId', '')">×</button>
+                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('departmentId', null)">×</button>
                             </span>
                         @endif
 
@@ -154,7 +154,7 @@
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                 <x-heroicon-o-user class="w-3.5 h-3.5"/>
                                 <span>User: {{ $activeUserLabel }}</span>
-                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('userId', '')">×</button>
+                                <button type="button" class="ml-1 hover:text-white" wire:click="$set('userId', null)">×</button>
                             </span>
                         @endif
 
@@ -174,24 +174,24 @@
                             <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
-                                    placeholder="Cari nama item, pengirim…" wire:model.live="q">
+                                    placeholder="{{ __('app.search_item_sender') }}" wire:model.live="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
                         </div>
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date_label') }}</label>
                             <div class="relative">
                                 <input type="date" class="{{ $input }} pl-9" wire:model.live="selectedDate">
                                 <x-heroicon-o-calendar-days class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
                         </div>
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort_label') }}</label>
                             <div class="relative">
                                 <select class="{{ $input }} appearance-none pr-8 bg-white" wire:model.live="dateMode">
-                                    <option value="semua">Default (terbaru)</option>
-                                    <option value="terbaru">Terbaru</option>
-                                    <option value="terlama">Terlama</option>
+                                    <option value="semua">{{ __('app.sort_default_opt') }}</option>
+                                    <option value="terbaru">{{ __('app.sort_newest_opt') }}</option>
+                                    <option value="terlama">{{ __('app.sort_oldest_opt') }}</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -296,7 +296,7 @@
                                 @empty
                                     <div class="col-span-full py-16 text-center text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">
                                         <x-heroicon-o-document-text class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
-                                        Tidak ada data pending
+                                        {{ __('app.no_data_pending') }}
                                     </div>
                                 @endforelse
                             @endif
@@ -392,7 +392,7 @@
                                 @empty
                                     <div class="col-span-full py-16 text-center text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">
                                         <x-heroicon-o-document-text class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
-                                        Tidak ada data stored
+                                        {{ __('app.no_data_stored') }}
                                     </div>
                                 @endforelse
                             @endif
@@ -461,7 +461,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">Tidak ada data pending</td>
+                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">{{ __('app.no_data_pending') }}</td>
                                             </tr>
                                         @endforelse
                                     @else
@@ -519,7 +519,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">Tidak ada data stored</td>
+                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">{{ __('app.no_data_stored') }}</td>
                                             </tr>
                                         @endforelse
                                     @endif
@@ -547,7 +547,7 @@
                 <section class="{{ $card }}">
                     <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">{{ __('app.advanced_filters') }}</h3>
-                        <p class="text-[11px] text-gray-500 mt-0.5">Filter berdasarkan department & user.</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.filter_by_dept_user') }}</p>
                     </div>
 
                     <div class="p-4 space-y-4 bg-white">
@@ -555,10 +555,10 @@
                         <div class="space-y-1">
                             <label class="{{ $label }}">Department</label>
                             <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
-                                placeholder="Cari department...">
+                                placeholder="{{ __('app.search_department_ph') }}">
                             <div class="relative mt-2">
                                 <select wire:model.live="departmentId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">Semua Department</option>
+                                    <option value="">{{ __('app.all_departments') }}</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
                                     @endforeach
@@ -572,10 +572,10 @@
                         {{-- User Filter --}}
                         <div class="space-y-1">
                             <label class="{{ $label }}">Receptionist / User</label>
-                            <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="Cari user...">
+                            <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="{{ __('app.search_user_ph') }}">
                             <div class="relative mt-2">
                                 <select wire:model.live="userId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">Semua User</option>
+                                    <option value="">{{ __('app.all_users') }}</option>
                                     @foreach($users as $u)
                                         <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
                                     @endforeach
@@ -599,7 +599,7 @@
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
                         <h3 class="text-sm font-semibold tracking-tight text-foreground">{{ __('app.advanced_filters') }}</h3>
-                        <p class="text-[11px] text-muted-foreground mt-0.5">Filter berdasarkan department & user.</p>
+                        <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_dept_user') }}</p>
                     </div>
                     <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
                 </div>
@@ -609,10 +609,10 @@
                     <div class="space-y-1.5">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Department</label>
                         <input type="text" wire:model.live="departmentQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
-                            placeholder="Cari department...">
+                            placeholder="{{ __('app.search_department_ph') }}">
                         <div class="relative mt-2">
                             <select wire:model.live="departmentId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
-                                <option value="">Semua Department</option>
+                                <option value="">{{ __('app.all_departments') }}</option>
                                 @foreach($departments as $dept)
                                     <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
                                 @endforeach
@@ -626,10 +626,10 @@
                     {{-- User Filter --}}
                     <div class="space-y-1.5">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Receptionist / User</label>
-                        <input type="text" wire:model.live="userQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" placeholder="Cari user...">
+                        <input type="text" wire:model.live="userQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" placeholder="{{ __('app.search_user_ph') }}">
                         <div class="relative mt-2">
                             <select wire:model.live="userId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
-                                <option value="">Semua User</option>
+                                <option value="">{{ __('app.all_users') }}</option>
                                 @foreach($users as $u)
                                     <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
                                 @endforeach
@@ -644,7 +644,7 @@
                 <div class="p-5 border-t border-border bg-muted/10">
                     <button type="button" class="w-full h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 focus:ring-2 focus:ring-primary/20 transition shadow-sm"
                         wire:click="closeFilterModal">
-                        Apply & Close
+                        {{ __('app.apply_close') }}
                     </button>
                 </div>
             </div>
@@ -673,12 +673,12 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nama Pengirim</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.sender_name') }}</label>
                             <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.nama_pengirim">
                             @error('edit.nama_pengirim') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1.5">
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nama Penerima</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.receiver_name') }}</label>
                             <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" wire:model.defer="edit.nama_penerima">
                             @error('edit.nama_penerima') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -688,14 +688,14 @@
                     <button type="button" wire:click="$set('showEdit', false)"
                         class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5">
                         <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                        <span>cancel</span>
+                        <span>{{ __('app.cancel') }}</span>
                     </button>
                     <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
                         class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
-                        <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
+                        <span wire:loading.remove wire:target="saveEdit">{{ __('app.save_changes') }}</span>
                         <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
                             <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-primary-foreground"/>
-                            Menyimpan…
+                            {{ __('app.saving') }}
                         </span>
                     </button>
                 </div>

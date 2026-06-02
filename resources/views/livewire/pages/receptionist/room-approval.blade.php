@@ -20,7 +20,7 @@
                 </div>
                 <div>
                     <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.room_approval_title') }}</h2>
-                    <p class="text-sm text-[#CDDEA7]/80">Setujui permintaan booking & pantau rapat berjalan.</p>
+                    <p class="text-sm text-[#CDDEA7]/80">{{ __('app.room_approval_sub') }}</p>
                 </div>
             </div>
 
@@ -138,15 +138,15 @@
                                     @if($rejectId === $id)
                                         <div class="mt-2 bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
                                             <textarea class="w-full h-20 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition"
-                                                      placeholder="Alasan penolakan (opsional, tidak disimpan)" wire:model.defer="reject_reason"></textarea>
+                                                      placeholder="{{ __('app.reject_reason_ph') }}" wire:model.defer="reject_reason"></textarea>
                                             <div class="flex justify-end gap-2">
                                                 <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
                                                         wire:click="$set('rejectId', null)">
-                                                    cancel
+                                                    {{ __('app.cancel') }}
                                                 </button>
                                                 <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:ring-2 focus:ring-rose-500/20 transition shadow-sm"
                                                         wire:click="reject">
-                                                    Kirim Penolakan
+                                                    {{ __('app.send_rejection') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -154,7 +154,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="col-span-full text-center py-12 text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">Tidak ada permintaan menunggu.</div>
+                            <div class="col-span-full text-center py-12 text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">{{ __('app.no_pending_requests') }}</div>
                         @endforelse
                     </div>
                 @else
@@ -202,15 +202,15 @@
                                             @if($rejectId === $id)
                                                 <div class="mt-2 bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2 text-left">
                                                     <textarea class="w-full h-20 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition"
-                                                              placeholder="Alasan penolakan (opsional)" wire:model.defer="reject_reason"></textarea>
+                                                              placeholder="{{ __('app.reject_reason_ph') }}" wire:model.defer="reject_reason"></textarea>
                                                     <div class="flex justify-end gap-2">
                                                         <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
                                                                 wire:click="$set('rejectId', null)">
-                                                            cancel
+                                                            {{ __('app.cancel') }}
                                                         </button>
                                                         <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition shadow-sm"
                                                                 wire:click="reject">
-                                                            Kirim
+                                                            {{ __('app.send_rejection') }}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -219,7 +219,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-12 text-gray-500 text-sm">Tidak ada permintaan menunggu.</td>
+                                        <td colspan="7" class="text-center py-12 text-gray-500 text-sm">{{ __('app.no_pending_requests') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -312,7 +312,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="col-span-full text-center py-12 text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">Belum ada rapat berjalan.</div>
+                            <div class="col-span-full text-center py-12 text-gray-500 text-sm bg-white border border-dashed border-gray-200 rounded-xl">{{ __('app.no_ongoing_meetings') }}</div>
                         @endforelse
                     </div>
                 @else
@@ -346,7 +346,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-12 text-gray-500 text-sm">Belum ada rapat berjalan.</td>
+                                        <td colspan="6" class="text-center py-12 text-gray-500 text-sm">{{ __('app.no_ongoing_meetings') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -87,11 +87,13 @@ class BookingHistory extends Component
             ])
             ->toArray();
 
+        // Deduplicate by room name, keeping the first occurrence of each name
         $this->roomsOptions = collect($this->rooms)
             ->map(fn (array $r) => [
                 'id'    => $r['id'],
                 'label' => $r['name'],
             ])
+            ->unique('label')
             ->values()
             ->all();
     }
@@ -282,13 +284,17 @@ class BookingHistory extends Component
         $data        = $this->validateForm();
         $statusForDb = $data['status'];
 
+        // Normalize start_time/end_time into full datetimes if DB expects datetimes
+        $dbStart = $this->formatDateTimeForDb($data['date'] ?? null, $data['start_time'] ?? null);
+        $dbEnd   = $this->formatDateTimeForDb($data['date'] ?? null, $data['end_time'] ?? null);
+
         if ($this->modalMode === 'create') {
             BookingRoom::create([
                 'booking_type'    => $data['booking_type'],
                 'meeting_title'   => $data['meeting_title'],
                 'date'            => $data['date'],
-                'start_time'      => $data['start_time'],
-                'end_time'        => $data['end_time'],
+                'start_time'      => $dbStart,
+                'end_time'        => $dbEnd,
                 'room_id'         => in_array($data['booking_type'], ['meeting', 'bookingroom'], true)
                     ? $data['room_id']
                     : null,
@@ -307,8 +313,8 @@ class BookingHistory extends Component
                 'booking_type'    => $data['booking_type'],
                 'meeting_title'   => $data['meeting_title'],
                 'date'            => $data['date'],
-                'start_time'      => $data['start_time'],
-                'end_time'        => $data['end_time'],
+                'start_time'      => $dbStart,
+                'end_time'        => $dbEnd,
                 'room_id'         => in_array($data['booking_type'], ['meeting', 'bookingroom'], true)
                     ? $data['room_id']
                     : null,
@@ -399,8 +405,8 @@ class BookingHistory extends Component
             'form.booking_type'    => ['required', 'string', 'max:50'],
             'form.meeting_title'   => ['required', 'string', 'max:255'],
             'form.date'            => ['nullable', 'date'],
-            'form.start_time'      => ['nullable', 'string', 'max:10'],
-            'form.end_time'        => ['nullable', 'string', 'max:10'],
+            'form.start_time'      => ['nullable', 'string', 'max:19'],
+            'form.end_time'        => ['nullable', 'string', 'max:19'],
             'form.room_id'         => [$isRoomType ? 'required' : 'nullable', 'integer', 'exists:rooms,room_id'],
             'form.online_provider' => [$isRoomType ? 'nullable' : 'required', Rule::in(['zoom', 'google_meet'])],
             'form.notes'           => ['nullable', 'string', 'max:1000'],
@@ -418,6 +424,42 @@ class BookingHistory extends Component
         }
 
         return $data;
+    }
+
+    /**
+     * Ensure we store `start_time`/`end_time` as full datetimes when DB columns are datetime.
+     * Accepts time-only values like `14:00` or `14:00:00`, or full datetimes `YYYY-MM-DD HH:MM:SS`.
+     * Returns null when no time provided.
+     */
+    private function formatDateTimeForDb(?string $date, ?string $time): ?string
+    {
+        if ($time === null || $time === '') {
+            return null;
+        }
+
+        $time = trim((string) $time);
+
+        // Already a datetime (contains a date prefix)
+        if (preg_match('/^\d{4}-\d{2}-\d{2} /', $time) === 1) {
+            return $time;
+        }
+
+        // Time-only like HH:MM or HH:MM:SS
+        if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $time) === 1) {
+            // Ensure seconds
+            if (substr_count($time, ':') === 1) {
+                $time .= ':00';
+            }
+
+            if ($date) {
+                return $date . ' ' . $time;
+            }
+
+            return $time;
+        }
+
+        // Fallback: return as-is
+        return $time;
     }
 
     // ───────── Query accessors used by Blade ─────────

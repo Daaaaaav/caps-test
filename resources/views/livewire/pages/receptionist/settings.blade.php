@@ -102,8 +102,8 @@
                         <x-heroicon-o-key class="w-5 h-5 shrink-0" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-semibold text-gray-900">Change Password</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Update your login password.</p>
+                        <h2 class="text-sm font-semibold text-gray-900">{{ __('app.change_password') }}</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ __('app.change_password_sub') }}</p>
                     </div>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 {{ $showPasswordSection ? 'rotate-180' : '' }}"

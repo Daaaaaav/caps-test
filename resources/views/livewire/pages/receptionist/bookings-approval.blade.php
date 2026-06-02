@@ -54,7 +54,7 @@
                     <div class="space-y-1">
                         <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.bookings_approval_title') }}</h2>
                         <p class="text-sm text-[#CDDEA7]/80">
-                            Kelola permintaan booking ruangan (online/offline): approve, reject (wajib isi alasan), atau reschedule.
+                            {{ __('app.bookings_approval_subtitle') }}
                         </p>
                     </div>
 
@@ -172,7 +172,7 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <div class="relative flex items-center gap-2">
                                 <div class="relative flex-1">
                                     <input type="date" class="{{ $input }} pl-9" wire:model.live="selectedDate">
@@ -190,11 +190,11 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort') }}</label>
                             <select wire:model.live="dateMode" class="{{ $input }}">
-                                <option value="semua">Default (terbaru)</option>
-                                <option value="terbaru">Tanggal terbaru</option>
-                                <option value="terlama">Tanggal terlama</option>
+                                <option value="semua">{{ __('app.sort_default') }}</option>
+                                <option value="terbaru">{{ __('app.sort_newest') }}</option>
+                                <option value="terlama">{{ __('app.sort_oldest') }}</option>
                             </select>
                         </div>
                     </div>
@@ -206,7 +206,7 @@
                 @if($activeTab === 'pending')
                     @if($list->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                            Tidak ada booking pending dengan filter saat ini.
+                            {{ __('app.no_pending_filter') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5">
@@ -295,7 +295,7 @@
                                                     {{-- 4. BOTTOM LEFT: Requester Info --}}
                                                     <div class="text-[12px] text-gray-600">
                                                         @if($requesterName)
-                                                            <p class="mb-1">Req. by <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
+                                                            <p class="mb-1">{{ __('app.req_by') }} <span class="font-medium text-gray-800">{{ $requesterName }}</span></p>
                                                         @endif
                                                         @if($requesterDept)
                                                             <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px] border border-gray-200">
@@ -445,7 +445,7 @@
                 @if($activeTab === 'ongoing')
                     @if($list->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                            Tidak ada booking ongoing dengan filter saat ini.
+                            {{ __('app.no_ongoing_filter') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5">
@@ -719,7 +719,7 @@
                                     @endif
                                 </button>
                             @empty
-                                <p class="text-xs text-gray-500">Tidak ada data ruangan.</p>
+                                <p class="text-xs text-gray-500">{{ __('app.no_room_data') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -751,7 +751,7 @@
 
                     {{-- Modal Body --}}
                     <div class="p-6 space-y-4">
-                        <p class="text-xs text-muted-foreground">Silakan berikan alasan penolakan. Field ini wajib diisi.</p>
+                        <p class="text-xs text-muted-foreground">{{ __('app.reject_reason_required') }}</p>
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
                             <textarea wire:model.live="rejectReason"
@@ -794,7 +794,7 @@
                         <div>
                             <h3 class="text-base font-bold text-foreground tracking-tight">Reschedule Booking</h3>
                             <p class="text-xs text-muted-foreground mt-0.5">
-                                Atur ulang jadwal dan ruangan. Alasan reschedule wajib diisi.
+                                {{ __('app.reschedule_reason_required') }}
                             </p>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeReschedule">✕</button>
@@ -802,28 +802,28 @@
 
                     <div class="p-6 space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Tanggal Baru</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.new_date') }}</label>
                             <input type="date" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleDate" required>
                             @error('rescheduleDate') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Jam Mulai</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.start_time_label') }}</label>
                                 <input type="time" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleStart" required>
                                 @error('rescheduleStart') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Jam Selesai</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.end_time_label') }}</label>
                                 <input type="time" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleEnd" required>
                                 @error('rescheduleEnd') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Ruangan (Opsional)</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.room') }} ({{ __('app.optional') }})</label>
                             <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleRoomId">
-                                <option value="">Pilih ruangan…</option>
+                                <option value="">{{ __('app.select_room') }}…</option>
                                 @foreach($roomsOptions as $r)
                                 <option value="{{ $r['id'] }}">{{ $r['label'] }}</option>
                                 @endforeach
@@ -840,10 +840,10 @@
 
                     <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
                         <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition" wire:click="closeReschedule" wire:loading.attr="disabled" wire:target="submitReschedule">
-                            cancel
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm" wire:loading.attr="disabled" wire:target="submitReschedule">
-                            Simpan Reschedule
+                            {{ __('app.save') }}
                         </button>
                     </div>
                 </form>
@@ -859,7 +859,7 @@
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
                         <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter & Recent</h3>
-                        <p class="text-[11px] text-muted-foreground mt-0.5">Filter berdasarkan ruangan & lihat aktivitas terbaru.</p>
+                        <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_room_recent') }}</p>
                     </div>
                     <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeFilterModal">✕</button>
                 </div>
@@ -903,7 +903,7 @@
                                     @endif
                                 </button>
                             @empty
-                                <p class="text-xs text-muted-foreground">Tidak ada data ruangan.</p>
+                                <p class="text-xs text-muted-foreground">{{ __('app.no_room_data') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -1001,7 +1001,7 @@
                         <div class="p-3 bg-muted/20 border border-border/60 rounded-xl space-y-2">
                             <div class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/90 flex items-center gap-1.5">
                                 <x-heroicon-o-check-badge class="w-4 h-4 text-primary" />
-                                <span>Daftar Kebutuhan:</span>
+                                <span>{{ __('app.requirements_list') }}:</span>
                                 @if ($loadedFromBugged)
                                     <span class="text-[9px] text-rose-500 font-bold lowercase">(workaround loaded)</span>
                                 @endif
@@ -1019,7 +1019,7 @@
                             @if ($isSpecialNotesBugged)
                             <div class="p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive">
                                 <p class="font-bold flex items-center gap-1.5"><x-heroicon-o-exclamation-triangle class="w-4 h-4 text-destructive" /> BUG DATA DETECTED</p>
-                                <p class="mt-1 leading-relaxed text-[11px] opacity-90">Sistem gagal memuat Daftar Kebutuhan secara standar karena format data tidak kompatibel di database.</p>
+                                <p class="mt-1 leading-relaxed text-[11px] opacity-90">{{ __('app.bug_data_msg') }}</p>
                             </div>
                             @endif
                         @endif
@@ -1042,7 +1042,7 @@
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-user-group class="w-3.5 h-3.5 text-muted-foreground/60" />
-                                    <span>Jumlah Peserta</span>
+                                    <span>{{ __('app.attendees_count') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground">{{ $detail->number_of_attendees }}</p>
                             </div>

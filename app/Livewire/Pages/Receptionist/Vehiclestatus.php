@@ -45,6 +45,13 @@ class Vehiclestatus extends Component
     public ?int $rejectId = null;
     public string $rejectNote = '';
 
+    // Reject result popup state
+    public bool $showRejectResult = false;
+    public string $rejectResultType = 'success'; // 'success' | 'error'
+    public string $rejectResultTitle = '';
+    public string $rejectResultMessage = '';
+    public ?int $rejectResultBookingId = null;
+
     // *** BARU: Detail modal state ***
     public bool $showDetailModal = false;
     public ?VehicleBooking $selectedBooking = null;
@@ -169,19 +176,19 @@ class Vehiclestatus extends Component
                     ->findOrFail($id);
 
                 if ($b->status !== 'pending') {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} bukan status pending.");
+                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} is not in pending status.");
                 }
                 $b->status = 'approved';
                 $b->save();
             });
 
-            $this->dispatch('toast', type: 'success', title: 'Approved', message: 'Booking disetujui.');
+            $this->dispatch('toast', type: 'success', title: 'Approved', message: 'Booking has been approved.');
             $this->resetPage();
         } catch (\RuntimeException $e) {
-            $this->dispatch('toast', type: 'warning', title: 'Tidak Bisa Disetujui', message: $e->getMessage());
+            $this->dispatch('toast', type: 'warning', title: 'Cannot Approve', message: $e->getMessage());
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal menyetujui: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to approve: ' . $e->getMessage());
         }
     } 
 
@@ -204,46 +211,74 @@ class Vehiclestatus extends Component
     /** Validate + perform rejection with required note */
     public function submitReject(): void
     {
-        $data = $this->validate([
+        $this->validate([
             'rejectNote' => 'required|string|min:5|max:2000',
-            'rejectId' => 'required|integer',
+            'rejectId'   => 'required|integer',
         ]);
 
+        $bookingId = (int) $this->rejectId;
+        $reason    = trim($this->rejectNote);
+        $prefix    = '[Rejected] ';
+
         try {
-            DB::transaction(function () use ($data) {
-                /** @var VehicleBooking $b */
-                $b = VehicleBooking::lockForUpdate()
-                    ->when($this->includeDeleted, fn($q) => $q->withTrashed())
-                    ->findOrFail($data['rejectId']);
+            $fullNote = $prefix . $reason;
 
-                if ($b->status !== 'pending') {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} bukan status pending.");
-                }
+            // Single atomic UPDATE — no SELECT needed, checks status in the WHERE clause.
+            // Uses a parameterized expression to safely append the rejection note.
+            $affected = DB::table('vehicle_bookings')
+                ->where('vehiclebooking_id', $bookingId)
+                ->where('status', 'pending')
+                ->when(!$this->includeDeleted, fn($q) => $q->whereNull('deleted_at'))
+                ->update([
+                    'status' => 'rejected',
+                    'notes'  => DB::raw(
+                        "TRIM(CONCAT(COALESCE(notes, ''), IF(COALESCE(notes, '') = '', '', '\n'), " .
+                        DB::getPdo()->quote($fullNote) . "))"
+                    ),
+                ]);
 
-                // Store reason in `notes` (adjust if you have a dedicated reject column)
-                $prefix = '[Rejected] ';
-                $reason = trim($data['rejectNote']);
-                // Check if notes already exists to append it nicely
-                $b->notes = trim(($b->notes ? $b->notes . "\n" : '') . $prefix . $reason);
-                $b->status = 'rejected';
-                $b->save();
-            });
+            if ($affected === 0) {
+                throw new \RuntimeException("Booking #{$bookingId} could not be rejected — it may no longer be in pending status.");
+            }
 
-            $this->showRejectModal = false;
-            $this->rejectId = null;
-            $this->rejectNote = '';
+            $this->showRejectModal   = false;
+            $this->rejectResultType  = 'success';
+            $this->rejectResultTitle = 'Booking Rejected';
+            $this->rejectResultMessage   = "Booking #{$bookingId} has been successfully rejected with a reason.";
+            $this->rejectResultBookingId = $bookingId;
+            $this->showRejectResult  = true;
 
-            $this->dispatch('toast', type: 'info', title: 'Rejected', message: 'Booking ditolak dengan alasan.');
-            $this->resetPage();
+            // Optimistically remove the card from the current list without a full re-render
+            $this->dispatch('booking-rejected', id: $bookingId);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Re-throw validation errors to be caught by Livewire/Blade error messages
             throw $e;
         } catch (\RuntimeException $e) {
-            $this->dispatch('toast', type: 'warning', title: 'Tidak Bisa Ditolak', message: $e->getMessage());
+            $this->showRejectModal        = false;
+            $this->rejectResultType       = 'error';
+            $this->rejectResultTitle      = 'Cannot Reject';
+            $this->rejectResultMessage    = $e->getMessage();
+            $this->rejectResultBookingId  = $bookingId;
+            $this->showRejectResult       = true;
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal menolak: ' . $e->getMessage());
+            $this->showRejectModal        = false;
+            $this->rejectResultType       = 'error';
+            $this->rejectResultTitle      = 'Error';
+            $this->rejectResultMessage    = 'Failed to reject: ' . $e->getMessage();
+            $this->rejectResultBookingId  = $bookingId;
+            $this->showRejectResult       = true;
         }
+    }
+
+    public function closeRejectResult(): void
+    {
+        $this->showRejectResult = false;
+        $this->rejectResultTitle = '';
+        $this->rejectResultMessage = '';
+        $this->rejectResultBookingId = null;
+        $this->rejectId = null;
+        $this->rejectNote = '';
     }
 
     public function markReturned(int $id): void
@@ -254,19 +289,19 @@ class Vehiclestatus extends Component
                     ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
                 if (!in_array($b->status, ['approved', 'on_progress'], true)) {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} belum on progress.");
+                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} is not yet on progress.");
                 }
                 $b->status = 'returned';
                 $b->save();
             });
 
-            $this->dispatch('toast', type: 'success', title: 'Returned', message: 'Status diubah ke Returned.');
+            $this->dispatch('toast', type: 'success', title: 'Returned', message: 'Status updated to Returned.');
             $this->resetPage();
         } catch (\RuntimeException $e) {
-            $this->dispatch('toast', type: 'warning', title: 'Tidak Bisa', message: $e->getMessage());
+            $this->dispatch('toast', type: 'warning', title: 'Cannot Update', message: $e->getMessage());
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal update: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to update: ' . $e->getMessage());
         }
     }
 
@@ -278,25 +313,25 @@ class Vehiclestatus extends Component
                     ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
                 if ($b->status !== 'returned') {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} belum Returned.");
+                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} has not been returned yet.");
                 }
                 $afterCount = VehicleBookingPhoto::where('vehiclebooking_id', $b->vehiclebooking_id)
                     ->where('photo_type', 'after')
                     ->count();
                 if ($afterCount < 1) {
-                    throw new \RuntimeException('Upload minimal 1 foto AFTER terlebih dahulu.');
+                    throw new \RuntimeException('Please upload at least 1 AFTER photo first.');
                 }
                 $b->status = 'completed';
                 $b->save();
             });
 
-            $this->dispatch('toast', type: 'success', title: 'Completed', message: 'Booking ditandai selesai.');
+            $this->dispatch('toast', type: 'success', title: 'Completed', message: 'Booking marked as completed.');
             $this->resetPage();
         } catch (\RuntimeException $e) {
-            $this->dispatch('toast', type: 'warning', title: 'Tidak Bisa', message: $e->getMessage());
+            $this->dispatch('toast', type: 'warning', title: 'Cannot Complete', message: $e->getMessage());
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal update: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to update: ' . $e->getMessage());
         }
     }
 
@@ -331,7 +366,7 @@ class Vehiclestatus extends Component
 
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal memuat detail: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to load details: ' . $e->getMessage());
         }
     }
 

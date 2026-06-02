@@ -31,7 +31,7 @@
                 <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
-                <span>Data dokumen berhasil disimpan.</span>
+                <span>{{ __('app.doc_saved') }}</span>
             </div>
         @endif
 
@@ -48,8 +48,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg sm:text-xl font-semibold">Dokumen</h2>
-                        <p class="text-xs text-[#CDDEA7]/80">Kelola dokumen masuk & pengiriman hari ini</p>
+                        <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.docpac_form_title') }}</h2>
+                        <p class="text-xs text-[#CDDEA7]/80">{{ __('app.complete_doc_data') }}</p>
                     </div>
                 </div>
             </div>
@@ -61,16 +61,16 @@
                     <x-heroicon-o-plus-circle class="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-foreground">Tambah Dokumen</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Lengkapi data dokumen</p>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __('app.add_document') }}</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.complete_doc_data') }}</p>
                 </div>
             </div>
 
             <form wire:submit.prevent="save" class="p-6 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="{{ $label }}">Nama Dokumen</label>
-                        <input type="text" wire:model.defer="document_name" class="{{ $input }}" placeholder="Contoh: Surat Perintah">
+                        <label class="{{ $label }}">{{ __('app.document_name_label') }}</label>
+                        <input type="text" wire:model.defer="document_name" class="{{ $input }}" placeholder="{{ __('app.document_name_ph') }}">
                         @error('document_name') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -91,18 +91,18 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="{{ $label }}">Nama Pengirim</label>
-                        <input type="text" wire:model.defer="nama_pengirim" class="{{ $input }}" placeholder="Instansi/Orang pengirim">
+                        <label class="{{ $label }}">{{ __('app.sender_name') }}</label>
+                        <input type="text" wire:model.defer="nama_pengirim" class="{{ $input }}" placeholder="{{ __('app.sender_name_ph') }}">
                     </div>
                     <div>
-                        <label class="{{ $label }}">Nama Penerima</label>
-                        <input type="text" wire:model.defer="nama_penerima" class="{{ $input }}" placeholder="Penerima internal">
+                        <label class="{{ $label }}">{{ __('app.receiver_name') }}</label>
+                        <input type="text" wire:model.defer="nama_penerima" class="{{ $input }}" placeholder="{{ __('app.receiver_name_ph') }}">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="{{ $label }}">Penyimpanan</label>
+                        <label class="{{ $label }}">{{ __('app.storage') }}</label>
                         <div class="relative">
                             <select wire:model.defer="penyimpanan" class="{{ $input }} appearance-none pr-8">
                                 <option value="">-</option>
@@ -117,7 +117,7 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Tanggal & Jam Pengambilan</label>
+                        <label class="{{ $label }}">{{ __('app.pickup_datetime') }}</label>
                         <div class="flex items-center gap-3">
                             <input type="date" wire:model.defer="pengambilan_date" class="{{ $input }} w-full">
                             <input type="time" wire:model.defer="pengambilan_time" class="{{ $input }} w-full">
@@ -142,7 +142,7 @@
                         </div>
                         @error('status') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                         <p class="text-[11px] text-muted-foreground mt-1.5 font-semibold">
-                            Jika pilih <b>Delivered</b>, data langsung masuk ke kotak Riwayat (ditandai waktu sekarang).
+                            {!! __('app.doc_status_hint') !!}
                         </p>
                     </div>
                 </div>
@@ -161,11 +161,11 @@
                         class="inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 relative overflow-hidden">
                         <span class="flex items-center gap-2" wire:loading.remove wire:target="save">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Simpan Data</span>
+                            <span>{{ __('app.save_data') }}</span>
                         </span>
                         <span class="flex items-center gap-2" wire:loading wire:target="save">
                             <x-heroicon-o-arrow-path class="animate-spin h-4 w-4 text-white" />
-                            <span>Menyimpan…</span>
+                            <span>{{ __('app.saving_data') }}</span>
                         </span>
                     </button>
                 </div>
@@ -178,8 +178,8 @@
                     <x-heroicon-o-archive-box-arrow-down class="w-4.5 h-4.5 text-amber-500" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-foreground">Dokumen Pending</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Menampilkan semua dokumen berstatus pending</p>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __('app.doc_pending_title') }}</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.doc_pending_sub') }}</p>
                 </div>
             </div>
             <div class="p-6 space-y-4">
@@ -201,8 +201,8 @@
                         <div class="flex items-center gap-2 shrink-0">
                             <button wire:click="openEdit({{ $r->document_id }})" wire:loading.attr="disabled"
                                 wire:target="openEdit({{ $r->document_id }})" class="{{ $btnBlk }}">
-                                <span wire:loading.remove wire:target="openEdit({{ $r->document_id }})">Edit</span>
-                                <span wire:loading wire:target="openEdit({{ $r->document_id }})">Memuat…</span>
+                                <span wire:loading.remove wire:target="openEdit({{ $r->document_id }})">{{ __('app.edit') }}</span>
+                                <span wire:loading wire:target="openEdit({{ $r->document_id }})">{{ __('app.loading_label') }}</span>
                             </button>
 
                             <button wire:click="setSudahDikirim({{ $r->document_id }})" wire:loading.attr="disabled"
@@ -215,13 +215,13 @@
                                         <path class="opacity-75" fill="currentColor"
                                             d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
                                     </svg>
-                                    <span>Sudah dikirim</span>
+                                    <span>{{ __('app.already_sent') }}</span>
                                 </span>
                             </button>
                         </div>
                     </div>
                 @empty
-                    <div class="text-center py-10 text-muted-foreground text-sm font-medium">Tidak ada pending.</div>
+                    <div class="text-center py-10 text-muted-foreground text-sm font-medium">{{ __('app.no_pending') }}</div>
                 @endforelse
             </div>
         </div>
@@ -232,8 +232,8 @@
                     <x-heroicon-o-check-badge class="w-4.5 h-4.5 text-emerald-500" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-foreground">Riwayat Dokumen</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Hanya dokumen yang sudah dikirim</p>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __('app.doc_history_title') }}</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.doc_history_sub') }}</p>
                 </div>
             </div>
 
@@ -246,7 +246,7 @@
                 </div>
                 <div class="relative flex-1 w-full">
                     <input type="text" wire:model.live="q"
-                        placeholder="Cari nama dokumen / pengirim / penerima / type / penyimpanan / status..."
+                        placeholder="{{ __('app.doc_search_ph') }}"
                         class="{{ $input }} pl-10">
                     <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
                         <x-heroicon-o-magnifying-glass class="w-4.5 h-4.5" />
@@ -267,10 +267,10 @@
                                     <div class="flex items-center gap-2 mb-2 flex-wrap">
                                         <h4 class="font-bold text-foreground text-base truncate">{{ $e->document_name }}</h4>
                                         @if ($e->nama_pengirim)
-                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Dari: {{ $e->nama_pengirim }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">{{ __('app.sender') }}: {{ $e->nama_pengirim }}</span>
                                         @endif
                                         @if ($e->nama_penerima)
-                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Ke: {{ $e->nama_penerima }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">{{ __('app.receiver') }}: {{ $e->nama_penerima }}</span>
                                         @endif
                                     </div>
 
@@ -300,7 +300,7 @@
                                             <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                             </svg>
-                                            <span>Dikirim: {{ optional($e->pengiriman)->format('d M Y H:i') }}</span>
+                                            <span>{{ __('app.sent_label') }} {{ optional($e->pengiriman)->format('d M Y H:i') }}</span>
                                         </span>
                                         <span class="flex items-center gap-1.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,22 +320,22 @@
                                 <div class="flex flex-wrap gap-2 justify-end">
                                     <button wire:click="openEdit({{ $e->document_id }})" wire:loading.attr="disabled"
                                         wire:target="openEdit({{ $e->document_id }})" class="{{ $btnBlk }}">
-                                        <span wire:loading.remove wire:target="openEdit({{ $e->document_id }})">Edit</span>
-                                        <span wire:loading wire:target="openEdit({{ $e->document_id }})">Memuat…</span>
+                                        <span wire:loading.remove wire:target="openEdit({{ $e->document_id }})">{{ __('app.edit') }}</span>
+                                        <span wire:loading wire:target="openEdit({{ $e->document_id }})">{{ __('app.loading_label') }}</span>
                                     </button>
                                     <button wire:click="delete({{ $e->document_id }})"
-                                        onclick="return confirm('Hapus dokumen ini?')" wire:loading.attr="disabled"
+                                        onclick="return confirm('{{ __('app.delete_document_confirm') }}')" wire:loading.attr="disabled"
                                         wire:target="delete({{ $e->document_id }})"
                                         class="inline-flex items-center justify-center gap-1.5 px-3.5 h-8 text-xs font-semibold rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition shadow-sm">
-                                        <span wire:loading.remove wire:target="delete({{ $e->document_id }})">Hapus</span>
-                                        <span wire:loading wire:target="delete({{ $e->document_id }})">Menghapus…</span>
+                                        <span wire:loading.remove wire:target="delete({{ $e->document_id }})">{{ __('app.delete') }}</span>
+                                        <span wire:loading wire:target="delete({{ $e->document_id }})">{{ __('app.deleting_label') }}</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="px-6 py-14 text-center text-muted-foreground text-sm font-medium">Tidak ada riwayat dokumen.</div>
+                    <div class="px-6 py-14 text-center text-muted-foreground text-sm font-medium">{{ __('app.no_doc_history') }}</div>
                 @endforelse
             </div>
 
@@ -357,7 +357,7 @@
                     </div>
                     <div class="relative z-10 flex items-center justify-between">
                         <div>
-                            <h3 class="text-base font-bold tracking-tight">Edit Dokumen</h3>
+                            <h3 class="text-base font-bold tracking-tight">{{ __('app.edit_document') }}</h3>
                             <div class="flex items-center gap-2 mt-1">
                                 <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                                 <p class="text-[10px] text-slate-300 font-semibold font-mono tracking-wider">{{ $this->serverClock }}</p>
@@ -372,8 +372,8 @@
 
                 <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div class="space-y-1.5">
-                        <label class="{{ $label }}">Nama Dokumen</label>
-                        <input type="text" wire:model="edit.document_name" class="{{ $editIn }}" placeholder="Nama dokumen">
+                        <label class="{{ $label }}">{{ __('app.document_name_label') }}</label>
+                        <input type="text" wire:model="edit.document_name" class="{{ $editIn }}" placeholder="{{ __('app.document_name_ph') }}">
                         @error('edit.document_name') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
@@ -393,13 +393,13 @@
                             @error('edit.type') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1.5">
-                            <label class="{{ $label }}">Penyimpanan</label>
+                            <label class="{{ $label }}">{{ __('app.storage') }}</label>
                             <input type="text" wire:model="edit.penyimpanan" class="{{ $editIn }}" placeholder="Rak/Box">
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="{{ $label }}">Pengambilan</label>
+                        <label class="{{ $label }}">{{ __('app.pickup_label') }}</label>
                         <div class="flex items-center gap-3">
                             <input type="date" wire:model="edit.pengambilan_date" class="{{ $editIn }} w-full">
                             <input type="time" wire:model="edit.pengambilan_time" class="{{ $editIn }} w-full">
@@ -408,27 +408,27 @@
                         @error('edit.pengambilan_time') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                         <div class="bg-primary/5 rounded-2xl p-4 border border-primary/20 mt-2">
                             <p class="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                                💡 <span class="font-bold text-foreground">Tips:</span> Klik <span class="font-bold text-primary">Sudah dikirim</span> di daftar Pending/Taken untuk pakai waktu real-time pengiriman.
+                                💡 <span class="font-bold text-foreground">{{ __('app.tips_label') }}</span> {!! __('app.tips_sent_realtime') !!}
                             </p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3.5">
                         <div class="space-y-1.5">
-                            <label class="{{ $label }}">Pengiriman</label>
+                            <label class="{{ $label }}">{{ __('app.delivery_label') }}</label>
                             <input type="datetime-local" wire:model="edit.pengiriman" class="{{ $editIn }}">
                             @error('edit.pengiriman') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1.5">
-                            <label class="{{ $label }}">Nama Pengirim</label>
-                            <input type="text" wire:model="edit.nama_pengirim" class="{{ $editIn }}" placeholder="Pengirim">
+                            <label class="{{ $label }}">{{ __('app.sender_name') }}</label>
+                            <input type="text" wire:model="edit.nama_pengirim" class="{{ $editIn }}" placeholder="{{ __('app.sender_name_ph') }}">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3.5">
                         <div class="space-y-1.5">
-                            <label class="{{ $label }}">Nama Penerima</label>
-                            <input type="text" wire:model="edit.nama_penerima" class="{{ $editIn }}" placeholder="Penerima">
+                            <label class="{{ $label }}">{{ __('app.receiver_name') }}</label>
+                            <input type="text" wire:model="edit.nama_penerima" class="{{ $editIn }}" placeholder="{{ __('app.receiver_name_ph') }}">
                         </div>
                         <div class="space-y-1.5">
                             <label class="{{ $label }}">Status</label>
@@ -444,7 +444,7 @@
                             </div>
                             @error('edit.status') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                             <p class="text-[11px] text-muted-foreground mt-1.5 font-semibold">
-                                Akan otomatis menjadi <b>Delivered</b> bila <b>Pengiriman</b> diisi.
+                                {!! __('app.doc_status_auto_hint') !!}
                             </p>
                         </div>
                     </div>
@@ -452,16 +452,16 @@
 
                 <div class="bg-muted/10 border-t border-border p-6 flex items-center justify-end gap-2.5">
                     <button type="button" wire:click="closeEdit"
-                        class="px-4 h-10 rounded-lg border border-border text-muted-foreground text-xs font-semibold hover:text-foreground hover:bg-muted transition">cancel</button>
+                        class="px-4 h-10 rounded-lg border border-border text-muted-foreground text-xs font-semibold hover:text-foreground hover:bg-muted transition">{{ __('app.cancel') }}</button>
                     <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
                         class="inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 relative overflow-hidden">
                         <span wire:loading.remove wire:target="saveEdit" class="flex items-center gap-1.5">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Simpan Perubahan</span>
+                            <span>{{ __('app.save_changes') }}</span>
                         </span>
                         <span wire:loading wire:target="saveEdit" class="flex items-center gap-2">
                             <x-heroicon-o-arrow-path class="animate-spin h-4 w-4 text-white" />
-                            <span>Menyimpan…</span>
+                            <span>{{ __('app.saving') }}</span>
                         </span>
                     </button>
                 </div>

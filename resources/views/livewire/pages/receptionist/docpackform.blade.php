@@ -53,11 +53,11 @@
                 {{-- Row: Direction & Type & Storage --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
-                        <label class="{{ $label }}">Arah</label>
+                        <label class="{{ $label }}">{{ __('app.type') }}</label>
                         <div class="relative">
                             <select class="{{ $input }} appearance-none pr-8" wire:model.live="direction" wire:key="direction-select">
-                                <option value="taken">Masuk untuk internal (Taken)</option>
-                                <option value="deliver">Titip untuk dikirim (Deliver later)</option>
+                                <option value="taken">{{ __('app.incoming') }} (Taken)</option>
+                                <option value="deliver">{{ __('app.outgoing') }} (Deliver later)</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -67,7 +67,7 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Tipe</label>
+                        <label class="{{ $label }}">{{ __('app.type') }}</label>
                         <div class="relative">
                             <select class="{{ $input }} appearance-none pr-8" wire:model.live="itemType" wire:key="type-select">
                                 <option value="package">Package</option>
@@ -81,10 +81,10 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Tempat Penyimpanan</label>
+                        <label class="{{ $label }}">{{ __('app.storage_location') }}</label>
                         <div class="relative">
                             <select class="{{ $input }} appearance-none pr-8" wire:model.defer="storageId" wire:key="storage-select">
-                                <option value="">Pilih penyimpanan…</option>
+                                <option value="">{{ __('app.select_storage') }}</option>
                                 @foreach($storages as $s)
                                     <option wire:key="storage-{{ $s['id'] }}" value="{{ $s['id'] }}">{{ $s['name'] }}</option>
                                 @endforeach
@@ -99,8 +99,8 @@
 
                 {{-- Item name --}}
                 <div>
-                    <label class="{{ $label }}">Nama Paket/Dokumen</label>
-                    <input type="text" class="{{ $input }}" wire:model.defer="itemName" placeholder="Contoh: Dokumen Kontrak PT ABC">
+                    <label class="{{ $label }}">{{ __('app.item_name_label') }}</label>
+                    <input type="text" class="{{ $input }}" wire:model.defer="itemName" placeholder="{{ __('app.item_name_placeholder') }}">
                     @error('itemName') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                 </div>
 
@@ -108,11 +108,11 @@
                     <div class="space-y-5">
                         <div>
                             <label class="{{ $label }}">
-                                {{ $direction === 'taken' ? 'Departemen Penerima' : 'Departemen Pengirim' }}
+                                {{ $direction === 'taken' ? __('app.receiver_dept') : __('app.sender_dept') }}
                             </label>
                             <div class="relative">
                                 <select class="{{ $input }} appearance-none pr-8" wire:model.live="departmentId" wire:key="dept-select">
-                                    <option value="">Pilih departemen…</option>
+                                    <option value="">{{ __('app.select_department') }}…</option>
                                     @foreach($departments as $d)
                                         <option wire:key="dept-{{ $d['id'] }}" value="{{ $d['id'] }}">{{ $d['name'] }}</option>
                                     @endforeach
@@ -126,7 +126,7 @@
 
                         <div>
                             <label class="{{ $label }}">
-                                {{ $direction === 'taken' ? 'Nama Penerima (User)' : 'Nama Pengirim (User)' }}
+                                {{ $direction === 'taken' ? __('app.receiver_user') : __('app.sender_user') }}
                             </label>
                             <div class="relative">
                                 <select
@@ -136,7 +136,7 @@
                                     @disabled(!$departmentId || empty($users))
                                 >
                                     <option value="" selected disabled>
-                                        {{ !$departmentId ? 'Pilih departemen dulu…' : (empty($users) ? 'Tidak ada user pada departemen ini' : 'Pilih user…') }}
+                                        {{ !$departmentId ? __('app.select_dept_first_ph') : (empty($users) ? __('app.no_users_dept_ph') : __('app.select_user_ph')) }}
                                     </option>
                                     @if($departmentId && !empty($users))
                                         @foreach($users as $id => $name)
@@ -155,14 +155,14 @@
                     <div class="space-y-5">
                         @if ($direction === 'taken')
                             <div>
-                                <label class="{{ $label }}">Nama Pengirim (Free Text)</label>
-                                <input type="text" class="{{ $input }}" wire:model.defer="senderText" placeholder="Kurir / Ekspedisi / Pengirim">
+                                <label class="{{ $label }}">{{ __('app.sender_freetext') }}</label>
+                                <input type="text" class="{{ $input }}" wire:model.defer="senderText" placeholder="{{ __('app.sender_placeholder') }}">
                                 @error('senderText') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                             </div>
                         @else
                             <div>
-                                <label class="{{ $label }}">Nama Penerima (Free Text)</label>
-                                <input type="text" class="{{ $input }}" wire:model.defer="receiverText" placeholder="Nama penerima">
+                                <label class="{{ $label }}">{{ __('app.receiver_freetext') }}</label>
+                                <input type="text" class="{{ $input }}" wire:model.defer="receiverText" placeholder="{{ __('app.receiver_placeholder') }}">
                                 @error('receiverText') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                             </div>
                         @endif
@@ -171,7 +171,7 @@
 
                 {{-- FOTO BUKTI --}}
                 <div>
-                    <label class="{{ $label }}">Bukti Foto <span class="text-muted-foreground/60 font-normal">(opsional)</span></label>
+                    <label class="{{ $label }}">{{ __('app.photo_proof') }} <span class="text-muted-foreground/60 font-normal">({{ __('app.optional') }})</span></label>
 
                     <div class="space-y-3.5">
                         {{-- upload biasa (galeri / file explorer) --}}
@@ -191,7 +191,7 @@
                             id="open-camera-btn"
                             class="inline-flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 transition">
                             <x-heroicon-o-camera class="w-4 h-4" />
-                            <span>Ambil dari kamera</span>
+                            <span>{{ __('app.take_from_camera') }}</span>
                         </button>
 
                         {{-- preview --}}
@@ -203,7 +203,7 @@
                         @endif
 
                         <p class="text-[11px] text-muted-foreground">
-                            Di HP: bisa pakai kamera atau galeri. Di laptop/PC: klik "Ambil dari kamera", beri izin akses kamera.
+                            {{ __('app.take_from_camera') }}.
                         </p>
                     </div>
                 </div>
@@ -213,11 +213,11 @@
                     <button type="submit" class="{{ $btnBlk }}" wire:loading.attr="disabled" wire:target="save,photo">
                         <span wire:loading.remove wire:target="save,photo" class="inline-flex items-center gap-2">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Simpan</span>
+                            <span>{{ __('app.save') }}</span>
                         </span>
                         <span wire:loading wire:target="save,photo" class="inline-flex items-center gap-2">
                             <x-heroicon-o-arrow-path class="animate-spin h-4 w-4 text-white" />
-                            <span>Menyimpan…</span>
+                            <span>{{ __('app.saving') }}</span>
                         </span>
                     </button>
                 </div>
@@ -233,7 +233,7 @@
             <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-sm font-semibold text-foreground">Kamera Aktif</span>
+                    <span class="text-sm font-semibold text-foreground">{{ __('app.camera_active') }}</span>
                 </div>
                 <button id="close-camera-btn" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition">
                     <x-heroicon-o-x-mark class="w-4.5 h-4.5" />

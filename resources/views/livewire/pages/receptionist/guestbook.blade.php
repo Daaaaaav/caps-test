@@ -54,8 +54,8 @@
                     <x-heroicon-o-plus class="w-4.5 h-4.5 text-[#4E653D]" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900">Tambah Entri Baru</h3>
-                    <p class="text-xs text-gray-500 mt-0.5 font-medium">Lengkapi data kunjungan tamu hari ini.</p>
+                    <h3 class="text-sm font-semibold text-gray-900">{{ __('app.add_new_entry') }}</h3>
+                    <p class="text-xs text-gray-500 mt-0.5 font-medium">{{ __('app.add_entry_subtitle') }}</p>
                 </div>
             </div>
 
@@ -64,52 +64,52 @@
                 <div class="flex flex-wrap items-center gap-2.5 text-xs">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#4E653D]/10 border border-[#4E653D]/25 text-[#4E653D] font-semibold shadow-sm">
                         <x-heroicon-o-calendar class="w-3.5 h-3.5" />
-                        Tanggal otomatis
+                        {{ __('app.auto_date') }}
                     </span>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#4E653D]/10 border border-[#4E653D]/25 text-[#4E653D] font-semibold shadow-sm">
                         <x-heroicon-o-clock class="w-3.5 h-3.5" />
-                        Jam masuk otomatis
+                        {{ __('app.auto_time_in') }}
                     </span>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 border border-gray-200 text-gray-600 font-semibold shadow-sm">
                         <x-heroicon-o-user class="w-3.5 h-3.5" />
-                        Petugas: {{ auth()->user()->full_name ?? auth()->user()->name ?? 'Receptionist' }}
+                        {{ __('app.officer') }}: {{ auth()->user()->full_name ?? auth()->user()->name ?? 'Receptionist' }}
                     </span>
                 </div>
 
                 {{-- Grid Form Tamu --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
-                        <label class="{{ $label }}">Nama Lengkap <span class="text-rose-500">*</span></label>
-                        <input type="text" wire:model.defer="name" placeholder="Masukkan nama lengkap" class="{{ $input }}">
+                        <label class="{{ $label }}">{{ __('app.full_name') }} <span class="text-rose-500">*</span></label>
+                        <input type="text" wire:model.defer="name" placeholder="{{ __('app.full_name_placeholder') }}" class="{{ $input }}">
                         @error('name') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Nomor HP</label>
-                        <input type="text" wire:model.defer="phone_number" placeholder="08xxxxxxxxxx" class="{{ $input }}">
+                        <label class="{{ $label }}">{{ __('app.phone') }}</label>
+                        <input type="text" wire:model.defer="phone_number" placeholder="{{ __('app.phone_placeholder') }}" class="{{ $input }}">
                         @error('phone_number') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Nama Instansi</label>
-                        <input type="text" wire:model.defer="instansi" placeholder="Nama instansi/perusahaan" class="{{ $input }}">
+                        <label class="{{ $label }}">{{ __('app.institution') }}</label>
+                        <input type="text" wire:model.defer="instansi" placeholder="{{ __('app.institution_placeholder') }}" class="{{ $input }}">
                         @error('instansi') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Keperluan <span class="text-rose-500">*</span></label>
-                        <input type="text" wire:model.defer="keperluan" placeholder="Tujuan kunjungan" class="{{ $input }}">
+                        <label class="{{ $label }}">{{ __('app.visit_purpose') }} <span class="text-rose-500">*</span></label>
+                        <input type="text" wire:model.defer="keperluan" placeholder="{{ __('app.visit_purpose_placeholder') }}" class="{{ $input }}">
                         @error('keperluan') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Departemen yang Dituju --}}
                     <div>
                         <label class="{{ $label }}">
-                            Departemen yang Dituju <span class="text-gray-400 font-normal">(Opsional)</span>
+                            {{ __('app.target_department_opt') }}
                         </label>
                         <div class="relative">
                             <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="">-- Pilih Departemen --</option>
+                                <option value="">{{ __('app.select_department_opt') }}</option>
                                 @foreach($departments_list as $dept)
                                     <option value="{{ $dept->id }}">{{ $dept->name ?? $dept->nama_departemen ?? 'Dept #'.$dept->id }}</option>
                                 @endforeach
@@ -124,13 +124,13 @@
                     {{-- Bertemu dengan --}}
                     <div>
                         <label class="{{ $label }}">
-                            Bertemu dengan <span class="text-gray-400 font-normal">(Opsional)</span>
+                            {{ __('app.meet_with_opt') }}
                         </label>
                         <div class="relative">
                             <select wire:model.defer="user_id"
                                     class="{{ $input }} appearance-none pr-8 disabled:bg-gray-100 disabled:text-gray-400"
                                     @if(empty($users_list) && $department_id) disabled @endif>
-                                <option value="">-- Pilih Pegawai --</option>
+                                <option value="">{{ __('app.select_employee') }}</option>
                                 @foreach($users_list as $user)
                                     <option value="{{ $user->id }}">{{ $user->full_name ?? $user->name }}</option>
                                 @endforeach
@@ -140,7 +140,7 @@
                             </div>
                         </div>
                         @if(empty($users_list) && $department_id)
-                            <p class="mt-1.5 text-xs text-amber-600 font-semibold">Tidak ada user di departemen ini.</p>
+                            <p class="mt-1.5 text-xs text-amber-600 font-semibold">{{ __('app.no_users_dept') }}</p>
                         @endif
                         @error('user_id') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
@@ -151,21 +151,21 @@
                     @if (session('saved'))
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 text-xs font-bold shadow-sm">
                             <x-heroicon-o-check class="w-3.5 h-3.5 font-bold" />
-                            <span>Data Tersimpan!</span>
+                            <span>{{ __('app.data_saved') }}</span>
                         </span>
                     @endif
 
                     <button type="submit" wire:loading.attr="disabled" wire:target="save" class="{{ $btnBlk }}">
                         <span class="flex items-center gap-2" wire:loading.remove wire:target="save">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Simpan Data</span>
+                            <span>{{ __('app.save_data') }}</span>
                         </span>
                         <span class="flex items-center gap-2 animate-pulse" wire:loading wire:target="save">
                             <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span>Menyimpan…</span>
+                            <span>{{ __('app.saving_data') }}</span>
                         </span>
                     </button>
                 </div>

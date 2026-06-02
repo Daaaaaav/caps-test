@@ -4,19 +4,19 @@
 
         if (!function_exists('fmtDate')) {
             function fmtDate($v){
-                try { return $v ? Carbon::parse($v)->format('d M Y') : '—'; }
-                catch(\Throwable){ return '—'; }
+                try { return $v ? Carbon::parse($v)->format('d M Y') : '-'; }
+                catch(\Throwable){ return '-'; }
             }
         }
 
         if (!function_exists('fmtTime')) {
             function fmtTime($v){
-                try { return $v ? Carbon::parse($v)->format('H:i') : '—'; }
+                try { return $v ? Carbon::parse($v)->format('H:i') : '-'; }
                 catch(\Throwable){
                     if (is_string($v) && preg_match('/^\d{2}:\d{2}/',$v)) {
                         return substr($v,0,5);
                     }
-                    return '—';
+                    return '-';
                 }
             }
         }
@@ -108,7 +108,7 @@
                                             {{ $activeTab === 'entries'
                                                 ? 'bg-[#4E653D] text-white shadow-sm'
                                                 : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Riwayat Kunjungan
+                                    {{ __('app.visit_list') }}
                                 </button>
                                 <button type="button"
                                         wire:click="setTab('latest')"
@@ -116,22 +116,22 @@
                                             {{ $activeTab === 'latest'
                                                 ? 'bg-[#4E653D] text-white shadow-sm'
                                                 : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Kunjungan Terbaru
+                                    {{ __('app.recent_visits') }}
                                 </button>
                             </div>
 
                             {{-- Layout Toggler --}}
                             <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
-                                <button type="button" 
-                                        wire:click="setViewMode('card')" 
+                                <button type="button"
+                                        wire:click="setViewMode('card')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'card' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Card View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                     </svg>
                                 </button>
-                                <button type="button" 
-                                        wire:click="setViewMode('table')" 
+                                <button type="button"
+                                        wire:click="setViewMode('table')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'table' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Table View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -148,7 +148,7 @@
                             @if($petugasFilter)
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30 font-medium">
                                     <x-heroicon-o-user class="w-3.5 h-3.5"/>
-                                    <span>Petugas: {{ $petugasFilter }}</span>
+                                    <span>{{ __('app.officer') }}: {{ $petugasFilter }}</span>
                                     <button type="button" class="ml-1 hover:text-white font-bold" wire:click="clearPetugasFilter">×</button>
                                 </span>
                             @else
@@ -169,14 +169,14 @@
                             <div class="relative">
                                 <input type="text"
                                        class="{{ $input }} pl-9"
-                                       placeholder="Cari nama, HP, instansi, petugas…"
+                                       placeholder="{{ __('app.search') }}�"
                                        wire:model.live.debounce.300ms="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <div class="relative">
                                 <input type="date"
                                        class="{{ $input }} pl-9"
@@ -186,11 +186,11 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort') }}</label>
                             <select wire:model.live="dateMode" class="{{ $input }}">
-                                <option value="semua">Default (terbaru)</option>
-                                <option value="terbaru">Tanggal terbaru</option>
-                                <option value="terlama">Tanggal terlama</option>
+                                <option value="semua">{{ __('app.sort_default') }}</option>
+                                <option value="terbaru">{{ __('app.sort_newest') }}</option>
+                                <option value="terlama">{{ __('app.sort_oldest') }}</option>
                             </select>
                         </div>
                     </div>
@@ -202,7 +202,7 @@
                     @if($entries->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
                             <x-heroicon-o-user-group class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
-                            Tidak ada entri kunjungan.
+                            {{ __('app.no_data') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5 bg-gray-50/30">
@@ -216,12 +216,12 @@
                                         @endphp
                                         <div wire:key="entry-card-{{ $e->guestbook_id }}-{{ $stateKey }}"
                                              class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between {{ $e->deleted_at ? 'opacity-60 bg-gray-50/50' : '' }}">
-                                            
+
                                             <div class="space-y-3">
                                                 <div class="flex items-start gap-4">
                                                     {{-- Avatar/Initial --}}
                                                     <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
-                                                    
+
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center justify-between gap-3 min-w-0 mb-1">
                                                             <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
@@ -242,13 +242,13 @@
                                                     @if($e->instansi)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-building-office class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">Instansi: <span class="font-semibold text-gray-900">{{ $e->instansi }}</span></span>
+                                                            <span class="truncate">{{ __('app.institution') }}: <span class="font-semibold text-gray-900">{{ $e->instansi }}</span></span>
                                                         </div>
                                                     @endif
                                                     @if($e->keperluan)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-information-circle class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">Keperluan: <span class="font-semibold text-gray-900">{{ $e->keperluan }}</span></span>
+                                                            <span class="truncate">{{ __('app.visit_purpose') }}: <span class="font-semibold text-gray-900">{{ $e->keperluan }}</span></span>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -268,7 +268,7 @@
                                                     @if($e->petugas_penjaga)
                                                         <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
                                                             <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-gray-600">Petugas: <span class="text-gray-900 font-semibold">{{ $e->petugas_penjaga }}</span></span>
+                                                            <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $e->petugas_penjaga }}</span></span>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -290,11 +290,9 @@
                                                     </button>
                                                     @if(!$e->deleted_at)
                                                         <button wire:click="delete({{ $e->guestbook_id }})"
-                                                                onclick="return confirm('Hapus entri ini?')"
+                                                                wire:confirm="{{ __(`app.delete_entry_confirm`) }}"
                                                                 wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                            Hapus
-                                                        </button>
+                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">{{ __('app.delete') }}</button>
                                                     @else
                                                         <button wire:click="restore({{ $e->guestbook_id }})"
                                                                 wire:loading.attr="disabled"
@@ -302,11 +300,9 @@
                                                             Restore
                                                         </button>
                                                         <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dicancelkan!')"
+                                                                wire:confirm="{{ __(`app.delete_permanent_confirm`) }}"
                                                                 wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 focus:outline-none transition">
-                                                            Permanen
-                                                        </button>
+                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 focus:outline-none transition">{{ __('app.delete') }}</button>
                                                     @endif
                                                 </div>
                                             </div>
@@ -320,12 +316,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 bg-gray-50/50">
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Instansi</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Keperluan</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Masuk / Keluar</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Petugas</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.name_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ __(`app.institution_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.purpose_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ __(`app.check_in_out_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                                 <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
@@ -342,7 +338,7 @@
                                                     <td class="h-12 px-4">
                                                         <div class="flex items-center gap-2.5">
                                                             <div class="w-7 h-7 rounded-full bg-[#4E653D] text-white flex items-center justify-center text-xs font-semibold shrink-0">
-                                                                {{ strtoupper(substr($e->name ?? '—', 0, 1)) }}
+                                                                {{ strtoupper(substr($e->name ?? 'G', 0, 1)) }}
                                                             </div>
                                                             <div class="min-w-0">
                                                                 <p class="font-semibold text-gray-900 truncate">{{ $e->name }}</p>
@@ -352,8 +348,8 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $e->instansi ?? '—' }}</td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $e->keperluan ?? '—' }}</td>
+                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $e->instansi ?? '-' }}</td>
+                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $e->keperluan ?? '-' }}</td>
                                                     <td class="h-12 px-4 text-gray-900 font-medium whitespace-nowrap">{{ fmtDate($e->date) }}</td>
                                                     <td class="h-12 px-4 text-gray-500 whitespace-nowrap hidden sm:table-cell">
                                                         <span class="text-emerald-600 font-semibold">{{ fmtTime($e->jam_in) }}</span>
@@ -379,11 +375,11 @@
                                                             </button>
                                                             @if(!$e->deleted_at)
                                                                 <button wire:click="delete({{ $e->guestbook_id }})"
-                                                                        onclick="return confirm('Hapus entri ini?')"
+                                                                        wire:confirm="{{ __(`app.delete_entry_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         wire:target="delete({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                                                                        title="Hapus">
+                                                                        title="{{ __(`app.delete`) }}">
                                                                     <x-heroicon-o-trash class="w-4 h-4" />
                                                                 </button>
                                                             @else
@@ -395,11 +391,11 @@
                                                                     <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                                                                 </button>
                                                                 <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                        onclick="return confirm('Hapus permanen entri ini? Tindakan tidak bisa dicancelkan!')"
+                                                                        wire:confirm="{{ __(`app.delete_permanent_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         wire:target="destroyForever({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-100 transition-colors"
-                                                                        title="Hapus Permanen">
+                                                                        title="{{ __(`app.delete_permanent`) }}">
                                                                     <x-heroicon-o-x-circle class="w-4 h-4" />
                                                                 </button>
                                                             @endif
@@ -432,11 +428,11 @@
                                         @endphp
                                         <div wire:key="latest-card-{{ $r->guestbook_id }}"
                                              class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
-                                            
+
                                             <div class="space-y-3">
                                                 <div class="flex items-start gap-4">
                                                     <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
-                                                    
+
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center justify-between gap-3 min-w-0 mb-1">
                                                             <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
@@ -456,13 +452,13 @@
                                                     @if($r->instansi)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-building-office class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">Instansi: <span class="font-semibold text-gray-900">{{ $r->instansi }}</span></span>
+                                                            <span class="truncate">{{ __('app.institution') }}: <span class="font-semibold text-gray-900">{{ $r->instansi }}</span></span>
                                                         </div>
                                                     @endif
                                                     @if($r->keperluan)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-information-circle class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">Keperluan: <span class="font-semibold text-gray-900">{{ $r->keperluan }}</span></span>
+                                                            <span class="truncate">{{ __('app.visit_purpose') }}: <span class="font-semibold text-gray-900">{{ $r->keperluan }}</span></span>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -479,7 +475,7 @@
                                                     @if($r->petugas_penjaga)
                                                         <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
                                                             <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-gray-600">Petugas: <span class="text-gray-900 font-semibold">{{ $r->petugas_penjaga }}</span></span>
+                                                            <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $r->petugas_penjaga }}</span></span>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -508,12 +504,12 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 bg-gray-50/50">
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Instansi</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Keperluan</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.name_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ __(`app.institution_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.purpose_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jam Masuk</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Petugas</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
                                                 <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
@@ -525,7 +521,7 @@
                                                     <td class="h-12 px-4">
                                                         <div class="flex items-center gap-2.5">
                                                             <div class="w-7 h-7 rounded-full bg-[#4E653D] text-white flex items-center justify-center text-xs font-semibold shrink-0">
-                                                                {{ strtoupper(substr($r->name ?? '—', 0, 1)) }}
+                                                                {{ strtoupper(substr($r->name ?? '�', 0, 1)) }}
                                                             </div>
                                                             <div class="min-w-0">
                                                                 <p class="font-semibold text-gray-900 truncate">{{ $r->name }}</p>
@@ -535,8 +531,8 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $r->instansi ?? '—' }}</td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $r->keperluan ?? '—' }}</td>
+                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $r->instansi ?? '�' }}</td>
+                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $r->keperluan ?? '�' }}</td>
                                                     <td class="h-12 px-4 text-gray-900 font-medium whitespace-nowrap">{{ fmtDate($r->date) }}</td>
                                                     <td class="h-12 px-4 text-emerald-600 font-semibold whitespace-nowrap">{{ fmtTime($r->jam_in) }}</td>
                                                     <td class="h-12 px-4 text-gray-900 hidden lg:table-cell font-semibold">{{ $r->petugas_penjaga }}</td>
@@ -556,7 +552,7 @@
                                                                     title="Set jam keluar sekarang">
                                                                 <x-heroicon-o-arrow-right-start-on-rectangle class="w-3.5 h-3.5" />
                                                                 <span wire:loading.remove wire:target="setJamKeluarNow({{ $r->guestbook_id }})">Keluar</span>
-                                                                <span wire:loading wire:target="setJamKeluarNow({{ $r->guestbook_id }})">…</span>
+                                                                <span wire:loading wire:target="setJamKeluarNow({{ $r->guestbook_id }})">...</span>
                                                             </button>
                                                         </div>
                                                     </td>
@@ -656,9 +652,11 @@
                             <div class="w-8 h-8 rounded-lg bg-[#CDDEA7]/10 flex items-center justify-center border border-[#CDDEA7]/20">
                                 <x-heroicon-o-pencil class="w-4 h-4 text-[#CDDEA7]" />
                             </div>
-                            <h3 class="text-base font-bold tracking-tight">Edit Entri Kunjungan</h3>
+                            <h3 class="text-base font-bold tracking-tight">{{ __('app.edit_entry_title') }}</h3>
                         </div>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="closeEdit">✕</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="closeEdit">
+                            <x-heroicon-o-x-mark class="w-4 h-4" />
+                        </button>
                     </div>
 
                     {{-- Body --}}
@@ -666,35 +664,35 @@
                         <form wire:submit.prevent="saveEdit" class="space-y-4">
                             {{-- Nama --}}
                             <div>
-                                <label for="edit_name" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Nama Tamu <span class="text-rose-500">*</span></label>
+                                <label for="edit_name" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.guest_name_label') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" id="edit_name" class="{{ $input }}" wire:model.defer="edit.name">
                                 @error('edit.name') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- No HP --}}
                             <div>
-                                <label for="edit_phone_number" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">No. HP</label>
+                                <label for="edit_phone_number" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.no_hp_label`) }}</label>
                                 <input type="text" id="edit_phone_number" class="{{ $input }}" wire:model.defer="edit.phone_number">
                                 @error('edit.phone_number') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Instansi --}}
                             <div>
-                                <label for="edit_instansi" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Instansi</label>
+                                <label for="edit_instansi" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.institution_col`) }}</label>
                                 <input type="text" id="edit_instansi" class="{{ $input }}" wire:model.defer="edit.instansi">
                                 @error('edit.instansi') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Keperluan --}}
                             <div>
-                                <label for="edit_keperluan" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Keperluan <span class="text-rose-500">*</span></label>
+                                <label for="edit_keperluan" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.purpose_col`) }} <span class="text-rose-500">*</span></label>
                                 <textarea id="edit_keperluan" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all resize-none" wire:model.defer="edit.keperluan"></textarea>
                                 @error('edit.keperluan') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Petugas Penjaga --}}
                             <div>
-                                <label for="edit_petugas_penjaga" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Petugas Penjaga <span class="text-rose-500">*</span></label>
+                                <label for="edit_petugas_penjaga" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.petugas_label`) }} <span class="text-rose-500">*</span></label>
                                 <input type="text" id="edit_petugas_penjaga" class="{{ $input }}" wire:model.defer="edit.petugas_penjaga">
                                 @error('edit.petugas_penjaga') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
@@ -702,17 +700,17 @@
                             {{-- Date / Jam In / Jam Out --}}
                             <div class="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label for="edit_date" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Tanggal <span class="text-rose-500">*</span></label>
+                                    <label for="edit_date" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.date_col`) }} <span class="text-rose-500">*</span></label>
                                     <input type="date" id="edit_date" class="{{ $input }}" wire:model.defer="edit.date">
                                     @error('edit.date') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="edit_jam_in" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Jam Masuk <span class="text-rose-500">*</span></label>
+                                    <label for="edit_jam_in" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_masuk_label`) }} <span class="text-rose-500">*</span></label>
                                     <input type="time" id="edit_jam_in" class="{{ $input }}" wire:model.defer="edit.jam_in">
                                     @error('edit.jam_in') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="edit_jam_out" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Jam Keluar</label>
+                                    <label for="edit_jam_out" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_keluar_label`) }}</label>
                                     <input type="time" id="edit_jam_out" class="{{ $input }}" wire:model.defer="edit.jam_out">
                                     @error('edit.jam_out') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
@@ -722,19 +720,20 @@
                             <div class="pt-5 border-t border-gray-200 flex items-center justify-end gap-3 bg-gray-50/50 -mx-6 -mb-6 p-4">
                                 <button type="button"
                                         class="h-9 px-4 rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition text-xs font-semibold"
-                                        wire:click="closeEdit">
-                                    cancel
-                                </button>
+                                        wire:click="closeEdit">{{ __('app.cancel') }}</button>
                                 <button type="submit"
                                         class="h-9 px-4 rounded-lg bg-[#4E653D] text-white text-xs font-semibold hover:bg-[#354C2B] transition shadow-sm flex items-center gap-1.5"
                                         wire:loading.attr="disabled" wire:target="saveEdit">
-                                    <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
+                                    <span wire:loading.remove wire:target="saveEdit" class="flex items-center gap-1.5">
+                                        <x-heroicon-o-check class="w-3.5 h-3.5" />
+                                        {{ __(`app.save_changes`) }}
+                                    </span>
                                     <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
                                         <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <span>Menyimpan…</span>
+                                        <span>{{ __(`app.saving`) }}</span>
                                     </span>
                                 </button>
                             </div>

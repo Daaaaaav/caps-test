@@ -66,10 +66,10 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Room</label>
+                        <label class="{{ $label }}">{{ __('app.room') }}</label>
                         <div class="relative">
                             <select wire:model.defer="form.room_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="" hidden>Pilih room</option>
+                                <option value="" hidden>{{ __('app.select_room') }}</option>
                                 @foreach ($rooms as $r)
                                 <option value="{{ $r['id'] }}">{{ $r['name'] }}</option>
                                 @endforeach
@@ -83,11 +83,11 @@
 
                     {{-- Department with SEARCH filter (OFFLINE) --}}
                     <div>
-                        <label class="{{ $label }}">Departemen</label>
-                        <input type="text" wire:model.live="deptQueryOffline" class="{{ $input }} mb-2.5" placeholder="Cari departemen…">
+                        <label class="{{ $label }}">{{ __('app.dept_label') }}</label>
+                        <input type="text" wire:model.live="deptQueryOffline" class="{{ $input }} mb-2.5" placeholder="{{ __('app.search_dept_offline_ph') }}">
                         <div class="relative">
                             <select wire:model.live="form.department_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="" hidden>Pilih departemen</option>
+                                <option value="" hidden>{{ __('app.select_dept_ph') }}</option>
                                 @foreach ($departmentsOffline as $d)
                                 <option value="{{ $d['id'] }}">{{ $d['name'] }}</option>
                                 @endforeach
@@ -101,15 +101,15 @@
 
                     {{-- User with SEARCH (OFFLINE) --}}
                     <div>
-                        <label class="{{ $label }}">User (filtered by department)</label>
-                        <input type="text" wire:model.live="userQueryOffline" class="{{ $input }} mb-2.5" placeholder="Cari user…">
+                        <label class="{{ $label }}">{{ __('app.user_filtered_dept') }}</label>
+                        <input type="text" wire:model.live="userQueryOffline" class="{{ $input }} mb-2.5" placeholder="{{ __('app.search_user_offline_ph') }}">
                         <div class="relative">
                             <select wire:model.live="offline_user_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="">— Select User —</option>
+                                <option value="">{{ __('app.select_user') }}</option>
                                 @forelse ($usersByDeptOffline as $u)
                                 <option wire:key="off-u-{{ $u['id'] }}" value="{{ $u['id'] }}">{{ $u['name'] }}</option>
                                 @empty
-                                <option value="" disabled>— No users found —</option>
+                                <option value="" disabled>{{ __('app.no_users_found') }}</option>
                                 @endforelse
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
@@ -120,31 +120,31 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Tanggal</label>
+                        <label class="{{ $label }}">{{ __('app.date_field') }}</label>
                         <input type="date" wire:model.defer="form.date" class="{{ $input }}">
                         @error('form.date') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Peserta</label>
+                        <label class="{{ $label }}">{{ __('app.participants_label') }}</label>
                         <input type="number" min="1" wire:model.defer="form.participant" class="{{ $input }}">
                         @error('form.participant') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Mulai</label>
+                        <label class="{{ $label }}">{{ __('app.start_label') }}</label>
                         <input type="time" wire:model.defer="form.time" class="{{ $input }}">
                         @error('form.time') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Selesai</label>
+                        <label class="{{ $label }}">{{ __('app.end_label') }}</label>
                         <input type="time" wire:model.defer="form.time_end" class="{{ $input }}">
                         @error('form.time_end') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="md:col-span-3">
-                        <label class="{{ $label }}">Kebutuhan Ruangan</label>
+                        <label class="{{ $label }}">{{ __('app.room_requirements_label') }}</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 bg-muted/20 border border-border rounded-2xl p-4">
                             @foreach ($requirementOptions as $opt)
                                 @if ($opt['id'] !== $otherId)
@@ -180,7 +180,7 @@
                         <input type="checkbox" wire:model.defer="informInfoOffline"
                             class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
                         <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">
-                            Minta Information Dept menginformasikan meeting ini (<span class="text-foreground">request</span>)
+                            {{ __('app.inform_info_dept') }}
                         </span>
                     </label>
                     @error('informInfoOffline') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
@@ -249,11 +249,11 @@
 
                     {{-- Department with SEARCH (ONLINE) --}}
                     <div>
-                        <label class="{{ $label }}">Department</label>
+                        <label class="{{ $label }}">{{ __('app.dept_label') }}</label>
                         <input type="text" wire:model.live="deptQueryOnline" class="{{ $input }} mb-2.5" placeholder="{{ __('app.search_department') }}">
                         <div class="relative">
                             <select wire:model.live="online_department_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="">— Select Department (Optional) —</option>
+                                <option value="">{{ __('app.select_dept_optional_ph') }}</option>
                                 @foreach($departmentsOnline as $d)
                                 <option value="{{ $d['id'] }}">{{ $d['name'] }}</option>
                                 @endforeach
@@ -267,15 +267,15 @@
 
                     {{-- User with SEARCH (ONLINE) --}}
                     <div>
-                        <label class="{{ $label }}">User (filtered by department, Optional)</label>
-                        <input type="text" wire:model.live="userQueryOnline" class="{{ $input }} mb-2.5" placeholder="Cari user…">
+                        <label class="{{ $label }}">{{ __('app.user_filtered_optional') }}</label>
+                        <input type="text" wire:model.live="userQueryOnline" class="{{ $input }} mb-2.5" placeholder="{{ __('app.search_user_online_ph') }}">
                         <div class="relative">
                             <select wire:model.live="online_user_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="">— Select User —</option>
+                                <option value="">{{ __('app.select_user') }}</option>
                                 @forelse($usersByDept as $u)
                                 <option wire:key="on-u-{{ $u['id'] }}" value="{{ $u['id'] }}">{{ $u['name'] }}</option>
                                 @empty
-                                <option value="" disabled>— No users found —</option>
+                                <option value="" disabled>{{ __('app.no_users_found') }}</option>
                                 @endforelse
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
@@ -311,7 +311,7 @@
                             <input type="checkbox" wire:model.defer="informInfoOnline"
                                 class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
                             <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">
-                                Minta Information Dept menginformasikan meeting ini (<span class="text-foreground">request</span>)
+                                {{ __('app.inform_info_dept') }}
                             </span>
                         </label>
                         @error('informInfoOnline') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror

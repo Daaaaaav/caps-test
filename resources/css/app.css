@@ -433,3 +433,115 @@ main {
     width: 80%;
     margin: 0.25rem auto;
 }
+
+/* ==========================================================================
+   MOBILE SIDEBAR RESPONSIVE OVERRIDES (below lg / 1024px)
+   Ensures all text labels, nav items, and group headings are fully visible
+   inside the Flux mobile drawer overlay, even when sidebarCollapsed = true
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+    /* Always show nav item text labels on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-item] > :not(svg):not([data-flux-icon]) {
+        display: revert !important;
+    }
+
+    /* Restore item layout to normal on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-item] {
+        justify-content: flex-start !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        height: auto !important;
+        width: auto !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Restore icon spacing on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-item] svg {
+        margin-right: 0.5rem !important;
+    }
+
+    /* Show group headings on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-group] > button,
+    .sidebar-is-collapsed [data-flux-sidebar-group] > [role="button"],
+    .sidebar-is-collapsed [data-flux-sidebar-group] > h3,
+    .sidebar-is-collapsed [data-flux-sidebar-group] > [role="heading"] {
+        display: flex !important;
+    }
+
+    /* Remove the divider-only group styling on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-group] {
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Show brand name on mobile */
+    .sidebar-is-collapsed [data-flux-sidebar-brand] > :not(img),
+    .sidebar-is-collapsed [data-flux-sidebar-brand] > span:not(:first-child) {
+        display: revert !important;
+    }
+    .sidebar-is-collapsed [data-flux-sidebar-brand] {
+        justify-content: flex-start !important;
+    }
+
+    /* Show search bar on mobile */
+    .sidebar-is-collapsed flux-sidebar-search,
+    .sidebar-is-collapsed [data-flux-sidebar-search] {
+        display: revert !important;
+    }
+
+    /* Restore sidebar width on mobile (Flux controls this via its overlay) */
+    .sidebar-is-collapsed [data-flux-sidebar],
+    .sidebar-is-collapsed ui-sidebar {
+        width: auto !important;
+        max-width: none !important;
+        overflow-x: visible !important;
+    }
+}
+
+
+/* ==========================================================================
+   SMALL SCREEN / MOBILE SIDEBAR ENHANCEMENTS
+   Ensures proper behavior on screens smaller than 640px (phones)
+   ========================================================================== */
+
+/* Ensure the mobile top header bar doesn't overflow */
+@media (max-width: 1023px) {
+    /* Mobile sidebar drawer: cap width to 85vw on small phones */
+    [data-flux-sidebar],
+    ui-sidebar {
+        max-width: 85vw !important;
+        width: 16rem !important;
+    }
+
+    /* Ensure sidebar nav items don't overflow on tiny screens */
+    [data-flux-sidebar-item] {
+        white-space: normal !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* Make the collapsed (icon-only) dock invisible on mobile — Flux handles the overlay */
+    .sidebar-collapsed-container {
+        display: none !important;
+    }
+
+    /* Ensure the sidebar can scroll on very small phones */
+    [data-flux-sidebar],
+    ui-sidebar {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Extra small screens (< 400px) */
+@media (max-width: 399px) {
+    [data-flux-sidebar],
+    ui-sidebar {
+        width: 80vw !important;
+        max-width: 80vw !important;
+    }
+}

@@ -24,7 +24,7 @@ class Login extends Component
     public string $password = '';
     public bool $remember = false;
     public string $captcha = '';
-    
+
     // OTP fields
     public string $otpCode = '';
     public bool $otpSent = false;
@@ -116,7 +116,7 @@ class Login extends Component
         try {
             // Check credentials (but don't log in yet)
             $user = User::where('email', Str::lower($this->email))->first();
-            
+
             if (!$user || !\Hash::check($this->password, $user->password)) {
                 RateLimiter::hit($key, 60);
                 if ($this->isCaptchaEnabled()) {
@@ -167,7 +167,7 @@ class Login extends Component
             $this->showOtpInput = true;
             $this->otpSent = true;
             $this->otpExpiresIn = 300; // 5 minutes in seconds
-            
+
             session()->flash('message', 'OTP code sent to your email. Please check your inbox.');
 
             Log::info('LOGIN_OTP_SENT', [

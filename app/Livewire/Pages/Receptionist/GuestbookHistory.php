@@ -303,8 +303,8 @@ class GuestbookHistory extends Component
         $this->dispatch(
             'toast',
             type: 'success',
-            title: 'Update',
-            message: 'Guest diedit.',
+            title: __('app.toast_updated_title'),
+            message: __('app.toast_updated_message'),
             duration: 3000
         );
 
@@ -323,8 +323,8 @@ class GuestbookHistory extends Component
         $this->dispatch(
             'toast',
             type: 'success',
-            title: 'Keluar',
-            message: 'Jam keluar diset sekarang.',
+            title: __('app.toast_checkout_title'),
+            message: __('app.toast_checkout_message'),
             duration: 2500
         );
 
@@ -347,8 +347,8 @@ class GuestbookHistory extends Component
         $this->dispatch(
             'toast',
             type: 'success',
-            title: 'Dihapus',
-            message: 'Guest dihapus (soft delete).',
+            title: __('app.toast_deleted_title'),
+            message: __('app.toast_deleted_message'),
             duration: 3000
         );
 
@@ -368,8 +368,8 @@ class GuestbookHistory extends Component
             $this->dispatch(
                 'toast',
                 type: 'success',
-                title: 'Pulihkan',
-                message: 'Guest dipulihkan.',
+                title: __('app.toast_restored_title'),
+                message: __('app.toast_restored_message'),
                 duration: 2500
             );
 
@@ -390,8 +390,8 @@ class GuestbookHistory extends Component
             $this->dispatch(
                 'toast',
                 type: 'success',
-                title: 'Hapus Permanen',
-                message: 'Guest dihapus permanen.',
+                title: __('app.toast_perm_deleted_title'),
+                message: __('app.toast_perm_deleted_message'),
                 duration: 2500
             );
 

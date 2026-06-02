@@ -177,8 +177,8 @@
         </div>
     </div>
 
-    <!-- EXPANDED STATE SIDEBAR (shown when sidebarCollapsed is false) -->
-    <div x-show="!sidebarCollapsed" class="flex flex-col h-full justify-between w-full">
+    <!-- EXPANDED STATE SIDEBAR (shown when sidebarCollapsed is false, or always on mobile) -->
+    <div x-show="!sidebarCollapsed || window.innerWidth < 1024" class="flex flex-col h-full justify-between w-full">
         {{-- Logo + Brand + Collapse (mobile) --}}
         <flux:sidebar.header>
             <flux:sidebar.brand

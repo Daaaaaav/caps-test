@@ -33,19 +33,27 @@ $invertStyle = 'filter: brightness(0) invert(1);';
 </head>
 
 <body class="min-h-screen bg-background text-foreground font-sans"
-    x-data="{ sidebarCollapsed: true }"
+    x-data="{
+        sidebarCollapsed: true,
+        isMobile: window.innerWidth < 1024,
+        init() {
+            const handler = () => { this.isMobile = window.innerWidth < 1024; };
+            window.addEventListener('resize', handler);
+            this.$cleanup = () => window.removeEventListener('resize', handler);
+        }
+    }"
     :style="sidebarCollapsed ? '--sbw: 4.5rem' : '--sbw: 16rem'"
     :class="sidebarCollapsed ? 'sidebar-is-collapsed' : 'sidebar-is-expanded'"
 >
     <flux:header class="lg:hidden bg-sidebar border-b border-sidebar-border">
-        <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        <flux:sidebar.toggle class="lg:hidden shrink-0" icon="bars-2" inset="left" />
 
-        <div class="font-semibold text-sidebar-foreground tracking-wide font-sans">Kebun Raya Bogor</div>
+        <div class="font-semibold text-sidebar-foreground tracking-wide font-sans truncate min-w-0 px-2">Kebun Raya Bogor</div>
 
         <flux:spacer />
 
         <flux:dropdown position="top" align="start">
-            <flux:profile avatar-text="{{ strtoupper($initials) }}" />
+            <flux:profile avatar-text="{{ strtoupper($initials) }}" class="shrink-0" />
             <flux:menu>
                 <flux:menu.radio.group>
                     <flux:menu.radio checked>{{ $fullName }}</flux:menu.radio>
@@ -73,7 +81,7 @@ $invertStyle = 'filter: brightness(0) invert(1);';
         {{-- Sidebar (always full height) --}}
         @include('livewire.components.partials.superadmin.sidebar')
 
-        <main class="bg-background flex-1 min-w-0 overflow-y-auto lg:ml-[var(--sbw)] px-4 sm:px-6 lg:px-8
+        <main class="bg-background flex-1 min-w-0 overflow-y-auto lg:ml-[var(--sbw)] px-3 sm:px-5 lg:px-8
                     [&_.container]:max-w-none [&_.container]:mx-0 [&_.container]:px-0 animate-fade-in-up">
             
             {{-- Premium Top Header Bar --}}

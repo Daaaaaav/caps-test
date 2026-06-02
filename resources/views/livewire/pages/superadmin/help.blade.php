@@ -74,7 +74,7 @@
         @endif
 
         {{-- ===== CONTACT CARD ===== --}}
-        <!-- <div class="bg-gray-900 text-white rounded-2xl px-6 py-6 shadow-sm">
+        <div class="bg-gray-900 text-white rounded-2xl px-6 py-6 shadow-sm">
             <h3 class="text-base font-semibold mb-1">Still need help?</h3>
             <p class="text-sm text-gray-300 mb-4">
                 If you can't find an answer above, reach out to your system administrator.
@@ -89,7 +89,7 @@
                     Email Admin
                 </a>
             </div>
-        </div> -->
+        </div>
 
     </main>
 </div>

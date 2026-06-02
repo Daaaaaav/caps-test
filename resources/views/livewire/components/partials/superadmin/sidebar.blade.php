@@ -198,8 +198,8 @@
         </div>
     </div>
 
-    <!-- EXPANDED STATE SIDEBAR (shown when sidebarCollapsed is false) -->
-    <div x-show="!sidebarCollapsed" class="flex flex-col h-full justify-between w-full">
+    <!-- EXPANDED STATE SIDEBAR (shown when sidebarCollapsed is false, or always on mobile) -->
+    <div x-show="!sidebarCollapsed || isMobile" class="flex flex-col h-full justify-between w-full">
         {{-- HEADER --}}
         <flux:sidebar.header>
             <flux:sidebar.brand 

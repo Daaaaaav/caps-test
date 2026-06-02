@@ -6,7 +6,6 @@ use App\Models\Delivery;
 use App\Models\Department;
 use App\Models\User as UserModel;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -107,11 +106,11 @@ class DocPackStatus extends Component
             $q->whereDate('created_at', $this->selectedDate);
         }
 
-        if ($this->departmentId && Schema::hasColumn('deliveries', 'department_id')) {
+        if ($this->departmentId) {
             $q->where('department_id', $this->departmentId);
         }
 
-        if (trim($this->departmentQ) !== '' && Schema::hasColumn('deliveries', 'department_id')) {
+        if (trim($this->departmentQ) !== '') {
             $deptIds = Department::query()
                 ->where('company_id', Auth::user()->company_id ?? null)
                 ->whereNull('deleted_at')
@@ -121,11 +120,11 @@ class DocPackStatus extends Component
             $deptIds->isNotEmpty() ? $q->whereIn('department_id', $deptIds) : $q->whereRaw('0=1');
         }
 
-        if ($this->userId && Schema::hasColumn('deliveries', 'receptionist_id')) {
+        if ($this->userId) {
             $q->where('receptionist_id', $this->userId);
         }
 
-        if (trim($this->userQ) !== '' && Schema::hasColumn('deliveries', 'receptionist_id')) {
+        if (trim($this->userQ) !== '') {
             $userIds = UserModel::query()
                 ->where('company_id', Auth::user()->company_id ?? null)
                 ->whereNull('deleted_at')
@@ -217,11 +216,9 @@ class DocPackStatus extends Component
 
     private function getDirectionFor(Delivery $row): string
     {
-        if (Schema::hasColumn('deliveries', 'direction')) {
-            $dir = (string) $row->direction;
-            if ($dir === 'deliver' || $dir === 'taken') {
-                return $dir;
-            }
+        $dir = (string) $row->direction;
+        if ($dir === 'deliver' || $dir === 'taken') {
+            return $dir;
         }
         return $this->inferDirection($row);
     }
@@ -266,14 +263,10 @@ class DocPackStatus extends Component
 
         if ($dir === 'deliver') {
             $row->status = 'delivered';
-            if (Schema::hasColumn('deliveries', 'pengiriman')) {
-                $row->pengiriman = $when;
-            }
+            $row->pengiriman = $when;
         } else {
             $row->status = 'taken';
-            if (Schema::hasColumn('deliveries', 'pengambilan')) {
-                $row->pengambilan = $when;
-            }
+            $row->pengambilan = $when;
         }
 
         $row->save();

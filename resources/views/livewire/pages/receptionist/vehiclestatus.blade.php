@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+<div class="min-h-screen bg-gray-50" wire:poll.5000ms.keep-alive>
     @php
     use Carbon\Carbon;
 
@@ -52,7 +52,7 @@
                         </div>
                         <div>
                             <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.vehicle_status_title') }}</h2>
-                            <p class="text-sm text-[#CDDEA7]/80">Kelola peminjaman: Pending / Approved / On Progress / Returned.</p>
+                            <p class="text-sm text-[#CDDEA7]/80">{{ __('app.vehicle_status_sub') }}</p>
                         </div>
                     </div>
 
@@ -156,7 +156,7 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <div class="relative">
                                 <input type="date" wire:model.live="selectedDate" class="{{ $input }} pl-9">
                                 <x-heroicon-o-calendar-days class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
@@ -164,12 +164,12 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort') }}</label>
                             <div class="relative">
                                 <select wire:model.live="sortFilter" class="{{ $input }} appearance-none pr-8 bg-white">
-                                    <option value="recent">Default (terbaru)</option>
-                                    <option value="oldest">Terlama dulu</option>
-                                    <option value="nearest">Paling dekat sekarang</option>
+                                    <option value="recent">{{ __('app.sort_default') }}</option>
+                                    <option value="oldest">{{ __('app.sort_oldest_first') }}</option>
+                                    <option value="nearest">{{ __('app.sort_nearest') }}</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -182,12 +182,22 @@
                 {{-- LIST BODY --}}
                 @if($bookings->isEmpty())
                     <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                        Tidak ada data pada filter ini.
+                        {{ __('app.no_data_filter') }}
                     </div>
                 @else
                     <div class="px-4 sm:px-6 py-5 bg-gray-50/50">
                         @if($viewMode === 'card')
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4"
+                                 x-on:booking-rejected.window="
+                                    const el = $el.querySelector('[wire\\:key=\'booking-\' + $event.detail.id]') ||
+                                               document.querySelector('[wire\\:key=\'booking-' + $event.detail.id + '\']');
+                                    if (el) {
+                                        el.style.transition = 'opacity 250ms ease, transform 250ms ease';
+                                        el.style.opacity = '0';
+                                        el.style.transform = 'scale(0.97)';
+                                        setTimeout(() => el.remove(), 260);
+                                    }
+                                 ">
                             @forelse($bookings as $b)
                                 @php
                                     $vehicleName = $vehicleMap[$b->vehicle_id] ?? 'Unknown';
@@ -344,7 +354,7 @@
                                 {{-- END: MODIFIED VEHICLE BOOKING CARD DESIGN --}}
                             @empty
                                 <div class="col-span-full text-center text-gray-500 text-sm py-6 bg-white border border-dashed border-gray-200 rounded-xl">
-                                    Tidak ada data pada filter ini.
+                                    {{ __('app.no_data_filter') }}
                                 </div>
                             @endforelse
                             </div>
@@ -364,7 +374,15 @@
                                             <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-100">
+                                    <tbody class="divide-y divide-gray-100"
+                                           x-on:booking-rejected.window="
+                                               const row = $el.querySelector('tr[data-booking-id=\'' + $event.detail.id + '\']');
+                                               if (row) {
+                                                   row.style.transition = 'opacity 250ms ease';
+                                                   row.style.opacity = '0';
+                                                   setTimeout(() => row.remove(), 260);
+                                               }
+                                           ">
                                         @forelse($bookings as $b)
                                             @php
                                                 $vehicleName = $vehicleMap[$b->vehicle_id] ?? 'Unknown';
@@ -372,7 +390,8 @@
                                                 $afterC  = $photoCounts[$b->vehiclebooking_id]['after']  ?? 0;
                                                 $rowNo = ($bookings->firstItem() ?? 1) + $loop->index;
                                             @endphp
-                                            <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
+                                            <tr data-booking-id="{{ $b->vehiclebooking_id }}"
+                                                class="hover:bg-gray-50/50 transition text-sm text-gray-700">
                                                 <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
                                                 <td class="px-6 py-4 font-semibold text-gray-900">
                                                     <div class="flex items-center gap-2">
@@ -422,7 +441,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="px-6 py-12 text-center text-gray-500">Tidak ada data pada filter ini.</td>
+                                                <td colspan="8" class="px-6 py-12 text-center text-gray-500">{{ __('app.no_data_filter') }}</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -447,7 +466,7 @@
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
                         <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">Klik kendaraan untuk mem-filter.</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('app.click_to_filter') }}</p>
                     </div>
 
                     <div class="px-4 py-3 max-h-64 overflow-y-auto">
@@ -483,7 +502,7 @@
                                     @endif
                                 </button>
                             @empty
-                                <p class="text-xs text-gray-500">Tidak ada data kendaraan.</p>
+                                <p class="text-xs text-gray-500">{{ __('app.no_vehicle_data_filter') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -499,7 +518,7 @@
                     <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                         <div>
                             <h3 class="text-sm font-semibold tracking-tight text-foreground">{{ __('app.filter_by_vehicle') }}</h3>
-                            <p class="text-[11px] text-muted-foreground mt-0.5">Filter riwayat peminjaman berdasarkan kendaraan.</p>
+                            <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_vehicle_history') }}</p>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
                     </div>
@@ -589,7 +608,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-foreground tracking-tight">
-                                Detail Booking #{{ $selectedBooking->vehiclebooking_id }}
+                                {{ __('app.detail') }} Booking #{{ $selectedBooking->vehiclebooking_id }}
                             </h3>
                             <p class="text-xs text-muted-foreground mt-0.5">
                                 {{ $selectedBooking->purpose }}
@@ -604,75 +623,75 @@
                     {{-- Detail Grid --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Peminjam</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.borrower') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ $selectedBooking->borrower_name }}</span>
                         </div>
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Kendaraan</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.vehicle') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ $vehicleMap[$selectedBooking->vehicle_id] ?? 'N/A' }}</span>
                         </div>
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tujuan</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.destination_col') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ $selectedBooking->destination ?? 'N/A' }}</span>
                         </div>
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipe Keperluan</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.purpose_type_col') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ ucfirst($selectedBooking->purpose_type) }}</span>
                         </div>
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mulai</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.start_col') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ fmtDate($selectedBooking->start_at) }}, {{ fmtTime($selectedBooking->start_at) }}</span>
                         </div>
                         <div class="space-y-1">
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Selesai</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.end_col') }}</span>
                             <span class="text-sm font-semibold text-foreground">{{ fmtDate($selectedBooking->end_at) }}, {{ fmtTime($selectedBooking->end_at) }}</span>
                         </div>
                     </div>
 
                     <div class="border-t border-border"></div>
 
-                    {{-- Foto Sebelum --}}
+                    {{-- Photos Before --}}
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>Foto Sebelum Peminjaman</span>
+                            <span>{{ __('app.photo_before') }}</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @forelse($selectedPhotos['before'] as $photo)
                                 <div class="group relative rounded-xl border border-border bg-muted/20 overflow-hidden shadow-sm hover:border-primary/30 transition-colors p-2">
                                     <a href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank" class="block rounded-lg overflow-hidden border border-border">
-                                        <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="Foto Before" class="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                                        <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="Photo Before" class="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300">
                                     </a>
                                     <span class="text-[11px] text-muted-foreground mt-2 block pl-1 font-medium">
-                                        Di-upload oleh: {{ $photo->user->full_name ?? 'N/A' }}
+                                        {{ __('app.uploaded_by') }}: {{ $photo->user->full_name ?? 'N/A' }}
                                     </span>
                                 </div>
                             @empty
-                                <p class="text-xs text-muted-foreground col-span-full italic">Tidak ada foto 'before' yang di-upload.</p>
+                                <p class="text-xs text-muted-foreground col-span-full italic">{{ __('app.no_before_photos') }}</p>
                             @endforelse
                         </div>
                     </div>
 
                     <div class="border-t border-border"></div>
 
-                    {{-- Foto Sesudah --}}
+                    {{-- Photos After --}}
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                            <span>Foto Setelah Peminjaman</span>
+                            <span>{{ __('app.photo_after') }}</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @forelse($selectedPhotos['after'] as $photo)
                                 <div class="group relative rounded-xl border border-border bg-muted/20 overflow-hidden shadow-sm hover:border-primary/30 transition-colors p-2">
                                     <a href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank" class="block rounded-lg overflow-hidden border border-border">
-                                        <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="Foto After" class="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                                        <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="Photo After" class="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300">
                                     </a>
                                     <span class="text-[11px] text-muted-foreground mt-2 block pl-1 font-medium">
-                                        Di-upload oleh: {{ $photo->user->full_name ?? 'N/A' }}
+                                        {{ __('app.uploaded_by') }}: {{ $photo->user->full_name ?? 'N/A' }}
                                     </span>
                                 </div>
                             @empty
-                                <p class="text-xs text-muted-foreground col-span-full italic">Tidak ada foto 'after' yang di-upload.</p>
+                                <p class="text-xs text-muted-foreground col-span-full italic">{{ __('app.no_after_photos') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -691,83 +710,166 @@
         </div>
     @endif
     
-    {{-- REJECT MODAL --}}
-    @if($showRejectModal && $rejectId)
-        <div x-data="{ show: @entangle('showRejectModal') }"
-             x-show="show"
+    {{-- REJECT RESULT POPUP --}}
+    <div x-data="{ show: @entangle('showRejectResult').live }"
+         x-show="show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+         style="display: none;">
+
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+             @click="$wire.closeRejectResult()"></div>
+
+        {{-- Popup --}}
+        <div x-show="show"
              x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
              x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4"
-             style="display: none;">
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90"
+             class="relative z-10 w-full max-w-sm bg-white border border-gray-200 shadow-2xl rounded-2xl overflow-hidden text-center">
 
-            {{-- Backdrop --}}
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="cancelReject"></div>
+            {{-- Top accent stripe --}}
+            <div class="h-1.5 w-full {{ $rejectResultType === 'success' ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-rose-500 to-rose-400' }}"></div>
 
-            {{-- Modal Content --}}
-            <div x-show="show"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95"
-                 class="relative z-10 w-full max-w-lg bg-card border border-border shadow-2xl rounded-2xl overflow-hidden">
-                 
-                <form wire:submit.prevent="submitReject">
-                    {{-- Header --}}
-                    <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center">
-                                <x-heroicon-o-x-circle class="w-4 h-4 text-rose-700" />
-                            </div>
-                            <h3 class="text-base font-bold text-foreground tracking-tight">
-                                Tolak Booking #{{ $rejectId }}
-                            </h3>
-                        </div>
-                        <button type="button" wire:click="cancelReject" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition">✕</button>
-                    </div>
+            <div class="p-8 flex flex-col items-center gap-4">
+                {{-- Icon circle --}}
+                <div class="w-16 h-16 rounded-full flex items-center justify-center
+                    {{ $rejectResultType === 'success'
+                        ? 'bg-emerald-50 border-2 border-emerald-200'
+                        : 'bg-rose-50 border-2 border-rose-200' }}">
+                    @if($rejectResultType === 'success')
+                        <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                    @else
+                        <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    @endif
+                </div>
 
-                    {{-- Body --}}
-                    <div class="p-6 space-y-4">
-                        <p class="text-xs text-muted-foreground leading-relaxed">
-                            Silakan masukkan alasan penolakan peminjaman kendaraan ini. Alasan ini bersifat wajib.
-                        </p>
-                        
-                        <div>
-                            <label for="reject-note" class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
-                            <textarea id="reject-note"
-                                      wire:model.defer="rejectNote"
-                                      rows="4"
-                                      placeholder="Contoh: Kendaraan sedang perbaikan, atau jadwal bentrok."
-                                      class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none @error('rejectNote') border-destructive @enderror"
-                                      required></textarea>
-                            @error('rejectNote')
-                                <p class="mt-1.5 text-xs font-medium text-destructive">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
+                {{-- Title --}}
+                <div class="space-y-1.5">
+                    <h3 class="text-lg font-bold {{ $rejectResultType === 'success' ? 'text-emerald-800' : 'text-rose-800' }}">
+                        {{ $rejectResultTitle }}
+                    </h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {{ $rejectResultMessage }}
+                    </p>
+                </div>
 
-                    {{-- Footer --}}
-                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
-                        <button type="button"
-                                wire:click="cancelReject"
-                                class="h-9 px-4 rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 transition inline-flex items-center gap-1.5">
-                            <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                            <span>cancel</span>
-                        </button>
-                        <button type="submit"
-                                wire:loading.attr="disabled"
-                                class="h-9 px-4 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:ring-2 focus:ring-rose-500/20 transition shadow-sm inline-flex items-center gap-1.5">
-                            <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
-                            <span>Tolak Booking</span>
-                        </button>
-                    </div>
-                </form>
+                {{-- Booking ID badge --}}
+                @if($rejectResultBookingId)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                        {{ $rejectResultType === 'success'
+                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                            : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                        <x-heroicon-o-hashtag class="w-3 h-3"/>
+                        Booking #{{ $rejectResultBookingId }}
+                    </span>
+                @endif
+
+                {{-- Close button --}}
+                <button type="button"
+                        wire:click="closeRejectResult"
+                        class="mt-1 w-full h-10 rounded-xl font-semibold text-sm transition
+                            {{ $rejectResultType === 'success'
+                                ? 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500/30'
+                                : 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-2 focus:ring-rose-500/30' }}">
+                    {{ __('app.close') }}
+                </button>
             </div>
         </div>
-    @endif
+    </div>
+
+    {{-- REJECT MODAL --}}
+    <div x-data="{ show: @entangle('showRejectModal').live }"
+         x-show="show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="display: none;">
+
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
+             @click="$wire.cancelReject()"></div>
+
+        {{-- Modal Content --}}
+        <div x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-2xl rounded-2xl overflow-hidden">
+
+            <form wire:submit.prevent="submitReject">
+                {{-- Header --}}
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center">
+                            <x-heroicon-o-x-circle class="w-4 h-4 text-rose-700" />
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 tracking-tight">
+                            {{ __('app.reject_booking_title') }} #{{ $rejectId }}
+                        </h3>
+                    </div>
+                    <button type="button"
+                            @click="$wire.cancelReject()"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">✕</button>
+                </div>
+
+                {{-- Body --}}
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        {{ __('app.reject_vehicle_reason') }}
+                    </p>
+
+                    <div>
+                        <label for="reject-note" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+                            {{ __('app.reject_reason_ph') }} <span class="text-rose-600">*</span>
+                        </label>
+                        <textarea id="reject-note"
+                                  wire:model.defer="rejectNote"
+                                  rows="4"
+                                  placeholder="{{ __('app.reject_reason_example') }}"
+                                  class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all resize-none @error('rejectNote') border-rose-400 @enderror"
+                                  required></textarea>
+                        @error('rejectNote')
+                            <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50/30">
+                    <button type="button"
+                            @click="$wire.cancelReject()"
+                            class="h-9 px-4 rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 transition inline-flex items-center gap-1.5">
+                        <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
+                        <span>{{ __('app.cancel') }}</span>
+                    </button>
+                    <button type="submit"
+                            wire:loading.attr="disabled"
+                            class="h-9 px-4 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:ring-2 focus:ring-rose-500/20 transition shadow-sm inline-flex items-center gap-1.5">
+                        <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
+                        <span>{{ __('app.reject_booking_title') }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

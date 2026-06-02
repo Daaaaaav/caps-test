@@ -40,7 +40,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg sm:text-xl font-semibold">Packages</h2>
-                        <p class="text-xs text-[#CDDEA7]/80">Kelola paket masuk (stored) & pengambilan (taken)</p>
+                        <p class="text-xs text-[#CDDEA7]/80">{{ __('app.complete_package_data') }}</p>
                     </div>
                 </div>
             </div>
@@ -53,21 +53,21 @@
                     <x-heroicon-o-plus-circle class="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-foreground">Tambah Package</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Lengkapi data paket baru</p>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __('app.add_package') }}</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.complete_package_data') }}</p>
                 </div>
             </div>
 
             <form wire:submit.prevent="save" class="p-6 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="{{ $label }}">Nama Paket</label>
-                        <input type="text" wire:model.defer="form.package_name" class="{{ $input }}" placeholder="Contoh: Paket Dokumen PT ABC">
+                        <label class="{{ $label }}">{{ __('app.package_name') }}</label>
+                        <input type="text" wire:model.defer="form.package_name" class="{{ $input }}" placeholder="{{ __('app.package_name_ph') }}">
                         @error('form.package_name') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Penyimpanan</label>
+                        <label class="{{ $label }}">{{ __('app.storage') }}</label>
                         <div class="relative">
                             <select wire:model.defer="form.penyimpanan" class="{{ $input }} appearance-none pr-8">
                                 <option value="">-</option>
@@ -101,11 +101,11 @@
                         class="inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 relative overflow-hidden">
                         <span class="flex items-center gap-2" wire:loading.remove wire:target="save">
                             <x-heroicon-o-check class="w-4 h-4" />
-                            <span>Simpan Data</span>
+                            <span>{{ __('app.save_data') }}</span>
                         </span>
                         <span class="flex items-center gap-2" wire:loading wire:target="save">
                             <x-heroicon-o-arrow-path class="animate-spin h-4 w-4 text-white" />
-                            <span>Menyimpan…</span>
+                            <span>{{ __('app.saving_data') }}</span>
                         </span>
                     </button>
                 </div>
@@ -120,7 +120,7 @@
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-foreground">On-going Packages</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Menampilkan semua paket berstatus <b>stored</b></p>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.no_pending_items') }}</p>
                 </div>
             </div>
 
@@ -146,8 +146,8 @@
                         <div class="flex items-center gap-2 shrink-0">
                             <button wire:click="openEdit({{ $r->delivery_id }})" wire:loading.attr="disabled"
                                     wire:target="openEdit({{ $r->delivery_id }})" class="{{ $btnBlk }}">
-                                <span wire:loading.remove wire:target="openEdit({{ $r->delivery_id }})">Edit</span>
-                                <span wire:loading wire:target="openEdit({{ $r->delivery_id }})">Memuat…</span>
+                                <span wire:loading.remove wire:target="openEdit({{ $r->delivery_id }})">{{ __('app.edit') }}</span>
+                                <span wire:loading wire:target="openEdit({{ $r->delivery_id }})">{{ __('app.loading_label') }}</span>
                             </button>
 
                             <button wire:click="markDone({{ $r->delivery_id }})" wire:loading.attr="disabled"
@@ -157,19 +157,19 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
                                     </svg>
-                                    <span>Done</span>
+                                    <span>{{ __('app.done') }}</span>
                                 </span>
                             </button>
 
-                            <button wire:click="delete({{ $r->delivery_id }})" onclick="return confirm('Hapus paket ini?')"
+                            <button wire:click="delete({{ $r->delivery_id }})" onclick="return confirm('{{ __('app.delete_package_confirm') }}')"
                                     wire:loading.attr="disabled" wire:target="delete({{ $r->delivery_id }})" class="{{ $btnRed }}">
-                                <span wire:loading.remove wire:target="delete({{ $r->delivery_id }})">Hapus</span>
-                                <span wire:loading wire:target="delete({{ $r->delivery_id }})">Menghapus…</span>
+                                <span wire:loading.remove wire:target="delete({{ $r->delivery_id }})">{{ __('app.delete') }}</span>
+                                <span wire:loading wire:target="delete({{ $r->delivery_id }})">{{ __('app.deleting_label') }}</span>
                             </button>
                         </div>
                     </div>
                 @empty
-                    <div class="text-center py-10 text-muted-foreground text-sm font-medium">Tidak ada paket on-going.</div>
+                    <div class="text-center py-10 text-muted-foreground text-sm font-medium">{{ __('app.no_ongoing_packages') }}</div>
                 @endforelse
             </div>
 
@@ -202,10 +202,10 @@
                                     <div class="flex items-center gap-2 mb-2 flex-wrap">
                                         <h4 class="font-bold text-foreground text-base truncate">{{ $e->package_name }}</h4>
                                         @if ($e->nama_pengirim)
-                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Dari: {{ $e->nama_pengirim }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">{{ __('app.sender') }}: {{ $e->nama_pengirim }}</span>
                                         @endif
                                         @if ($e->nama_penerima)
-                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">Ke: {{ $e->nama_penerima }}</span>
+                                            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted border border-border px-2 py-0.5 rounded-md">{{ __('app.receiver') }}: {{ $e->nama_penerima }}</span>
                                         @endif
                                     </div>
 
@@ -249,8 +249,8 @@
                                 <div class="flex flex-wrap gap-2 justify-end">
                                     <button wire:click="openEdit({{ $e->delivery_id }})" wire:loading.attr="disabled"
                                             wire:target="openEdit({{ $e->delivery_id }})" class="{{ $btnBlk }}">
-                                        <span wire:loading.remove wire:target="openEdit({{ $e->delivery_id }})">Edit</span>
-                                        <span wire:loading wire:target="openEdit({{ $e->delivery_id }})">Memuat…</span>
+                                        <span wire:loading.remove wire:target="openEdit({{ $e->delivery_id }})">{{ __('app.edit') }}</span>
+                                        <span wire:loading wire:target="openEdit({{ $e->delivery_id }})">{{ __('app.loading_label') }}</span>
                                     </button>
 
                                     <button wire:click="markStored({{ $e->delivery_id }})" wire:loading.attr="disabled"
@@ -264,17 +264,17 @@
                                         </span>
                                     </button>
 
-                                    <button wire:click="delete({{ $e->delivery_id }})" onclick="return confirm('Hapus paket ini?')"
+                                    <button wire:click="delete({{ $e->delivery_id }})" onclick="return confirm('{{ __('app.delete_package_confirm') }}')"
                                             wire:loading.attr="disabled" wire:target="delete({{ $e->delivery_id }})" class="{{ $btnRed }}">
-                                        <span wire:loading.remove wire:target="delete({{ $e->delivery_id }})">Hapus</span>
-                                        <span wire:loading wire:target="delete({{ $e->delivery_id }})">Menghapus…</span>
+                                        <span wire:loading.remove wire:target="delete({{ $e->delivery_id }})">{{ __('app.delete') }}</span>
+                                        <span wire:loading wire:target="delete({{ $e->delivery_id }})">{{ __('app.deleting_label') }}</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="px-6 py-14 text-center text-muted-foreground text-sm font-medium">Tidak ada paket selesai.</div>
+                    <div class="px-6 py-14 text-center text-muted-foreground text-sm font-medium">{{ __('app.no_completed_packages') }}</div>
                 @endforelse
             </div>
 

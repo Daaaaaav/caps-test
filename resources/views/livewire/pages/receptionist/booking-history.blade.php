@@ -54,7 +54,7 @@
                         <div>
                             <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.booking_history_title') }}</h2>
                             <p class="text-sm text-[#CDDEA7]/80">
-                                Lihat dan kelola riwayat booking yang sudah selesai atau ditolak.
+                                {{ __('app.booking_history_subtitle') }}
                             </p>
                         </div>
                     </div>
@@ -193,14 +193,14 @@
                             <div class="relative">
                                 <input type="text"
                                        class="{{ $input }} pl-9"
-                                       placeholder="Cari judul…"
+                                       placeholder="{{ __('app.search_title_ph') }}"
                                        wire:model.live="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Tanggal</label>
+                            <label class="{{ $label }}">{{ __('app.date') }}</label>
                             <div class="relative">
                                 <input type="date"
                                        class="{{ $input }} pl-9"
@@ -210,11 +210,11 @@
                         </div>
 
                         <div>
-                            <label class="{{ $label }}">Urutkan</label>
+                            <label class="{{ $label }}">{{ __('app.sort') }}</label>
                             <select wire:model.live="dateMode" class="{{ $input }}">
-                                <option value="semua">Default (terbaru)</option>
-                                <option value="terbaru">Tanggal terbaru</option>
-                                <option value="terlama">Tanggal terlama</option>
+                                <option value="semua">{{ __('app.sort_default') }}</option>
+                                <option value="terbaru">{{ __('app.sort_newest') }}</option>
+                                <option value="terlama">{{ __('app.sort_oldest') }}</option>
                             </select>
                         </div>
                     </div>
@@ -223,7 +223,7 @@
                 @if($activeTab === 'done')
                     @if($doneRows->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                            Tidak ada data.
+                            {{ __('app.no_data') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5">
@@ -468,7 +468,7 @@
                                                             @if(!$row->deleted_at)
                                                                 <button type="button"
                                                                         wire:click="destroy({{ $row->bookingroom_id }})"
-                                                                        wire:confirm="Yakin ingin menghapus data booking ini?"
+                                                                        wire:confirm="{{ __(`app.delete_booking_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                                     Delete
@@ -497,7 +497,7 @@
                 @if($activeTab === 'rejected')
                     @if($rejectedRows->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                            Tidak ada data.
+                            {{ __('app.no_data') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5">
@@ -732,7 +732,7 @@
                                                             @if(!$row->deleted_at)
                                                                 <button type="button"
                                                                         wire:click="destroy({{ $row->bookingroom_id }})"
-                                                                        wire:confirm="Yakin ingin menghapus data booking ini?"
+                                                                        wire:confirm="{{ __(`app.delete_booking_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                                     Delete
@@ -813,7 +813,7 @@
                                     @endif
                                 </button>
                             @empty
-                                <p class="text-xs text-gray-500">Tidak ada data ruangan.</p>
+                                <p class="text-xs text-gray-500">{{ __('app.no_room_data') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -947,7 +947,7 @@
                                 wire:loading.attr="disabled"
                                 class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5">
                             <x-heroicon-o-check class="w-3.5 h-3.5" />
-                            <span>Simpan</span>
+                            <span>{{ __('app.save') }}</span>
                         </button>
                     </div>
                 </div>
@@ -962,7 +962,7 @@
                     <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                         <div>
                             <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter & Recent</h3>
-                            <p class="text-[11px] text-muted-foreground mt-0.5">Filter berdasarkan ruangan & lihat aktivitas terbaru.</p>
+                            <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_room_recent') }}</p>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
                     </div>
@@ -1004,7 +1004,7 @@
                                         @endif
                                     </button>
                                 @empty
-                                    <p class="text-xs text-gray-500">Tidak ada data ruangan.</p>
+                                    <p class="text-xs text-gray-500">{{ __('app.no_room_data') }}</p>
                                 @endforelse
                             </div>
                         </div>

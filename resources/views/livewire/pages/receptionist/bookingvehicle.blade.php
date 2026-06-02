@@ -61,8 +61,8 @@
                     <x-heroicon-o-truck class="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-foreground">Booking Kendaraan</h3>
-                    <p class="text-xs text-muted-foreground mt-0.5">Lengkapi detail peminjaman kendaraan</p>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __('app.booking_form_title') }}</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.booking_form_subtitle') }}</p>
                 </div>
             </div>
 
@@ -80,18 +80,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {{-- Departemen --}}
                         <div>
-                            <label class="{{ $label }}">Departemen <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.department') }} <span class="text-destructive">*</span></label>
 
                             <input
                                 type="text"
                                 wire:model.live="departmentSearch"
-                                placeholder="Cari departemen..."
+                                placeholder="{{ __('app.search_department') }}"
                                 class="{{ $input }} mb-2.5"
                             >
 
                             <div class="relative">
                                 <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">Pilih departemen</option>
+                                    <option value="">{{ __('app.select_department') }}</option>
                                     @foreach($departments as $d)
                                         <option value="{{ $d->department_id }}">{{ $d->department_name }}</option>
                                     @endforeach
@@ -107,12 +107,12 @@
 
                         {{-- User peminjam (filtered by department) --}}
                         <div>
-                            <label class="{{ $label }}">User (filtered by department)</label>
+                            <label class="{{ $label }}">{{ __('app.user_filtered') }}</label>
 
                             <input
                                 type="text"
                                 wire:model.live="userSearch"
-                                placeholder="Cari user..."
+                                placeholder="{{ __('app.search_user') }}"
                                 class="{{ $input }} mb-2.5 disabled:bg-muted disabled:text-muted-foreground"
                                 @disabled(!$department_id)
                             >
@@ -124,7 +124,7 @@
                                     @disabled(!$department_id)
                                 >
                                     @if(!$department_id)
-                                        <option value="">Pilih departemen terlebih dahulu</option>
+                                        <option value="">{{ __('app.select_dept_first') }}</option>
                                     @else
                                         <option value="">{{ __('app.select_user') }}</option>
                                         @forelse($users as $u)
@@ -142,7 +142,7 @@
                             </div>
 
                             <p class="text-[11px] text-muted-foreground mt-1.5">
-                                Jika tidak memilih user, isi nama peminjam manual di kolom di bawah.
+                                {{ __('app.borrower_name_hint') }}
                             </p>
                             @error('borrower_user_id')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -152,12 +152,12 @@
                         {{-- Nama peminjam manual --}}
                         <div>
                             <label class="{{ $label }}">
-                                Nama Peminjam (manual) <span class="text-destructive">*</span>
+                                {{ __('app.borrower_name') }} <span class="text-destructive">*</span>
                             </label>
                             <input
                                 type="text"
                                 wire:model.defer="borrower_name"
-                                placeholder="Nama peminjam"
+                                placeholder="{{ __('app.borrower_name') }}"
                                 class="{{ $input }} md:mt-[50px]"
                             >
                             @error('borrower_name')
@@ -167,7 +167,7 @@
 
                         {{-- Kendaraan --}}
                         <div>
-                            <label class="{{ $label }}">Kendaraan <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.vehicle') }} <span class="text-destructive">*</span></label>
                             <div class="relative">
                                 <select
                                     wire:model.defer="vehicle_id"
@@ -175,12 +175,12 @@
                                     class="{{ $input }} appearance-none pr-8 disabled:bg-muted disabled:text-muted-foreground"
                                 >
                                     @if(!$hasVehicles)
-                                        <option value="">Data kendaraan belum tersedia</option>
+                                        <option value="">{{ __('app.no_vehicle_data') }}</option>
                                     @else
-                                        <option value="">Pilih kendaraan</option>
+                                        <option value="">{{ __('app.select_vehicle') }}</option>
                                         @foreach($vehicles as $v)
                                             @php
-                                                $vehicleLabel = $v->name ?? 'Kendaraan';
+                                                $vehicleLabel = $v->name ?? __('app.vehicle');
                                                 $plate = $v->plate_number ? ' — '.$v->plate_number : '';
                                             @endphp
                                             <option value="{{ $v->vehicle_id }}">
@@ -200,7 +200,7 @@
 
                         {{-- Tanggal pinjam --}}
                         <div>
-                            <label class="{{ $label }}">Tanggal Peminjaman <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.borrow_date') }} <span class="text-destructive">*</span></label>
                             <input type="date" wire:model.defer="date_from" class="{{ $input }}">
                             @error('date_from')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -209,7 +209,7 @@
 
                         {{-- Tanggal kembali --}}
                         <div>
-                            <label class="{{ $label }}">Tanggal Pengembalian <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.return_date') }} <span class="text-destructive">*</span></label>
                             <input type="date" wire:model.defer="date_to" class="{{ $input }}">
                             @error('date_to')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -218,7 +218,7 @@
 
                         {{-- Jam mulai --}}
                         <div>
-                            <label class="{{ $label }}">Pukul Mulai <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.start_time') }} <span class="text-destructive">*</span></label>
                             <input type="time" wire:model.defer="start_time" class="{{ $input }}">
                             @error('start_time')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -227,7 +227,7 @@
 
                         {{-- Jam selesai --}}
                         <div>
-                            <label class="{{ $label }}">Pukul Selesai <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.end_time') }} <span class="text-destructive">*</span></label>
                             <input type="time" wire:model.defer="end_time" class="{{ $input }}">
                             @error('end_time')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -236,12 +236,12 @@
 
                         {{-- Odd/even --}}
                         <div>
-                            <label class="{{ $label }}">Masuk Area Ganjil/Genap</label>
+                            <label class="{{ $label }}">{{ __('app.odd_even_area') }}</label>
                             <div class="relative">
                                 <select wire:model.defer="odd_even_area" class="{{ $input }} appearance-none pr-8">
-                                    <option value="tidak">Tidak Masuk</option>
-                                    <option value="ganjil">Ganjil</option>
-                                    <option value="genap">Genap</option>
+                                    <option value="tidak">{{ __('app.not_enter') }}</option>
+                                    <option value="ganjil">{{ __('app.odd') }}</option>
+                                    <option value="genap">{{ __('app.even') }}</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -254,14 +254,14 @@
 
                         {{-- Jenis keperluan --}}
                         <div>
-                            <label class="{{ $label }}">Jenis Keperluan</label>
+                            <label class="{{ $label }}">{{ __('app.purpose_type') }}</label>
                             <div class="relative">
                                 <select wire:model.live="purpose_type" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">Pilih Keperluan</option>
-                                    <option value="dinas">Dinas</option>
-                                    <option value="operasional">Operasional</option>
-                                    <option value="antar jemput">Antar Jemput</option>
-                                    <option value="lainnya">Lainnya</option>
+                                    <option value="">{{ __('app.select_purpose') }}</option>
+                                    <option value="dinas">{{ __('app.official') }}</option>
+                                    <option value="operasional">{{ __('app.operational') }}</option>
+                                    <option value="antar jemput">{{ __('app.pickup_dropoff') }}</option>
+                                    <option value="lainnya">{{ __('app.other') }}</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -274,11 +274,11 @@
 
                         {{-- Keperluan --}}
                         <div class="md:col-span-2">
-                            <label class="{{ $label }}">Keperluan <span class="text-destructive">*</span></label>
+                            <label class="{{ $label }}">{{ __('app.purpose') }} <span class="text-destructive">*</span></label>
                             <input
                                 type="text"
                                 wire:model.defer="purpose"
-                                placeholder="Uraian singkat keperluan"
+                                placeholder="{{ __('app.purpose_placeholder') }}"
                                 class="{{ $input }}"
                             >
                             @error('purpose')
@@ -288,11 +288,11 @@
 
                         {{-- Tujuan --}}
                         <div class="md:col-span-3">
-                            <label class="{{ $label }}">Tujuan Lokasi</label>
+                            <label class="{{ $label }}">{{ __('app.destination') }}</label>
                             <input
                                 type="text"
                                 wire:model.defer="destination"
-                                placeholder="Contoh: Kantor Cabang Cibubur"
+                                placeholder="{{ __('app.destination_placeholder') }}"
                                 class="{{ $input }}"
                             >
                             @error('destination')
@@ -304,16 +304,16 @@
                         @if($purpose_type === 'lainnya')
                             <div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 md:col-span-3">
                                 <label class="{{ $label }}">
-                                    Detail Keperluan Lainnya <span class="text-destructive">*</span>
+                                    {{ __('app.other_purpose_detail') }} <span class="text-destructive">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     wire:model.defer="purpose_type_other"
-                                    placeholder="Jelaskan keperluan lainnya secara detail"
+                                    placeholder="{{ __('app.other_purpose_placeholder') }}"
                                     class="{{ $input }}"
                                 >
                                 <p class="text-[11px] text-muted-foreground mt-1.5 font-medium">
-                                    Wajib diisi karena Anda memilih "Lainnya"
+                                    {{ __('app.other_purpose_required') }}
                                 </p>
                                 @error('purpose_type_other')
                                     <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -329,7 +329,7 @@
                                     wire:model.defer="terms_agreed"
                                     class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all"
                                 >
-                                <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">Saya menyetujui syarat & ketentuan peminjaman kendaraan.</span>
+                                <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">{{ __('app.terms_agree') }}</span>
                             </label>
                             @error('terms_agreed')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
