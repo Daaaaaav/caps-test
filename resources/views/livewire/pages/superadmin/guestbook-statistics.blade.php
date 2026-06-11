@@ -126,7 +126,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Visitors',
+                    label: '{{ __('app.visitors') }}',
                     data: data,
                     backgroundColor: '#4E653D',
                     borderRadius: 6,
@@ -139,8 +139,8 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Visitors' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: '{{ __('app.visitors') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date_label') }}' } }
                 }
             }
         });

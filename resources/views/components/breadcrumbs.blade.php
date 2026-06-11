@@ -7,105 +7,105 @@ $breadcrumbs = [];
 
 // Home / Dashboard base
 if (str_starts_with($routeName, 'superadmin.')) {
-    $breadcrumbs[] = ['label' => 'Dashboard', 'url' => route('superadmin.dashboard')];
+    $breadcrumbs[] = ['label' => __('app.dashboard'), 'url' => route('superadmin.dashboard')];
 } elseif (str_starts_with($routeName, 'receptionist.')) {
-    $breadcrumbs[] = ['label' => 'Home', 'url' => route('receptionist.dashboard')];
+    $breadcrumbs[] = ['label' => __('app.home'), 'url' => route('receptionist.dashboard')];
 } else {
-    $breadcrumbs[] = ['label' => 'Home', 'url' => '/home'];
+    $breadcrumbs[] = ['label' => __('app.home'), 'url' => '/home'];
 }
 
 // Map sub-pages
 $routeMappings = [
     // Receptionist Page Mappings
     'receptionist.schedule' => [
-        ['label' => 'Room Management'],
-        ['label' => 'Booking Room', 'url' => route('receptionist.schedule')]
+        ['label' => __('app.room_management')],
+        ['label' => __('app.booking_room'), 'url' => route('receptionist.schedule')]
     ],
     'receptionist.bookings' => [
-        ['label' => 'Room Management'],
-        ['label' => 'Booking Approval', 'url' => route('receptionist.bookings')]
+        ['label' => __('app.room_management')],
+        ['label' => __('app.room_book_approval'), 'url' => route('receptionist.bookings')]
     ],
     'receptionist.bookinghistory' => [
-        ['label' => 'Room Management'],
-        ['label' => 'Booking History', 'url' => route('receptionist.bookinghistory')]
+        ['label' => __('app.room_management')],
+        ['label' => __('app.booking_history'), 'url' => route('receptionist.bookinghistory')]
     ],
     'receptionist.bookingvehicle' => [
-        ['label' => 'Vehicle Management'],
-        ['label' => 'Book Vehicle', 'url' => route('receptionist.bookingvehicle')]
+        ['label' => __('app.vehicle_management')],
+        ['label' => __('app.vehicle_book'), 'url' => route('receptionist.bookingvehicle')]
     ],
     'receptionist.vehiclestatus' => [
-        ['label' => 'Vehicle Management'],
-        ['label' => 'Vehicle Status', 'url' => route('receptionist.vehiclestatus')]
+        ['label' => __('app.vehicle_management')],
+        ['label' => __('app.vehicle_status_menu'), 'url' => route('receptionist.vehiclestatus')]
     ],
     'receptionist.vehicleshistory' => [
-        ['label' => 'Vehicle Management'],
-        ['label' => 'Vehicle History', 'url' => route('receptionist.vehicleshistory')]
+        ['label' => __('app.vehicle_management')],
+        ['label' => __('app.vehicle_history'), 'url' => route('receptionist.vehicleshistory')]
     ],
     'receptionist.guestbook' => [
-        ['label' => 'Guest Management'],
-        ['label' => 'GuestBook', 'url' => route('receptionist.guestbook')]
+        ['label' => __('app.guest_management')],
+        ['label' => __('app.guestbook'), 'url' => route('receptionist.guestbook')]
     ],
     'receptionist.guestbookhistory' => [
-        ['label' => 'Guest Management'],
-        ['label' => 'GuestBook History', 'url' => route('receptionist.guestbookhistory')]
+        ['label' => __('app.guest_management')],
+        ['label' => __('app.guestbook_history'), 'url' => route('receptionist.guestbookhistory')]
     ],
     'receptionist.docpackform' => [
-        ['label' => 'DocPac Management'],
-        ['label' => 'DocPac Form', 'url' => route('receptionist.docpackform')]
+        ['label' => __('app.docpac_management')],
+        ['label' => __('app.docpac_form'), 'url' => route('receptionist.docpackform')]
     ],
     'receptionist.docpackstatus' => [
-        ['label' => 'DocPac Management'],
-        ['label' => 'DocPac Status', 'url' => route('receptionist.docpackstatus')]
+        ['label' => __('app.docpac_management')],
+        ['label' => __('app.docpac_status'), 'url' => route('receptionist.docpackstatus')]
     ],
     'receptionist.docpackhistory' => [
-        ['label' => 'DocPac Management'],
-        ['label' => 'DocPac History', 'url' => route('receptionist.docpackhistory')]
+        ['label' => __('app.docpac_management')],
+        ['label' => __('app.docpac_history'), 'url' => route('receptionist.docpackhistory')]
     ],
     'receptionist.settings' => [
-        ['label' => 'Settings', 'url' => route('receptionist.settings')]
+        ['label' => __('app.settings'), 'url' => route('receptionist.settings')]
     ],
     'receptionist.help' => [
-        ['label' => 'Help', 'url' => route('receptionist.help')]
+        ['label' => __('app.help'), 'url' => route('receptionist.help')]
     ],
 
     // Superadmin Page Mappings
     'superadmin.receptionists' => [
-        ['label' => 'User Management'],
-        ['label' => 'Receptionists', 'url' => route('superadmin.receptionists')]
+        ['label' => __('app.user_management')],
+        ['label' => __('app.receptionists'), 'url' => route('superadmin.receptionists')]
     ],
     'superadmin.room' => [
-        ['label' => 'Analytics'],
-        ['label' => 'Room Bookings', 'url' => route('superadmin.room')]
+        ['label' => __('app.analytics')],
+        ['label' => __('app.room_bookings'), 'url' => route('superadmin.room')]
     ],
     'superadmin.vehicle' => [
-        ['label' => 'Analytics'],
-        ['label' => 'Vehicle Bookings', 'url' => route('superadmin.vehicle')]
+        ['label' => __('app.analytics')],
+        ['label' => __('app.vehicle_bookings'), 'url' => route('superadmin.vehicle')]
     ],
     'superadmin.delivery' => [
-        ['label' => 'Analytics'],
-        ['label' => 'Deliveries', 'url' => route('superadmin.delivery')]
+        ['label' => __('app.analytics')],
+        ['label' => __('app.deliveries'), 'url' => route('superadmin.delivery')]
     ],
     'superadmin.guestbook' => [
-        ['label' => 'Analytics'],
-        ['label' => 'Guestbook', 'url' => route('superadmin.guestbook')]
+        ['label' => __('app.analytics')],
+        ['label' => __('app.guestbook'), 'url' => route('superadmin.guestbook')]
     ],
     'superadmin.lstm-predictions' => [
-        ['label' => 'AI & Security System'],
-        ['label' => 'Visitor Predictions', 'url' => route('superadmin.lstm-predictions')]
+        ['label' => __('app.ai_security')],
+        ['label' => __('app.visitor_predictions'), 'url' => route('superadmin.lstm-predictions')]
     ],
     'superadmin.occupancy' => [
-        ['label' => 'AI & Security System'],
-        ['label' => 'Occupancy Forecast', 'url' => route('superadmin.occupancy')]
+        ['label' => __('app.ai_security')],
+        ['label' => __('app.occupancy_forecast'), 'url' => route('superadmin.occupancy')]
     ],
     'superadmin.ai-security' => [
-        ['label' => 'AI & Security System'],
-        ['label' => 'Security Reports', 'url' => route('superadmin.ai-security')]
+        ['label' => __('app.ai_security')],
+        ['label' => __('app.security_reports'), 'url' => route('superadmin.ai-security')]
     ],
     'superadmin.settings' => [
-        ['label' => 'Settings', 'url' => route('superadmin.settings')]
+        ['label' => __('app.settings'), 'url' => route('superadmin.settings')]
     ],
     'superadmin.help' => [
-        ['label' => 'Help', 'url' => route('superadmin.help')]
+        ['label' => __('app.help'), 'url' => route('superadmin.help')]
     ],
 ];
 

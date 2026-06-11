@@ -75,9 +75,9 @@
 
         {{-- ===== CONTACT CARD ===== --}}
         <div class="bg-gray-900 text-white rounded-2xl px-6 py-6 shadow-sm">
-            <h3 class="text-base font-semibold mb-1">Still need help?</h3>
+            <h3 class="text-base font-semibold mb-1">{{ __('app.still_need_help') }}</h3>
             <p class="text-sm text-gray-300 mb-4">
-                If you can't find an answer above, reach out to your system administrator.
+                {{ __('app.still_need_help_sub') }}
             </p>
             <div class="flex flex-wrap gap-3 text-sm">
                 <a href="mailto:admin@kebunraya.id"
@@ -86,7 +86,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    Email Admin
+                    {{ __('app.email_admin') }}
                 </a>
             </div>
         </div>

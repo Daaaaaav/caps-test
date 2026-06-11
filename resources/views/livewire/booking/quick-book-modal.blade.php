@@ -16,7 +16,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
-                        <h3 class="text-base font-bold text-foreground tracking-tight">Quick Room Booking</h3>
+                        <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.quick_book_title') }}</h3>
                     </div>
                     <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="close">✕</button>
                 </div>
@@ -25,12 +25,12 @@
                 <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Room</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_room') }}</label>
                             <input type="text" value="{{ $roomName ?? '' }}" disabled
                                 class="w-full h-10 px-3.5 bg-muted text-foreground/80 border border-input rounded-lg text-sm cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Date</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_date') }}</label>
                             <input type="date" wire:model="date"
                                 class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                             @error('date') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
@@ -39,13 +39,13 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Start Time</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_start') }}</label>
                             <input type="time" wire:model="start_time" min="{{ $minStart }}"
                                 class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                             @error('start_time') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">End Time</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_end') }}</label>
                             <input type="time" wire:model="end_time" min="{{ $start_time ?: $minStart }}"
                                 class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                             @error('end_time') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
@@ -54,27 +54,36 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Meeting Title</label>
-                            <input type="text" wire:model="meeting_title" placeholder="Enter meeting title"
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_meeting_title') }}</label>
+                            <input type="text" wire:model="meeting_title" placeholder="{{ __('app.quick_book_meeting_ph') }}"
                                 class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                             @error('meeting_title') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Attendees</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_attendees') }}</label>
                             <input type="number" wire:model="number_of_attendees" min="1" placeholder="0"
                                 class="w-full h-10 px-3.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                             @error('number_of_attendees') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
+                    @php
+                        $quickReqMap = [
+                            'projector'        => __('app.req_projector_screen'),
+                            'whiteboard'       => __('app.req_whiteboard'),
+                            'video_conference' => __('app.req_video_conference'),
+                            'catering'         => __('app.req_catering'),
+                            'other'            => __('app.req_other'),
+                        ];
+                    @endphp
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Additional Requirements</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{{ __('app.quick_book_add_req') }}</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/20 border border-border rounded-xl p-4">
                             @foreach (['projector', 'whiteboard', 'video_conference', 'catering', 'other'] as $req)
                                 <label class="flex items-center space-x-2.5 cursor-pointer group">
                                     <input type="checkbox" wire:model.live="requirements" value="{{ $req }}"
                                         class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
-                                    <span class="text-xs text-foreground group-hover:text-primary transition-colors">{{ ucwords(str_replace('_', ' ', $req)) }}</span>
+                                    <span class="text-xs text-foreground group-hover:text-primary transition-colors">{{ $quickReqMap[$req] }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -82,9 +91,9 @@
 
                     @if (in_array('other', $requirements ?? [], true))
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Special Notes</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.quick_book_special_notes') }}</label>
                             <textarea wire:model.defer="special_notes" rows="3"
-                                placeholder="Please specify your other requirements…"
+                                placeholder="{{ __('app.quick_book_notes_ph') }}"
                                 class="w-full px-3.5 py-2.5 border border-input rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"></textarea>
                             @error('special_notes') <span class="text-destructive text-xs mt-1.5 font-medium block">{{ $message }}</span> @enderror
                         </div>
@@ -95,10 +104,10 @@
                 <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/10">
                     <button wire:click="close"
                         class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition">
-                        Cancel
+                        {{ __('app.quick_book_cancel') }}
                     </button>
                     <button wire:click="submit" class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm">
-                        Confirm Booking
+                        {{ __('app.quick_book_confirm') }}
                     </button>
                 </div>
             </div>

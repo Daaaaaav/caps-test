@@ -85,15 +85,15 @@
                         <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium shrink-0">
                             <button type="button" wire:click="$set('type', 'all')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'all' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                All
+                                {{ __('app.tab_all') }}
                             </button>
                             <button type="button" wire:click="$set('type', 'document')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'document' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Document
+                                {{ __('app.type_document') }}
                             </button>
                             <button type="button" wire:click="$set('type', 'package')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'package' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Package
+                                {{ __('app.type_package') }}
                             </button>
                         </div>
 
@@ -162,7 +162,7 @@
                                 $avatarChar = strtoupper(substr($row->item_name ?? 'D', 0, 1));
                                 $rowNo = ($done->firstItem() ?? 1) + $loop->index;
                                 $isDelivered = $row->status === 'delivered';
-                                $statusLabel = $isDelivered ? 'Delivered' : 'Taken';
+                                $statusLabel = $isDelivered ? __('app.delivered') : __('app.taken');
                                 $statusBg = $isDelivered ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800';
 
                                 $completionDate = $row->created_at; // Default to created_at
@@ -197,7 +197,7 @@
                                                 <div class="flex-shrink-0 flex items-center gap-2">
                                                     {{-- Type Badge --}}
                                                     <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-medium uppercase">
-                                                        {{ $row->type }}
+                                                        {{ __('app.type_' . $row->type) }}
                                                     </span>
                                                     {{-- Status Badge --}}
                                                     <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 {{ $statusBg }}">
@@ -211,13 +211,13 @@
                                                 @if($row->nama_pengirim)
                                                     <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                         <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                        <span class="truncate">From: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
+                                                        <span class="truncate">{{ __('app.from_label') }}: <span class="font-semibold">{{ $row->nama_pengirim }}</span></span>
                                                     </div>
                                                 @endif
                                                 @if($row->nama_penerima)
                                                     <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                         <x-heroicon-o-user class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                        <span class="truncate">To: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
+                                                        <span class="truncate">{{ __('app.to_label') }}: <span class="font-semibold">{{ $row->nama_penerima }}</span></span>
                                                     </div>
                                                 @endif
                                             </div>
@@ -248,13 +248,13 @@
                                         <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
                                             wire:loading.attr="disabled"
                                             class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:ring-2 focus:ring-[#4E653D]/20 focus:outline-none transition shadow-sm">
-                                            Edit
+                                            {{ __('app.edit') }}
                                         </button>
                                         <button type="button" wire:click="softDelete({{ $row->delivery_id }})"
                                             wire:loading.attr="disabled"
-                                            wire:confirm="Are you sure you want to delete this item?"
+                                            wire:confirm="{{ __('app.are_you_sure_delete') }}"
                                             class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                            Delete
+                                            {{ __('app.delete') }}
                                         </button>
                                     </div>
                                 </div>
@@ -275,7 +275,7 @@
                                         <th class="px-6 py-3.5">#</th>
                                         <th class="px-6 py-3.5">{{ __('app.item_name') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.type') }}</th>
-                                        <th class="px-6 py-3.5">Status</th>
+                                        <th class="px-6 py-3.5">{{ __('app.status') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.sender') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.receiver') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.completed_at') }}</th>
@@ -288,7 +288,7 @@
                                         @php
                                             $rowNo = ($done->firstItem() ?? 1) + $loop->index;
                                             $isDelivered = $row->status === 'delivered';
-                                            $statusLabel = $isDelivered ? 'Delivered' : 'Taken';
+                                            $statusLabel = $isDelivered ? __('app.delivered') : __('app.taken');
                                             $statusBg = $isDelivered ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800';
 
                                             $completionDate = $row->created_at;
@@ -303,7 +303,7 @@
                                             <td class="px-6 py-4 font-semibold text-gray-900">{{ $row->item_name }}</td>
                                             <td class="px-6 py-4">
                                                 <span class="text-[10px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 font-medium uppercase">
-                                                    {{ $row->type }}
+                                                    {{ __('app.type_' . $row->type) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4">
@@ -319,12 +319,12 @@
                                                 <div class="flex items-center justify-end gap-2 font-medium">
                                                     <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
-                                                        Edit
+                                                        {{ __('app.edit') }}
                                                     </button>
                                                     <button type="button" wire:click="softDelete({{ $row->delivery_id }})"
-                                                        wire:confirm="Are you sure you want to delete this item?"
+                                                        wire:confirm="{{ __('app.are_you_sure_delete') }}"
                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
-                                                        Delete
+                                                        {{ __('app.delete') }}
                                                     </button>
                                                 </div>
                                             </td>
@@ -358,38 +358,159 @@
                     </div>
 
                     <div class="p-4 space-y-4 bg-white">
-                        {{-- Department Filter --}}
+                        {{-- Department Combobox --}}
                         <div class="space-y-1">
-                            <label class="{{ $label }}">Department</label>
-                            <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
-                                placeholder="{{ __('app.search_department_ph') }}">
-                            <div class="relative mt-2">
-                                <select wire:model.live="departmentId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.all_departments') }}</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <label class="{{ $label }}">{{ __('app.department') }}</label>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
+                                            !q || i.label.toLowerCase().includes(q)
+                                        );
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        $wire.set('departmentId', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        $wire.set('departmentId', null);
+                                    }
+                                }"
+                                x-init="
+                                    $watch('$wire.departmentId', val => {
+                                        if (!val) { search = ''; }
+                                        else {
+                                            const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
+                                            if (found) search = found.label;
+                                        }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.all_departments') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="$wire.departmentId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                    {{ __('app.no_data_label') }}
+                                </p>
                             </div>
                         </div>
 
-                        {{-- User Filter --}}
+                        {{-- User / Receptionist Combobox --}}
                         <div class="space-y-1">
                             <label class="{{ $label }}">Receptionist / User</label>
-                            <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="{{ __('app.search_user_ph') }}">
-                            <div class="relative mt-2">
-                                <select wire:model.live="userId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.all_users') }}</option>
-                                    @foreach($users as $u)
-                                        <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        const deptId = $wire.departmentId;
+                                        const all = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name, 'dept' => $u->department_id])->values()->toArray());
+                                        const filtered = deptId ? all.filter(i => i.dept == deptId) : all;
+                                        return q ? filtered.filter(i => i.label.toLowerCase().includes(q)) : filtered;
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        $wire.set('userId', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        $wire.set('userId', null);
+                                    }
+                                }"
+                                x-init="
+                                    $watch('$wire.departmentId', () => { search = ''; $wire.set('userId', null); });
+                                    $watch('$wire.userId', val => {
+                                        if (!val) { search = ''; }
+                                        else {
+                                            const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
+                                            if (found) search = found.label;
+                                        }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.all_users') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="$wire.userId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                    {{ __('app.no_data_label') }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -412,38 +533,159 @@
                 </div>
 
                 <div class="p-5 space-y-5 overflow-y-auto flex-1 bg-white">
-                    {{-- Department Filter --}}
+                    {{-- Department Combobox (Mobile) --}}
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">Department</label>
-                        <input type="text" wire:model.live="departmentQ" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition"
-                            placeholder="{{ __('app.search_department_ph') }}">
-                        <div class="relative mt-2">
-                            <select wire:model.live="departmentId" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition appearance-none pr-8">
-                                <option value="">{{ __('app.all_departments') }}</option>
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-400">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">{{ __('app.department') }}</label>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                get items() {
+                                    const q = this.search.toLowerCase().trim();
+                                    return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
+                                        !q || i.label.toLowerCase().includes(q)
+                                    );
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    $wire.set('departmentId', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    $wire.set('departmentId', null);
+                                }
+                            }"
+                            x-init="
+                                $watch('$wire.departmentId', val => {
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
+                                        if (found) search = found.label;
+                                    }
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.all_departments') }}"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="$wire.departmentId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                {{ __('app.no_data_label') }}
+                            </p>
                         </div>
                     </div>
 
-                    {{-- User Filter --}}
+                    {{-- User / Receptionist Combobox (Mobile) --}}
                     <div class="space-y-1.5">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">Receptionist / User</label>
-                        <input type="text" wire:model.live="userQ" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition" placeholder="{{ __('app.search_user_ph') }}">
-                        <div class="relative mt-2">
-                            <select wire:model.live="userId" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition appearance-none pr-8">
-                                <option value="">{{ __('app.all_users') }}</option>
-                                @foreach($users as $u)
-                                    <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-400">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                get items() {
+                                    const q = this.search.toLowerCase().trim();
+                                    const deptId = $wire.departmentId;
+                                    const all = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name, 'dept' => $u->department_id])->values()->toArray());
+                                    const filtered = deptId ? all.filter(i => i.dept == deptId) : all;
+                                    return q ? filtered.filter(i => i.label.toLowerCase().includes(q)) : filtered;
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    $wire.set('userId', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    $wire.set('userId', null);
+                                }
+                            }"
+                            x-init="
+                                $watch('$wire.departmentId', () => { search = ''; $wire.set('userId', null); });
+                                $watch('$wire.userId', val => {
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
+                                        if (found) search = found.label;
+                                    }
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.all_users') }}"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="$wire.userId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                {{ __('app.no_data_label') }}
+                            </p>
                         </div>
                     </div>
                 </div>

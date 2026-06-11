@@ -82,24 +82,96 @@
                         <div>
                             <label class="{{ $label }}">{{ __('app.department') }} <span class="text-destructive">*</span></label>
 
-                            <input
-                                type="text"
-                                wire:model.live="departmentSearch"
-                                placeholder="{{ __('app.search_department') }}"
-                                class="{{ $input }} mb-2.5"
+                            {{-- Combobox: search + select in one --}}
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: $wire.departmentSearch,
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
+                                            !q || i.label.toLowerCase().includes(q)
+                                        );
+                                    },
+                                    get selectedLabel() {
+                                        const id = $wire.department_id;
+                                        const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == id);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        $wire.set('department_id', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        $wire.set('department_id', null);
+                                        $wire.set('departmentSearch', '');
+                                    }
+                                }"
+                                x-init="
+                                    $watch('search', val => $wire.set('departmentSearch', val));
+                                    $watch('$wire.department_id', val => {
+                                        if (!val) { search = ''; }
+                                        else { search = selectedLabel; }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
                             >
-
-                            <div class="relative">
-                                <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.select_department') }}</option>
-                                    @foreach($departments as $d)
-                                        <option value="{{ $d->department_id }}">{{ $d->department_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.search_department') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button
+                                            x-show="search"
+                                            type="button"
+                                            @click.stop="clear()"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+
+                                {{-- Dropdown list --}}
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="$wire.department_id == item.id
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'text-foreground hover:bg-muted cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
+
+                                {{-- Hidden real input for Livewire --}}
+                                <input type="hidden" wire:model="department_id">
                             </div>
+
                             @error('department_id')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror
@@ -109,36 +181,92 @@
                         <div>
                             <label class="{{ $label }}">{{ __('app.user_filtered') }}</label>
 
-                            <input
-                                type="text"
-                                wire:model.live="userSearch"
-                                placeholder="{{ __('app.search_user') }}"
-                                class="{{ $input }} mb-2.5 disabled:bg-muted disabled:text-muted-foreground"
-                                @disabled(!$department_id)
+                            {{-- Combobox: search + select in one --}}
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        const list = ($wire.usersForCombobox || []);
+                                        return q ? list.filter(i => i.label.toLowerCase().includes(q) || (i.email && i.email.toLowerCase().includes(q))) : list;
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        $wire.set('borrower_user_id', id);
+                                        if (!$wire.borrower_name) $wire.set('borrower_name', label);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        $wire.set('borrower_user_id', null);
+                                        $wire.set('userSearch', '');
+                                    }
+                                }"
+                                x-init="
+                                    $watch('search', val => $wire.set('userSearch', val));
+                                    $watch('$wire.department_id', () => { search = ''; });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
                             >
-
-                            <div class="relative">
-                                <select
-                                    wire:model.defer="borrower_user_id"
-                                    class="{{ $input }} appearance-none pr-8 disabled:bg-muted disabled:text-muted-foreground"
-                                    @disabled(!$department_id)
-                                >
-                                    @if(!$department_id)
-                                        <option value="">{{ __('app.select_dept_first') }}</option>
-                                    @else
-                                        <option value="">{{ __('app.select_user') }}</option>
-                                        @forelse($users as $u)
-                                            <option value="{{ $u->user_id }}">
-                                                {{ $u->full_name }} — {{ $u->email }}
-                                            </option>
-                                        @empty
-                                            <option value="">{{ __('app.no_users_found') }}</option>
-                                        @endforelse
-                                    @endif
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="if ($wire.department_id) open = true"
+                                        @input="if ($wire.department_id) open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.search_user') }}"
+                                        :disabled="!$wire.department_id"
+                                        class="{{ $input }} pr-8 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button
+                                            x-show="search"
+                                            type="button"
+                                            @click.stop="clear()"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+
+                                {{-- Dropdown list --}}
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="$wire.borrower_user_id == item.id
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'text-foreground hover:bg-muted cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        >
+                                            <span x-text="item.label" class="font-medium"></span>
+                                            <span x-show="item.email" x-text="' — ' + item.email" class="text-xs opacity-60"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search && $wire.department_id" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                    {{ __('app.no_users_found') }}
+                                </p>
+                                <p x-show="!$wire.department_id" class="mt-1.5 text-[11px] text-muted-foreground">
+                                    {{ __('app.select_dept_first') }}
+                                </p>
+
+                                {{-- Hidden real input for Livewire --}}
+                                <input type="hidden" wire:model="borrower_user_id">
                             </div>
 
                             <p class="text-[11px] text-muted-foreground mt-1.5">

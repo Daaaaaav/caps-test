@@ -45,15 +45,15 @@
                     <div class="flex gap-2">
                         <button wire:click="setForecastDays(7)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 7 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                            7 Days
+                            {{ __('app.7_days') }}
                         </button>
                         <button wire:click="setForecastDays(14)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 14 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                            14 Days
+                            {{ __('app.14_days') }}
                         </button>
                         <button wire:click="setForecastDays(21)"
                             class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 21 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                            21 Days
+                            {{ __('app.21_days') }}
                         </button>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold text-[#2d3a24]">{{ __('app.occupancy_forecast_chart') }}</h3>
                     <p class="text-sm text-[#7a8f6a] mt-1">
-                        {{ $forecastDays }}-{{ __('app.day') }} prediction based on historical patterns
+                        {{ $forecastDays }}-{{ __('app.day') }} {{ __('app.prediction_based_on_history') }}
                         ({{ $isLSTMAvailable ? __('app.lstm_model') : __('app.statistical_model') }})
                     </p>
                 </div>
@@ -151,7 +151,7 @@
                                 <p class="text-sm font-semibold text-[#2d3a24]">{{ $day['date_label'] }}</p>
                                 <p class="text-xs text-[#7a8f6a]">{{ $day['summary']['weather_desc'] ?? '—' }}</p>
                                 <p class="text-lg font-bold text-[#2d3a24] mt-1">{{ $day['max_temp'] }}°C</p>
-                                <p class="text-xs text-[#9aaa8a]">🌧️ {{ $day['rain_chance'] }}% rain</p>
+                                <p class="text-xs text-[#9aaa8a]">🌧️ {{ $day['rain_chance'] }}% {{ __('app.rain') }}</p>
                             </div>
                         </div>
                     @endforeach
@@ -191,7 +191,7 @@
 
         if (roomData && roomData.some(v => v !== null)) {
             datasets.push({
-                label: 'Room Bookings',
+                label: '{{ __('app.room_bookings') }}',
                 data: roomData,
                 borderColor: '#4E653D',
                 backgroundColor: 'rgba(78, 101, 61, 0.1)',
@@ -204,7 +204,7 @@
 
         if (vehicleData && vehicleData.length > 0) {
             datasets.push({
-                label: 'Vehicle Bookings',
+                label: '{{ __('app.vehicle_bookings') }}',
                 data: vehicleData,
                 borderColor: '#4A2F24',
                 backgroundColor: 'rgba(74, 47, 36, 0.1)',
@@ -231,8 +231,8 @@
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Bookings' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, title: { display: true, text: '{{ __('app.reservations') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date_label') }}' } }
                 }
             }
         });

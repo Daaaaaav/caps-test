@@ -222,7 +222,7 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->forget('url.intended');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect('/login');
     })->name('logout');
 
 }); // end auth middleware group

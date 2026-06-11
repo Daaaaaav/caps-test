@@ -92,12 +92,12 @@
                                 <button type="button"
                                     wire:click="setTab('pending')"
                                     class="px-3 py-1 rounded-full transition {{ $activeTab === 'pending' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Pending
+                                    {{ __('app.pending') }}
                                 </button>
                                 <button type="button"
                                     wire:click="setTab('ongoing')"
                                     class="px-3 py-1 rounded-full transition {{ $activeTab === 'ongoing' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Ongoing
+                                    {{ __('app.ongoing') }}
                                 </button>
                             </div>
 
@@ -144,15 +144,15 @@
                         <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-[11px] font-medium">
                             <button type="button" wire:click="setTypeScope('all')"
                                 class="px-3 py-1 rounded-full {{ $typeScope === 'all' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                All
+                                {{ __('app.all') }}
                             </button>
                             <button type="button" wire:click="setTypeScope('offline')"
                                 class="px-3 py-1 rounded-full {{ $typeScope === 'offline' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Offline
+                                {{ __('app.offline') }}
                             </button>
                             <button type="button" wire:click="setTypeScope('online')"
                                 class="px-3 py-1 rounded-full {{ $typeScope === 'online' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700' }}">
-                                Online
+                                {{ __('app.online') }}
                             </button>
                         </div>
                     </div>
@@ -312,7 +312,7 @@
                                                     {{-- Reject Note (if any) --}}
                                                     @if($b->book_reject)
                                                         <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
-                                                            <span class="font-medium">Note:</span> {{ $b->book_reject }}
+                                                            <span class="font-medium">{{ __('app.notes') }}:</span> {{ $b->book_reject }}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -325,7 +325,7 @@
                                                 <button type="button"
                                                     wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                     class="{{ $btnGhost }} px-4 py-2">
-                                                    Detail
+                                                    {{ __('app.detail') }}
                                                 </button>
      
                                                 {{-- APPROVE BUTTON (Green) --}}
@@ -335,7 +335,7 @@
                                                     wire:target="approve"
                                                     class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm inline-flex items-center justify-center">
                                                     <x-heroicon-o-check class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                    Approve
+                                                    {{ __('app.approve') }}
                                                 </button>
      
                                                 {{-- REJECT BUTTON (Red) --}}
@@ -345,7 +345,7 @@
                                                     wire:target="openReject"
                                                     class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
                                                     <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                    Reject
+                                                    {{ __('app.reject') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -396,7 +396,7 @@
                                                             </span>
                                                         @else
                                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-semibold uppercase border border-blue-200">
-                                                                {{ $b->room?->room_name ?? 'Not selected' }}
+                                                                {{ $b->room?->room_name ?? __('app.not_selected') }}
                                                             </span>
                                                         @endif
                                                     </td>
@@ -415,19 +415,19 @@
                                                             <button type="button"
                                                                 wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                Detail
+                                                                {{ __('app.detail') }}
                                                             </button>
                                                             <button type="button"
                                                                 wire:click="approve({{ $b->bookingroom_id }})"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition">
-                                                                Approve
+                                                                {{ __('app.approve') }}
                                                             </button>
                                                             <button type="button"
                                                                 wire:click="openReject({{ $b->bookingroom_id }})"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                Reject
+                                                                {{ __('app.reject') }}
                                                             </button>
                                                         </div>
                                                     </td>
@@ -540,7 +540,7 @@
                                                     {{-- Reject Note (if any) --}}
                                                     @if($b->book_reject)
                                                         <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
-                                                            <span class="font-medium">Note:</span> {{ $b->book_reject }}
+                                                            <span class="font-medium">{{ __('app.notes') }}:</span> {{ $b->book_reject }}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -553,14 +553,14 @@
                                                             wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                             class="{{ $btnGhost }}">
                                                             <x-heroicon-o-eye class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                            Detail
+                                                            {{ __('app.detail') }}
                                                         </button>
      
                                                         {{-- CANCEL BUTTON (for ongoing) --}}
                                                         <button type="button"
                                                             x-data
                                                             @click="
-                                                                if (confirm('Are you sure you want to cancel this request?')) {
+                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
                                                                     $wire.openReschedule({{ $b->bookingroom_id }});
                                                                 }
                                                             "
@@ -568,7 +568,7 @@
                                                             wire:target="openReschedule"
                                                             class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
                                                             <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                            Cancel
+                                                            {{ __('app.cancel') }}
                                                         </button>
                                                     </div>
 
@@ -643,14 +643,14 @@
                                                             <button type="button"
                                                                 wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                Detail
+                                                                {{ __('app.detail') }}
                                                             </button>
                                                             <button type="button"
                                                                 x-data
-                                                                @click="if (confirm('Are you sure you want to cancel this request?')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
+                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                Cancel
+                                                                {{ __('app.cancel') }}
                                                             </button>
                                                         </div>
                                                     </td>
@@ -744,7 +744,7 @@
                             <div class="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
                                 <x-heroicon-o-x-circle class="w-4 h-4 text-destructive" />
                             </div>
-                            <h3 class="text-base font-bold text-foreground tracking-tight">Tolak Booking</h3>
+                            <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking_title') }}</h3>
                         </div>
                         <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeReject">✕</button>
                     </div>
@@ -866,7 +866,7 @@
 
                 <div class="p-5 space-y-4 overflow-y-auto flex-1">
                     <div>
-                        <h4 class="text-xs font-semibold text-foreground mb-2">Filter by Room</h4>
+                        <h4 class="text-xs font-semibold text-foreground mb-2">{{ __('app.filter_by_room_label') }}</h4>
 
                         <button type="button"
                             wire:click="clearRoomFilter"
@@ -913,7 +913,7 @@
                     <button type="button"
                         class="w-full h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-colors shadow-sm"
                         wire:click="closeFilterModal">
-                        Apply & Close
+                        {{ __('app.apply_close') }}
                     </button>
                 </div>
             </div>
@@ -937,7 +937,7 @@
                         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <x-heroicon-o-eye class="w-4 h-4 text-primary" />
                         </div>
-                        <h3 class="text-base font-bold text-foreground tracking-tight">Detail Booking</h3>
+                        <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.detail_booking') }}</h3>
                     </div>
                     <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeDetailModal">✕</button>
                 </div>
@@ -1028,7 +1028,7 @@
                         <div class="space-y-1">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                 <x-heroicon-o-calendar class="w-3.5 h-3.5 text-muted-foreground/60" />
-                                <span>Waktu Booking</span>
+                                <span>{{ __('app.booking_time_label') }}</span>
                             </div>
                             <p class="text-sm font-semibold text-foreground">
                                 {{ \Illuminate\Support\Carbon::parse($detail->date)->format('d M Y') }}
@@ -1050,7 +1050,7 @@
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-building-office-2 class="w-3.5 h-3.5 text-muted-foreground/60" />
-                                    <span>Ruang Meeting</span>
+                                    <span>{{ __('app.meeting_room_label') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground">{{ $detail->room->room_name ?? '—' }}</p>
                             </div>
@@ -1058,7 +1058,7 @@
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-swatch class="w-3.5 h-3.5 text-muted-foreground/60" />
-                                    <span>Provider Online</span>
+                                    <span>{{ __('app.online_provider_label') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground capitalize">{{ str_replace('_', ' ', $detail->online_provider ?? '—') }}</p>
                             </div>
@@ -1069,11 +1069,11 @@
                         @if ($isOnline)
                         <div class="grid grid-cols-2 gap-4 border-t border-border/40 pt-3">
                             <div class="space-y-1">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Kode Meeting</div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.meeting_code_label') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">{{ $detail->online_meeting_code ?: '—' }}</p>
                             </div>
                             <div class="space-y-1">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Password</div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.password') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">{{ $detail->online_meeting_password ?: '—' }}</p>
                             </div>
                         </div>
@@ -1109,7 +1109,7 @@
                         <div class="space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                 <x-heroicon-o-document-text class="w-3.5 h-3.5 text-muted-foreground/60" />
-                                <span>Catatan Khusus Booking</span>
+                                <span>{{ __('app.special_notes_label') }}</span>
                             </div>
                             <p class="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">{{ $detail->special_notes ?: '—' }}</p>
                         </div>

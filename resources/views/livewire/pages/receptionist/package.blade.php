@@ -39,7 +39,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg sm:text-xl font-semibold">Packages</h2>
+                        <h2 class="text-lg sm:text-xl font-semibold">{{ __('app.on_going_packages') }}</h2>
                         <p class="text-xs text-[#CDDEA7]/80">{{ __('app.complete_package_data') }}</p>
                     </div>
                 </div>

@@ -112,7 +112,7 @@ $invertStyle = 'filter: brightness(0) invert(1);';
                         </div>
                     </div>
                     <span class="text-xs font-semibold text-muted-foreground/80 bg-secondary/80 border border-border px-3 py-1.5 rounded-xl shadow-xs">
-                        {{ now()->format('l, d M Y') }}
+                        {{ now()->locale(app()->getLocale())->translatedFormat('l, d M Y') }}
                     </span>
                 </div>
             </header>

@@ -84,8 +84,8 @@
                                 <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->borrower_name }}</td>
                                 <td class="px-6 py-4 text-[#2d3a24]">{{ Str::limit($booking->purpose, 30) }}</td>
                                 <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->destination }}</td>
-                                <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->start_at->format('M d, H:i') }}</td>
-                                <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->end_at->format('M d, H:i') }}</td>
+                                <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->start_at->format('d/m H:i') }}</td>
+                                <td class="px-6 py-4 text-[#2d3a24]">{{ $booking->end_at->format('d/m H:i') }}</td>
                                 <td class="px-6 py-4">
                                     @php
                                         $statusValue = strtolower($booking->status ?? 'pending');
@@ -99,11 +99,17 @@
                                             'cancelled'   => 'bg-red-50 text-red-600',
                                         ];
                                         $statusLabels = [
-                                            'on_progress' => 'In Progress',
+                                            'pending'     => __('app.pending'),
+                                            'approved'    => __('app.approved'),
+                                            'on_progress' => __('app.in_progress'),
+                                            'completed'   => __('app.completed'),
+                                            'returned'    => __('app.returned'),
+                                            'rejected'    => __('app.rejected'),
+                                            'cancelled'   => __('app.cancelled'),
                                         ];
                                     @endphp
                                     <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$statusValue] ?? 'bg-[#eef1e8] text-[#4E653D]' }}">
-                                        {{ $statusLabels[$statusValue] ?? ucfirst($statusValue) }}
+                                        {{ $statusLabels[$statusValue] ?? $statusValue }}
                                     </span>
                                 </td>
                             </tr>
@@ -135,7 +141,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Vehicle Bookings',
+                    label: '{{ __('app.total_bookings') }}',
                     data: data,
                     backgroundColor: '#4E653D',
                     borderRadius: 6,
@@ -148,8 +154,8 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Bookings' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: '{{ __('app.total_bookings') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date_label') }}' } }
                 }
             }
         });

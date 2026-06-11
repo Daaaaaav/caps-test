@@ -111,7 +111,7 @@
                             <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
                                 <option value="">{{ __('app.select_department_opt') }}</option>
                                 @foreach($departments_list as $dept)
-                                    <option value="{{ $dept->id }}">{{ $dept->name ?? $dept->nama_departemen ?? 'Dept #'.$dept->id }}</option>
+                                    <option value="{{ $dept['id'] }}">{{ $dept['name'] }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-500">
@@ -132,7 +132,7 @@
                                     @if(empty($users_list) && $department_id) disabled @endif>
                                 <option value="">{{ __('app.select_employee') }}</option>
                                 @foreach($users_list as $user)
-                                    <option value="{{ $user->id }}">{{ $user->full_name ?? $user->name }}</option>
+                                    <option value="{{ $user['id'] }}">{{ $user['full_name'] }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-500">

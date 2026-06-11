@@ -218,21 +218,15 @@ class DocPackHistory extends Component
         $departments = Department::query()
             ->where('company_id', $companyId)
             ->whereNull('deleted_at')
-            ->when(trim($this->departmentQ) !== '', function ($q) {
-                $q->where('department_name', 'like', '%' . trim($this->departmentQ) . '%');
-            })
             ->orderBy('department_name')
             ->get(['department_id', 'department_name']);
 
         $users = UserModel::query()
             ->where('company_id', $companyId)
-            ->when($this->departmentId, fn($q) => $q->where('department_id', $this->departmentId))
-            ->when(trim($this->userQ) !== '', function ($q) {
-                $q->where('full_name', 'like', '%' . trim($this->userQ) . '%');
-            })
             ->whereNull('deleted_at')
             ->orderBy('full_name')
-            ->get(['user_id', 'full_name']);
+            ->get(['user_id', 'full_name', 'department_id'])
+            ->unique('user_id');
 
         return view('livewire.pages.receptionist.docpackhistory', [
             'done' => $this->done,

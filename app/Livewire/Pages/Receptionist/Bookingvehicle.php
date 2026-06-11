@@ -41,6 +41,9 @@ class Bookingvehicle extends Component
     public $vehicles;
     public bool $hasVehicles = false;
 
+    /** Plain array for the Alpine combobox — updated whenever department changes */
+    public array $usersForCombobox = [];
+
     // search box seperti di MeetingSchedule
     public string $departmentSearch = '';
     public string $userSearch = '';
@@ -108,6 +111,7 @@ class Bookingvehicle extends Component
         if (!$value) {
             // kalau dikosongkan, list user dikosongkan
             $this->users = collect();
+            $this->usersForCombobox = [];
             return;
         }
 
@@ -119,6 +123,16 @@ class Bookingvehicle extends Component
             ->where('department_id', $value)
             ->orderBy('full_name', 'asc')
             ->get();
+
+        // keep a plain array for the Alpine combobox
+        $this->usersForCombobox = $this->users
+            ->map(fn($u) => [
+                'id'    => $u->user_id,
+                'label' => $u->full_name,
+                'email' => $u->email,
+            ])
+            ->values()
+            ->all();
     }
 
     public function submit()
@@ -204,6 +218,7 @@ class Bookingvehicle extends Component
 
         // list user dikosongkan lagi
         $this->users = collect();
+        $this->usersForCombobox = [];
 
         $today = now($this->tz)->toDateString();
         $this->date_from     = $today;

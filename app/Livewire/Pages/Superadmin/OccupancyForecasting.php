@@ -150,7 +150,7 @@ class OccupancyForecasting extends Component
         // Use whichever forecast is available for labels
         $base = $room ?? $vehicle ?? [];
         foreach ($base as $p) {
-            $labels[]    = date('M d', strtotime($p['date']));
+            $labels[]    = date('d/m', strtotime($p['date']));
             $roomData[]  = $room    ? round($p['predicted'], 1) : null;
         }
 
@@ -180,7 +180,7 @@ class OccupancyForecasting extends Component
             $max = max(array_column($roomFc, 'predicted'));
             foreach ($roomFc as $p) {
                 if (round($p['predicted'], 1) === round($max, 1)) {
-                    $peakDay = date('D, d M', strtotime($p['date']));
+                    $peakDay = Carbon::parse($p['date'])->isoFormat('ddd, D MMM');
                     break;
                 }
             }

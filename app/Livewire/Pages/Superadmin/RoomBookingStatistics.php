@@ -64,11 +64,11 @@ class RoomBookingStatistics extends Component
             }
 
             $kpis = [
-                ['label' => 'Total Bookings', 'value' => $totalBookings,     'color' => 'blue'],
-                ['label' => 'Pending',         'value' => $pendingBookings,   'color' => 'yellow'],
-                ['label' => 'Approved',        'value' => $approvedBookings,  'color' => 'green'],
-                ['label' => 'Rejected',        'value' => $rejectedBookings,  'color' => 'red'],
-                ['label' => 'Completed',       'value' => $completedBookings, 'color' => 'gray'],
+                ['label' => __('app.total_bookings'), 'value' => $totalBookings,     'color' => 'blue'],
+                ['label' => __('app.pending'),        'value' => $pendingBookings,   'color' => 'yellow'],
+                ['label' => __('app.approved'),       'value' => $approvedBookings,  'color' => 'green'],
+                ['label' => __('app.rejected'),       'value' => $rejectedBookings,  'color' => 'red'],
+                ['label' => __('app.completed'),      'value' => $completedBookings, 'color' => 'gray'],
             ];
 
             $bookings = $this->showList
@@ -97,11 +97,11 @@ class RoomBookingStatistics extends Component
 
             return view('livewire.pages.superadmin.room-booking-statistics', [
                 'kpis' => [
-                    ['label' => 'Total Bookings', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Pending',         'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Approved',        'value' => 0, 'color' => 'green'],
-                    ['label' => 'Rejected',        'value' => 0, 'color' => 'red'],
-                    ['label' => 'Completed',       'value' => 0, 'color' => 'gray'],
+                    ['label' => __('app.total_bookings'), 'value' => 0, 'color' => 'blue'],
+                    ['label' => __('app.pending'),        'value' => 0, 'color' => 'yellow'],
+                    ['label' => __('app.approved'),       'value' => 0, 'color' => 'green'],
+                    ['label' => __('app.rejected'),       'value' => 0, 'color' => 'red'],
+                    ['label' => __('app.completed'),      'value' => 0, 'color' => 'gray'],
                 ],
                 'labels'   => [],
                 'data'     => [],

@@ -44,10 +44,15 @@ class Guestbook extends Component
         // Load list departemen
         if ($compId = $this->companyId()) {
             // Load departments belonging to the current user's company
-            $this->departments_list = Department::where('company_id', $compId)->get();
+            $this->departments_list = Department::where('company_id', $compId)
+                ->get(['department_id', 'department_name'])
+                ->map(fn($d) => ['id' => $d->department_id, 'name' => $d->department_name])
+                ->toArray();
         } else {
             // Fallback: Load all departments if company_id is null/not used
-            $this->departments_list = Department::all();
+            $this->departments_list = Department::all(['department_id', 'department_name'])
+                ->map(fn($d) => ['id' => $d->department_id, 'name' => $d->department_name])
+                ->toArray();
         }
         
         // Load users if department_id is already set (e.g., via session or initial state)
@@ -71,8 +76,11 @@ class Guestbook extends Component
         
         if ($departmentId) {
             // Load users based on the selected department ID
-            // NOTE: Ensure User model is using 'department_id' as the foreign key column name
-            $this->users_list = User::where('department_id', (int)$departmentId)->get();
+            // Convert to plain array so Livewire serializes it correctly between requests
+            $this->users_list = User::where('department_id', (int)$departmentId)
+                ->get(['user_id', 'full_name'])
+                ->map(fn($u) => ['id' => $u->user_id, 'full_name' => $u->full_name])
+                ->toArray();
         } else {
             $this->users_list = [];
         }
@@ -87,8 +95,8 @@ class Guestbook extends Component
             'instansi'      => ['nullable', 'string', 'max:255'],
             'keperluan'     => ['nullable', 'string', 'max:255'],
             // Ensures department_id and user_id are nullable
-            'department_id' => ['nullable', 'exists:departments,id'], 
-            'user_id'       => ['nullable', 'exists:users,id'],      
+            'department_id' => ['nullable', 'exists:departments,department_id'],
+            'user_id'       => ['nullable', 'exists:users,user_id'],
         ];
     }
 

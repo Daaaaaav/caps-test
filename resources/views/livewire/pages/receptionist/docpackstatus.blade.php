@@ -85,11 +85,11 @@
                         <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium shrink-0">
                             <button type="button" wire:click="setTab('pending')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $activeTab === 'pending' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Pending
+                                {{ __('app.tab_pending') }}
                             </button>
                             <button type="button" wire:click="setTab('stored')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $activeTab === 'stored' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Stored
+                                {{ __('app.tab_stored') }}
                             </button>
                         </div>
 
@@ -97,15 +97,15 @@
                         <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium shrink-0">
                             <button type="button" wire:click="$set('type', 'all')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'all' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                All
+                                {{ __('app.tab_all') }}
                             </button>
                             <button type="button" wire:click="$set('type', 'document')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'document' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Document
+                                {{ __('app.type_document') }}
                             </button>
                             <button type="button" wire:click="$set('type', 'package')" 
                                 class="px-3.5 py-1 rounded-full transition {{ $type === 'package' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                Package
+                                {{ __('app.type_package') }}
                             </button>
                         </div>
 
@@ -238,11 +238,11 @@
                                                         <div class="flex-shrink-0 flex items-center gap-2">
                                                             {{-- Type Badge --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-medium uppercase">
-                                                                {{ $row->type }}
+                                                                {{ __('app.type_' . $row->type) }}
                                                             </span>
                                                             {{-- Status Badge --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 bg-amber-100 text-amber-800">
-                                                                Pending
+                                                                {{ __('app.tab_pending') }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -269,7 +269,7 @@
                                             @if($row->created_at)
                                                 <div class="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-2">
                                                     <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                    <span>Received: <span class="font-medium text-gray-700">{{ fmtDate($row->created_at) }} · {{ fmtTime($row->created_at) }}</span></span>
+                                                    <span>{{ __('app.received_label') }}: <span class="font-medium text-gray-700">{{ fmtDate($row->created_at) }} · {{ fmtTime($row->created_at) }}</span></span>
                                                 </div>
                                             @endif
                                         </div>
@@ -288,7 +288,7 @@
                                                 <button type="button" wire:click="storeItem({{ $row->delivery_id }})"
                                                     wire:loading.attr="disabled"
                                                     class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:ring-2 focus:ring-[#4E653D]/20 focus:outline-none transition shadow-sm">
-                                                    Store
+                                                    {{ __('app.store_action') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -308,11 +308,8 @@
                                         $avatarChar = strtoupper(substr($row->item_name ?? 'S', 0, 1));
                                         $rowNo = ($stored->firstItem() ?? 1) + $loop->index;
                                         $dir = $storedDirections[$row->delivery_id] ?? 'taken';
-                                        $dirLabel = $dir === 'deliver' ? 'Deliver' : 'Taken';
-                                        $actionLabel = $dir === 'deliver' ? 'Delivered' : 'Taken';
-                                    @endphp
-
-                                    <div wire:key="stor-{{ $row->delivery_id }}"
+                                        $dirLabel = $dir === 'deliver' ? __('app.deliver') : __('app.taken');
+                                        $actionLabel = $dir === 'deliver' ? __('app.delivered') : __('app.taken');
                                         class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
                                         
                                         <div class="space-y-3">
@@ -336,11 +333,11 @@
                                                         <div class="flex-shrink-0 flex items-center gap-2">
                                                             {{-- Type Badge --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-medium uppercase">
-                                                                {{ $row->type }}
+                                                                {{ __('app.type_' . $row->type) }}
                                                             </span>
                                                             {{-- Status Badge --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 bg-blue-100 text-blue-800">
-                                                                Stored
+                                                                {{ __('app.tab_stored') }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -366,7 +363,7 @@
                                             {{-- Direction info --}}
                                             <div class="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-2">
                                                 <x-heroicon-o-arrow-up-right class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                <span>Direction: <span class="font-semibold text-gray-700 uppercase tracking-wide">{{ $dirLabel }}</span></span>
+                                                <span>{{ __('app.direction_label') }}: <span class="font-semibold text-gray-700 uppercase tracking-wide">{{ $dirLabel }}</span></span>
                                             </div>
                                         </div>
 
@@ -411,7 +408,7 @@
                                         @if($activeTab === 'pending')
                                             <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                         @else
-                                            <th class="px-6 py-3.5">Direction</th>
+                                            <th class="px-6 py-3.5">{{ __('app.direction_label') }}</th>
                                         @endif
                                         <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                     </tr>
@@ -438,7 +435,7 @@
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium uppercase border border-gray-200 text-gray-700 bg-gray-50">
-                                                        {{ $row->type }}
+                                                        {{ __('app.type_' . $row->type) }}
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4">{{ $row->nama_pengirim ?? '—' }}</td>
@@ -450,11 +447,11 @@
                                                     <div class="flex items-center justify-end gap-2">
                                                         <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
                                                             class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
-                                                            Edit
+                                                            {{ __('app.edit') }}
                                                         </button>
                                                         <button type="button" wire:click="storeItem({{ $row->delivery_id }})"
                                                             class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm">
-                                                            Store
+                                                            {{ __('app.store_action') }}
                                                         </button>
                                                     </div>
                                                 </td>
@@ -469,8 +466,8 @@
                                             @php
                                                 $rowNo = ($stored->firstItem() ?? 1) + $loop->index;
                                                 $dir = $storedDirections[$row->delivery_id] ?? 'taken';
-                                                $dirLabel = $dir === 'deliver' ? 'Deliver' : 'Taken';
-                                                $actionLabel = $dir === 'deliver' ? 'Delivered' : 'Taken';
+                                                $dirLabel = $dir === 'deliver' ? __('app.deliver') : __('app.taken');
+                                                $actionLabel = $dir === 'deliver' ? __('app.delivered') : __('app.taken');
                                             @endphp
                                             <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
                                                 <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
@@ -488,7 +485,7 @@
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium uppercase border border-gray-200 text-gray-700 bg-gray-50">
-                                                        {{ $row->type }}
+                                                        {{ __('app.type_' . $row->type) }}
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4">{{ $row->nama_pengirim ?? '—' }}</td>
@@ -508,7 +505,7 @@
                                                     <div class="flex items-center justify-end gap-2">
                                                         <button type="button" wire:click="openEdit({{ $row->delivery_id }})"
                                                             class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
-                                                            Edit
+                                                            {{ __('app.edit') }}
                                                         </button>
                                                         <button type="button" wire:click="finalizeItem({{ $row->delivery_id }})"
                                                             class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm">
@@ -553,7 +550,7 @@
                     <div class="p-4 space-y-4 bg-white">
                         {{-- Department Filter --}}
                         <div class="space-y-1">
-                            <label class="{{ $label }}">Department</label>
+                            <label class="{{ $label }}">{{ __('app.department') }}</label>
                             <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
                                 placeholder="{{ __('app.search_department_ph') }}">
                             <div class="relative mt-2">
@@ -571,7 +568,7 @@
 
                         {{-- User Filter --}}
                         <div class="space-y-1">
-                            <label class="{{ $label }}">Receptionist / User</label>
+                            <label class="{{ $label }}">{{ __('app.officer') }}</label>
                             <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="{{ __('app.search_user_ph') }}">
                             <div class="relative mt-2">
                                 <select wire:model.live="userId" class="{{ $input }} appearance-none pr-8">

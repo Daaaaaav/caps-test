@@ -107,15 +107,15 @@
             </button>
             <button wire:click="setSeverity('high')"
                 class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'high' ? 'bg-red-600 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
-                🔴 High
+                🔴 {{ __('app.severity_high') }}
             </button>
             <button wire:click="setSeverity('medium')"
                 class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'medium' ? 'bg-yellow-500 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
-                🟡 Medium
+                🟡 {{ __('app.severity_medium') }}
             </button>
             <button wire:click="setSeverity('low')"
                 class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $selectedSeverity === 'low' ? 'bg-green-600 text-white' : 'bg-white border border-[#d4dfc8] text-[#4E653D] hover:bg-[#f0f4eb]' }}">
-                🟢 Low
+                🟢 {{ __('app.severity_low') }}
             </button>
         </div>
 
@@ -136,7 +136,7 @@
                                 <div class="flex flex-wrap items-center gap-2">
                                     <p class="font-semibold text-[#2d3a24]">{{ $alert['title'] }}</p>
                                     @if($alert['rule_id'])
-                                        <span class="text-xs px-2 py-1 rounded-full bg-[#eef1e8] text-[#5a6e4a]">Rule {{ $alert['rule_id'] }}</span>
+                                        <span class="text-xs px-2 py-1 rounded-full bg-[#eef1e8] text-[#5a6e4a]">{{ __('app.rule_label') }} {{ $alert['rule_id'] }}</span>
                                     @endif
                                 </div>
                                 <p class="text-sm text-[#5a6e4a] mt-1 break-words">{{ $alert['message'] }}</p>
@@ -148,8 +148,8 @@
                             </div>
                         </div>
                         <div class="text-sm text-[#7a8f6a] lg:text-right">
-                            <div>{{ $alert['timestamp'] ?? 'Live entry' }}</div>
-                            <div class="text-xs mt-1 uppercase tracking-wide">{{ $alert['severity'] }} severity</div>
+                            <div>{{ $alert['timestamp'] ?? __('app.live_entry') }}</div>
+                            <div class="text-xs mt-1 uppercase tracking-wide">{{ $alert['severity'] }} {{ __('app.severity_label') }}</div>
                         </div>
                     </div>
                     <details class="mt-4">

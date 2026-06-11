@@ -76,19 +76,20 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     const CHART_COLORS = {
-        'Room Bookings':    { border: '#4E653D', bg: 'rgba(78, 101, 61, 0.1)' },
-        'Vehicle Bookings': { border: '#4A2F24', bg: 'rgba(74, 47, 36, 0.1)' },
+        'room':    { border: '#4E653D', bg: 'rgba(78, 101, 61, 0.1)' },
+        'vehicle': { border: '#4A2F24', bg: 'rgba(74, 47, 36, 0.1)' },
     };
     const FALLBACK_COLORS = ['#354C2B', '#CDDEA7'];
 
     function applyDatasetStyles(datasets) {
         return datasets.map((ds, i) => {
-            const c = CHART_COLORS[ds.label] ?? {
+            const { type: dsType, ...rest } = ds;
+            const c = CHART_COLORS[dsType] ?? {
                 border: FALLBACK_COLORS[i] ?? '#374151',
                 bg:     (FALLBACK_COLORS[i] ?? '#374151') + '14',
             };
             return {
-                ...ds,
+                ...rest,
                 borderColor:      c.border,
                 backgroundColor:  c.bg,
                 borderWidth:      2,
@@ -143,12 +144,12 @@
                         beginAtZero: true,
                         ticks: { stepSize: 1, font: { family: 'Inter', size: 11 } },
                         grid: { color: 'rgba(0,0,0,0.04)' },
-                        title: { display: true, text: 'Bookings', font: { family: 'Inter', size: 12 } }
+                        title: { display: true, text: @json(__('app.bookings_axis')), font: { family: 'Inter', size: 12 } }
                     },
                     x: {
                         grid: { display: false },
                         ticks: { font: { family: 'Inter', size: 11 } },
-                        title: { display: true, text: 'Month', font: { family: 'Inter', size: 12 } }
+                        title: { display: true, text: @json(__('app.month_axis')), font: { family: 'Inter', size: 12 } }
                     }
                 }
             }

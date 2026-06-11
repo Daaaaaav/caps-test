@@ -1,4 +1,6 @@
-<div class="min-h-screen bg-[#f5f7f2]">
+<div class="min-h-screen bg-[#f5f7f2]"
+    x-data="{ confirmDeleteId: null, confirmDeleteName: '' }"
+    @keydown.escape.window="confirmDeleteId = null">
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {{-- ================= HEADER ================= --}}
@@ -131,8 +133,8 @@
                                         {{ __('app.edit') }}
                                     </button>
 
-                                    <button wire:confirm="{{ __('app.delete_confirm') }}"
-                                        wire:click="delete({{ $user->user_id }})"
+                                    <button type="button"
+                                        @click="confirmDeleteId = {{ $user->user_id }}; confirmDeleteName = '{{ addslashes($user->full_name) }}'"
                                         class="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm">
                                         {{ __('app.delete') }}
                                     </button>
@@ -150,12 +152,68 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- PAGINATION --}}
+            @if($receptionists->hasPages())
+                <div class="px-6 py-4 border-t border-[#d4dfc8]">
+                    {{ $receptionists->links() }}
+                </div>
+            @endif
+
         </div>
 
     </main>
 
 
-    {{-- ================= MODAL ================= --}}
+    {{-- ================= DELETE CONFIRM MODAL ================= --}}
+    <template x-teleport="body">
+        <div x-show="confirmDeleteId !== null"
+            x-transition.opacity
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            style="display: none;">
+
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md"
+                @click="confirmDeleteId = null"></div>
+
+            {{-- Dialog --}}
+            <div class="relative w-full max-w-sm bg-white rounded-2xl border border-[#d4dfc8] shadow-2xl overflow-hidden"
+                @click.stop>
+
+                {{-- Header --}}
+                <div class="px-6 pt-6 pb-4 text-center">
+                    <div class="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-bold text-[#2d3a24]">{{ __('app.delete_confirm_title') ?? 'Delete Receptionist' }}</h3>
+                    <p class="mt-1 text-sm text-[#7a8f6a]">
+                        {{ __('app.delete_confirm') }}
+                        <br>
+                        <span class="font-medium text-[#2d3a24]" x-text="confirmDeleteName"></span>
+                    </p>
+                </div>
+
+                {{-- Buttons --}}
+                <div class="px-6 pb-6 flex gap-3">
+                    <button type="button"
+                        @click="confirmDeleteId = null"
+                        class="flex-1 px-4 py-2 rounded-lg border border-[#d4dfc8] text-sm text-[#5a6e4a] hover:bg-[#f0f4eb] transition">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="button"
+                        @click="$wire.delete(confirmDeleteId); confirmDeleteId = null"
+                        class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition">
+                        {{ __('app.delete') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    {{-- ================= CREATE / EDIT MODAL ================= --}}
     @if($showModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             {{-- Backdrop --}}
@@ -234,7 +292,7 @@
                         <button type="submit"
                             class="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition shadow-sm inline-flex items-center gap-1.5">
                             <x-heroicon-o-check class="w-3.5 h-3.5" />
-                            <span>{{ $editMode ? 'Update' : 'Create' }}</span>
+                            <span>{{ $editMode ? __('app.update') : __('app.create') }}</span>
                         </button>
                     </div>
                 </form>

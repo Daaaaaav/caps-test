@@ -25,15 +25,15 @@
                 <div class="flex gap-2 max-w-xs">
                     <button wire:click="setForecastDays(7)"
                         class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 7 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                        7 Days
+                        {{ __('app.7_days') }}
                     </button>
                     <button wire:click="setForecastDays(14)"
                         class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 14 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                        14 Days
+                        {{ __('app.14_days') }}
                     </button>
                     <button wire:click="setForecastDays(21)"
                         class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition {{ $forecastDays === 21 ? 'bg-[#4A2F24] text-white' : 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' }}">
-                        21 Days
+                        {{ __('app.21_days') }}
                     </button>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                     <h3 class="text-lg font-semibold text-[#2d3a24]">{{ __('app.daily_predictions') }}</h3>
                     <p class="text-sm text-[#7a8f6a] mt-1">
                         @if($rmse > 0) RMSE: {{ number_format($rmse, 4) }} &middot; @endif
-                        Model: <span class="font-medium capitalize">{{ $isLSTMAvailable ? __('app.lstm_model') : __('app.statistical_model') }}</span>
+                        {{ __('app.lstm_model_label') }}: <span class="font-medium capitalize">{{ $isLSTMAvailable ? __('app.lstm_model') : __('app.statistical_model') }}</span>
                     </p>
                 </div>
                 <div wire:ignore style="position: relative; height: 400px;">
@@ -104,7 +104,7 @@
                             @foreach($predictions as $pred)
                                 <tr class="hover:bg-[#f0f4eb]">
                                     <td class="px-6 py-4 text-[#2d3a24] font-medium">{{ $pred['date'] }}</td>
-                                    <td class="px-6 py-4 text-[#5a6e4a]">{{ date('l', strtotime($pred['date'])) }}</td>
+                                    <td class="px-6 py-4 text-[#5a6e4a]">{{ \Carbon\Carbon::parse($pred['date'])->isoFormat('dddd') }}</td>
                                     <td class="px-6 py-4 text-right text-[#2d3a24] font-semibold">{{ number_format($pred['predicted'], 1) }}</td>
                                     <td class="px-6 py-4 text-right text-[#5a6e4a]">{{ number_format($pred['lower_bound'], 1) }}</td>
                                     <td class="px-6 py-4 text-right text-[#5a6e4a]">{{ number_format($pred['upper_bound'], 1) }}</td>
@@ -162,20 +162,20 @@
                 labels: @json($dailyLabels),
                 datasets: [
                     {
-                        label: 'Predicted',
+                        label: '{{ __('app.predicted') }}',
                         data: @json($dailyPredicted),
                         borderColor: '#4E653D',
                         backgroundColor: 'rgba(78, 101, 61, 0.1)',
                         borderWidth: 3, fill: false, tension: 0.4, pointRadius: 4, pointHoverRadius: 6,
                     },
                     {
-                        label: 'Upper Bound',
+                        label: '{{ __('app.upper_bound') }}',
                         data: @json($dailyUpperBound),
                         borderColor: '#9aaa8a', borderWidth: 1.5, borderDash: [5, 5],
                         fill: false, tension: 0.4, pointRadius: 0,
                     },
                     {
-                        label: 'Lower Bound',
+                        label: '{{ __('app.lower_bound') }}',
                         data: @json($dailyLowerBound),
                         borderColor: '#9aaa8a', backgroundColor: 'rgba(154, 170, 138, 0.1)',
                         borderWidth: 1.5, borderDash: [5, 5], fill: '-1', tension: 0.4, pointRadius: 0,
@@ -190,8 +190,8 @@
                     tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) } }
                 },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Visitors' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, title: { display: true, text: '{{ __('app.visitors') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date_label') }}' } }
                 }
             }
         });
@@ -208,12 +208,12 @@
             type: 'bar',
             data: {
                 labels: @json($weeklyData['labels']),
-                datasets: [{ label: 'Total Visitors', data: @json($weeklyData['totals']), backgroundColor: '#4A2F24', borderRadius: 8 }]
+                datasets: [{ label: '{{ __('app.total_visitors') }}', data: @json($weeklyData['totals']), backgroundColor: '#4A2F24', borderRadius: 8 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, title: { display: true, text: 'Total Visitors' } } }
+                scales: { y: { beginAtZero: true, title: { display: true, text: '{{ __('app.total_visitors') }}' } } }
             }
         });
     }

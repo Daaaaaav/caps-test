@@ -68,7 +68,7 @@ class GuestbookStatistics extends Component
             $data   = [];
             for ($i = $days - 1; $i >= 0; $i--) {
                 $date     = now()->subDays($i)->format('Y-m-d');
-                $labels[] = now()->subDays($i)->format('M d');
+                $labels[] = now()->subDays($i)->format('d/m');
                 $data[]   = (int) ($raw[$date] ?? 0);
             }
 
@@ -81,10 +81,10 @@ class GuestbookStatistics extends Component
                 : collect();
 
             $stats = [
-                ['label' => 'Total Visitors', 'value' => $totalVisitors,                                                    'color' => 'blue'],
-                ['label' => 'Currently In',   'value' => $checkedIn,                                                        'color' => 'yellow'],
-                ['label' => 'Checked Out',    'value' => $checkedOut,                                                       'color' => 'green'],
-                ['label' => 'Avg per Day',    'value' => $days > 0 ? round($totalVisitors / $days, 1) : 0,                  'color' => 'purple'],
+                ['label' => __('app.total_visitors'), 'value' => $totalVisitors,                                           'color' => 'blue'],
+                ['label' => __('app.currently_in'),   'value' => $checkedIn,                                               'color' => 'yellow'],
+                ['label' => __('app.checked_out'),    'value' => $checkedOut,                                              'color' => 'green'],
+                ['label' => __('app.avg_per_day'),    'value' => $days > 0 ? round($totalVisitors / $days, 1) : 0,         'color' => 'purple'],
             ];
 
             $this->dispatch('guestbook-chart-updated', labels: $labels, data: $data);
@@ -105,10 +105,10 @@ class GuestbookStatistics extends Component
 
             return view('livewire.pages.superadmin.guestbook-statistics', [
                 'stats' => [
-                    ['label' => 'Total Visitors', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Currently In',   'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Checked Out',    'value' => 0, 'color' => 'green'],
-                    ['label' => 'Avg per Day',    'value' => 0, 'color' => 'purple'],
+                    ['label' => __('app.total_visitors'), 'value' => 0, 'color' => 'blue'],
+                    ['label' => __('app.currently_in'),   'value' => 0, 'color' => 'yellow'],
+                    ['label' => __('app.checked_out'),    'value' => 0, 'color' => 'green'],
+                    ['label' => __('app.avg_per_day'),    'value' => 0, 'color' => 'purple'],
                 ],
                 'labels'     => [],
                 'data'       => [],

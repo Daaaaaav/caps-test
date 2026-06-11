@@ -119,29 +119,33 @@ class Dashboard extends Component
             if ($this->activeFilter === 'room') {
                 $datasets = [
                     [
-                        'label' => 'Room Bookings',
-                        'data' => $room,
+                        'type'  => 'room',
+                        'label' => __('app.room_bookings_label'),
+                        'data'  => $room,
                         'borderColor' => '#2563eb',
                     ]
                 ];
             } elseif ($this->activeFilter === 'vehicle') {
                 $datasets = [
                     [
-                        'label' => 'Vehicle Bookings',
-                        'data' => $vehicle,
+                        'type'  => 'vehicle',
+                        'label' => __('app.vehicle_bookings_label'),
+                        'data'  => $vehicle,
                         'borderColor' => '#059669',
                     ]
                 ];
             } else {
                 $datasets = [
                     [
-                        'label' => 'Room Bookings',
-                        'data' => $room,
+                        'type'  => 'room',
+                        'label' => __('app.room_bookings_label'),
+                        'data'  => $room,
                         'borderColor' => '#2563eb',
                     ],
                     [
-                        'label' => 'Vehicle Bookings',
-                        'data' => $vehicle,
+                        'type'  => 'vehicle',
+                        'label' => __('app.vehicle_bookings_label'),
+                        'data'  => $vehicle,
                         'borderColor' => '#059669',
                     ]
                 ];

@@ -53,7 +53,7 @@ class LSTMPredictions extends Component
 
             // ── Build chart arrays ────────────────────────────────────────────
             $predictions     = $result['predictions'];
-            $dailyLabels     = array_map(fn($p) => date('M d', strtotime($p['date'])), $predictions);
+            $dailyLabels     = array_map(fn($p) => date('d/m', strtotime($p['date'])), $predictions);
             $dailyPredicted  = array_map(fn($p) => round($p['predicted'], 1), $predictions);
             $dailyLowerBound = array_map(fn($p) => round($p['lower_bound'], 1), $predictions);
             $dailyUpperBound = array_map(fn($p) => round($p['upper_bound'], 1), $predictions);
@@ -62,7 +62,7 @@ class LSTMPredictions extends Component
             $weeklyData = null;
             if (!empty($result['weekly_summary'])) {
                 $weeklyData = [
-                    'labels'   => array_map(fn($w) => 'Week ' . $w['week'], $result['weekly_summary']),
+                    'labels'   => array_map(fn($w) => __('app.week_label') . ' ' . $w['week'], $result['weekly_summary']),
                     'totals'   => array_map(fn($w) => round($w['total_predicted'], 0), $result['weekly_summary']),
                     'averages' => array_map(fn($w) => round($w['avg_predicted'], 1), $result['weekly_summary']),
                 ];
@@ -75,10 +75,10 @@ class LSTMPredictions extends Component
             $maxDay         = !empty($dailyPredicted) ? max($dailyPredicted) : 0;
 
             $stats = [
-                ['label' => 'Total Predicted', 'value' => number_format($totalPredicted, 0), 'color' => 'blue',   'icon' => 'chart-bar'],
-                ['label' => 'Avg per Day',      'value' => number_format($avgDaily, 1),        'color' => 'green',  'icon' => 'calculator'],
-                ['label' => 'Peak Day',         'value' => number_format($maxDay, 0),           'color' => 'yellow', 'icon' => 'arrow-trending-up'],
-                ['label' => 'Confidence',       'value' => number_format($avgConfidence * 100, 1) . '%', 'color' => 'purple', 'icon' => 'check-badge'],
+                ['label' => __('app.total_predicted'), 'value' => number_format($totalPredicted, 0), 'color' => 'blue',   'icon' => 'chart-bar'],
+                ['label' => __('app.avg_per_day'),      'value' => number_format($avgDaily, 1),        'color' => 'green',  'icon' => 'calculator'],
+                ['label' => __('app.peak_day'),         'value' => number_format($maxDay, 0),           'color' => 'yellow', 'icon' => 'arrow-trending-up'],
+                ['label' => __('app.confidence'),       'value' => number_format($avgConfidence * 100, 1) . '%', 'color' => 'purple', 'icon' => 'check-badge'],
             ];
 
             return view('livewire.pages.superadmin.lstm-predictions', [
@@ -137,10 +137,10 @@ class LSTMPredictions extends Component
     private function getEmptyStats(): array
     {
         return [
-            ['label' => 'Total Predicted', 'value' => '0',  'color' => 'blue',   'icon' => 'chart-bar'],
-            ['label' => 'Avg per Day',      'value' => '0',  'color' => 'green',  'icon' => 'calculator'],
-            ['label' => 'Peak Day',         'value' => '0',  'color' => 'yellow', 'icon' => 'arrow-trending-up'],
-            ['label' => 'Confidence',       'value' => '0%', 'color' => 'purple', 'icon' => 'check-badge'],
+            ['label' => __('app.total_predicted'), 'value' => '0',  'color' => 'blue',   'icon' => 'chart-bar'],
+            ['label' => __('app.avg_per_day'),      'value' => '0',  'color' => 'green',  'icon' => 'calculator'],
+            ['label' => __('app.peak_day'),         'value' => '0',  'color' => 'yellow', 'icon' => 'arrow-trending-up'],
+            ['label' => __('app.confidence'),       'value' => '0%', 'color' => 'purple', 'icon' => 'check-badge'],
         ];
     }
 }

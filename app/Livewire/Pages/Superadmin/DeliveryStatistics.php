@@ -58,7 +58,7 @@ class DeliveryStatistics extends Component
             $data   = [];
             for ($i = $days - 1; $i >= 0; $i--) {
                 $date     = now()->subDays($i)->format('Y-m-d');
-                $labels[] = now()->subDays($i)->format('M d');
+                $labels[] = now()->subDays($i)->format('d/m');
                 $data[]   = (int) ($raw[$date] ?? 0);
             }
 
@@ -71,10 +71,10 @@ class DeliveryStatistics extends Component
                 : collect();
 
             $stats = [
-                ['label' => 'Total Deliveries', 'value' => $totalDeliveries,     'color' => 'blue'],
-                ['label' => 'Pending',           'value' => $pendingDeliveries,   'color' => 'yellow'],
-                ['label' => 'Stored',            'value' => $storedDeliveries,    'color' => 'purple'],
-                ['label' => 'Completed',         'value' => $completedDeliveries, 'color' => 'green'],
+                ['label' => __('app.total_deliveries'), 'value' => $totalDeliveries,     'color' => 'blue'],
+                ['label' => __('app.pending'),           'value' => $pendingDeliveries,   'color' => 'yellow'],
+                ['label' => __('app.stored'),            'value' => $storedDeliveries,    'color' => 'purple'],
+                ['label' => __('app.completed'),         'value' => $completedDeliveries, 'color' => 'green'],
             ];
 
             $this->dispatch('delivery-chart-updated', labels: $labels, data: $data);
@@ -95,10 +95,10 @@ class DeliveryStatistics extends Component
 
             return view('livewire.pages.superadmin.delivery-statistics', [
                 'stats' => [
-                    ['label' => 'Total Deliveries', 'value' => 0, 'color' => 'blue'],
-                    ['label' => 'Pending',           'value' => 0, 'color' => 'yellow'],
-                    ['label' => 'Stored',            'value' => 0, 'color' => 'purple'],
-                    ['label' => 'Completed',         'value' => 0, 'color' => 'green'],
+                    ['label' => __('app.total_deliveries'), 'value' => 0, 'color' => 'blue'],
+                    ['label' => __('app.pending'),           'value' => 0, 'color' => 'yellow'],
+                    ['label' => __('app.stored'),            'value' => 0, 'color' => 'purple'],
+                    ['label' => __('app.completed'),         'value' => 0, 'color' => 'green'],
                 ],
                 'labels'     => [],
                 'data'       => [],

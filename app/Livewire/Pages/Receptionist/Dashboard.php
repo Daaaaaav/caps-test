@@ -139,9 +139,9 @@ class Dashboard extends Component
             ->map(fn($d) => [
                 'id' => $d->delivery_id,
                 'item' => $d->item_name ?? '—',
-                'type' => ucfirst($d->type ?? '—'),
-                'status' => ucfirst($d->status ?? '—'),
-                'direction' => ucfirst($d->direction ?? '—'),
+                'type' => $d->type ? (__('app.' . $d->type) !== 'app.' . $d->type ? __('app.' . $d->type) : ucfirst($d->type)) : '—',
+                'status' => $d->status ? (__('app.' . $d->status) !== 'app.' . $d->status ? __('app.' . $d->status) : ucfirst($d->status)) : '—',
+                'direction' => $d->direction ? (__('app.' . $d->direction) !== 'app.' . $d->direction ? __('app.' . $d->direction) : ucfirst($d->direction)) : '—',
                 'created' => $this->fmtDate($d->created_at),
             ]);
 

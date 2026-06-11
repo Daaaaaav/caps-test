@@ -91,7 +91,7 @@
                 <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Vehicle History</h3>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('app.vehicle_history_title') }}</h3>
                             <p class="text-xs text-gray-500">
                                 {{ $statusTab === 'rejected'
                                     ? __('app.vehicle_history_sub_rej')
@@ -104,11 +104,11 @@
                             <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium">
                                 <button type="button" wire:click="$set('statusTab','done')"
                                     class="px-3.5 py-1 rounded-full transition {{ $statusTab === 'done' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Done
+                                    {{ __('app.done') }}
                                 </button>
                                 <button type="button" wire:click="$set('statusTab','rejected')"
                                     class="px-3.5 py-1 rounded-full transition {{ $statusTab === 'rejected' ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Rejected
+                                    {{ __('app.rejected') }}
                                 </button>
                             </div>
 
@@ -157,7 +157,7 @@
                             <label class="{{ $label }}">{{ __('app.search') }}</label>
                             <div class="relative">
                                 <input type="text" class="{{ $input }} pl-9"
-                                    placeholder="Search purpose, destination, borrower…"
+                                    placeholder="{{ __('app.search_vehicle_ph') }}"
                                     wire:model.live.debounce.400ms="q">
                                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -198,8 +198,8 @@
                                     $isRejected = $b->status === 'rejected';
                                     $isTrashed  = method_exists($b, 'trashed') ? $b->trashed() : false;
                                     $statusStyle = $isRejected
-                                        ? ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>'Rejected']
-                                        : ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>'Completed'];
+                                        ? ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>__('app.rejected')]
+                                        : ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')];
                                 @endphp
                                 
                                 {{-- START: MODIFIED VEHICLE HISTORY CARD DESIGN --}}
@@ -214,7 +214,7 @@
                                             {{-- 2. TOP ROW: Title, Status, ID --}}
                                             <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
                                                 <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
-                                                    {{ $b->purpose ? ucfirst($b->purpose) : 'Vehicle Booking' }}
+                                                    {{ $b->purpose ? ucfirst($b->purpose) : __('app.vehicle_book') }}
                                                 </h4>
                                                 <div class="flex-shrink-0 flex items-center gap-2">
                                                     {{-- Status Badge --}}
@@ -223,7 +223,7 @@
                                                     </span>
                                                     @if($isTrashed)
                                                         <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-800 border border-gray-300 flex-shrink-0">
-                                                            Deleted
+                                                            {{ __('app.deleted') }}
                                                         </span>
                                                     @endif
                                                     {{-- ID Chip --}}
@@ -294,13 +294,13 @@
                                             <button type="button"
                                                 class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition"
                                                 wire:click="softDelete({{ $b->vehiclebooking_id }})">
-                                                Delete
+                                                {{ __('app.delete') }}
                                             </button>
                                         @else
                                             <button type="button"
                                                 class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm"
                                                 wire:click="restore({{ $b->vehiclebooking_id }})">
-                                                Restore
+                                                {{ __('app.restore') }}
                                             </button>
                                         @endif
                                     </div>
@@ -329,8 +329,8 @@
                                             $isRejected = $b->status === 'rejected';
                                             $isTrashed  = method_exists($b, 'trashed') ? $b->trashed() : false;
                                             $statusStyle = $isRejected
-                                                ? ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>'Rejected']
-                                                : ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>'Completed'];
+                                                ? ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>__('app.rejected')]
+                                                : ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')];
                                         @endphp
                                         <tr wire:key="history-row-{{ $b->vehiclebooking_id }}" class="hover:bg-gray-50/50 transition {{ $isTrashed ? 'opacity-60' : '' }}">
                                             <td class="h-12 px-4 text-gray-400 text-xs font-mono">#{{ $b->vehiclebooking_id }}</td>
@@ -354,7 +354,7 @@
                                                     </span>
                                                     @if($isTrashed)
                                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                                                            Deleted
+                                                            {{ __('app.deleted') }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -368,13 +368,13 @@
                                                         <button type="button"
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition"
                                                             wire:click="softDelete({{ $b->vehiclebooking_id }})">
-                                                            Delete
+                                                            {{ __('app.delete') }}
                                                         </button>
                                                     @else
                                                         <button type="button"
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm"
                                                             wire:click="restore({{ $b->vehiclebooking_id }})">
-                                                            Restore
+                                                            {{ __('app.restore') }}
                                                         </button>
                                                     @endif
                                                 </div>
@@ -410,7 +410,7 @@
                         <button type="button" wire:click="$set('vehicleFilter', null)"
                             class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                             <span class="flex items-center gap-2">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">All</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">{{ __('app.all') }}</span>
                                 <span>{{ __('app.all_vehicles') }}</span>
                             </span>
                             @if(is_null($vehicleFilter))
@@ -448,12 +448,12 @@
                         <h4 class="text-xs font-semibold text-gray-900 mb-2">{{ __('app.analytics') }}</h4>
                         <div class="space-y-2 text-xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-gray-600">Total Vehicles</span>
+                                <span class="text-gray-600">{{ __('app.total_vehicles') }}</span>
                                 <span class="font-semibold text-gray-900">{{ count($vehicles) }}</span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">
-                                    {{ $statusTab === 'rejected' ? 'Rejected Records' : 'Completed Records' }}
+                                    {{ $statusTab === 'rejected' ? __('app.rejected_records') : __('app.completed_records') }}
                                 </span>
                                 <span class="font-semibold text-gray-900">{{ $bookings->total() }}</span>
                             </div>

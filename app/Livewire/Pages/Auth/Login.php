@@ -75,7 +75,7 @@ class Login extends Component
         ];
     }
 
-    public function login()
+    public function login(string $captchaToken = '')
     {
         SecurityMonitoringService::inspectLoginPayload($this->email, $this->password);
 
@@ -84,8 +84,10 @@ class Login extends Component
             'email' => $this->email,
         ]);
 
-        if ($this->isCaptchaEnabled() && empty($this->captcha)) {
-            $this->captcha = (string) request()->input('g-recaptcha-response', '');
+        // Accept captcha token passed directly from JS to avoid race conditions
+        // with $wire.set() + $wire.login() being batched separately.
+        if ($this->isCaptchaEnabled() && $captchaToken !== '') {
+            $this->captcha = $captchaToken;
         }
 
         // Validate input

@@ -59,17 +59,17 @@ class VehicleBookingStatistics extends Component
             $data   = [];
             for ($i = $days - 1; $i >= 0; $i--) {
                 $date     = now()->subDays($i)->format('Y-m-d');
-                $labels[] = now()->subDays($i)->format('M d');
+                $labels[] = now()->subDays($i)->format('d/m');
                 $data[]   = (int) ($raw[$date] ?? 0);
             }
 
             $kpis = [
-                ['label' => 'Total Bookings', 'value' => $totalBookings,      'color' => 'blue',   'icon' => 'truck'],
-                ['label' => 'Pending',         'value' => $pendingBookings,    'color' => 'yellow', 'icon' => 'clock'],
-                ['label' => 'Approved',        'value' => $approvedBookings,   'color' => 'green',  'icon' => 'check-circle'],
-                ['label' => 'In Progress',     'value' => $onProgressBookings, 'color' => 'purple', 'icon' => 'arrow-path'],
-                ['label' => 'Completed',       'value' => $completedBookings,  'color' => 'gray',   'icon' => 'check-badge'],
-                ['label' => 'Rejected',        'value' => $rejectedBookings,   'color' => 'red',    'icon' => 'x-circle'],
+                ['label' => __('app.total_bookings'), 'value' => $totalBookings,      'color' => 'blue',   'icon' => 'truck'],
+                ['label' => __('app.pending'),         'value' => $pendingBookings,    'color' => 'yellow', 'icon' => 'clock'],
+                ['label' => __('app.approved'),        'value' => $approvedBookings,   'color' => 'green',  'icon' => 'check-circle'],
+                ['label' => __('app.in_progress'),     'value' => $onProgressBookings, 'color' => 'purple', 'icon' => 'arrow-path'],
+                ['label' => __('app.completed'),       'value' => $completedBookings,  'color' => 'gray',   'icon' => 'check-badge'],
+                ['label' => __('app.rejected'),        'value' => $rejectedBookings,   'color' => 'red',    'icon' => 'x-circle'],
             ];
 
             $bookings = $this->showList
@@ -98,12 +98,12 @@ class VehicleBookingStatistics extends Component
 
             return view('livewire.pages.superadmin.vehicle-booking-statistics', [
                 'kpis' => [
-                    ['label' => 'Total Bookings', 'value' => 0, 'color' => 'blue',   'icon' => 'truck'],
-                    ['label' => 'Pending',         'value' => 0, 'color' => 'yellow', 'icon' => 'clock'],
-                    ['label' => 'Approved',        'value' => 0, 'color' => 'green',  'icon' => 'check-circle'],
-                    ['label' => 'In Progress',     'value' => 0, 'color' => 'purple', 'icon' => 'arrow-path'],
-                    ['label' => 'Completed',       'value' => 0, 'color' => 'gray',   'icon' => 'check-badge'],
-                    ['label' => 'Rejected',        'value' => 0, 'color' => 'red',    'icon' => 'x-circle'],
+                    ['label' => __('app.total_bookings'), 'value' => 0, 'color' => 'blue',   'icon' => 'truck'],
+                    ['label' => __('app.pending'),         'value' => 0, 'color' => 'yellow', 'icon' => 'clock'],
+                    ['label' => __('app.approved'),        'value' => 0, 'color' => 'green',  'icon' => 'check-circle'],
+                    ['label' => __('app.in_progress'),     'value' => 0, 'color' => 'purple', 'icon' => 'arrow-path'],
+                    ['label' => __('app.completed'),       'value' => 0, 'color' => 'gray',   'icon' => 'check-badge'],
+                    ['label' => __('app.rejected'),        'value' => 0, 'color' => 'red',    'icon' => 'x-circle'],
                 ],
                 'labels'   => [],
                 'data'     => [],

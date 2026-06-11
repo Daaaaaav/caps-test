@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Superadmin;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -14,6 +15,7 @@ use App\Models\Role;
 #[Title('Receptionist Users')]
 class ReceptionistUsers extends Component
 {
+    use WithPagination;
     /*
     |--------------------------------------------------------------------------
     | FILTERS
@@ -50,6 +52,12 @@ class ReceptionistUsers extends Component
     public function setStatusFilter($status)
     {
         $this->statusFilter = $status;
+        $this->resetPage();
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
     }
 
     /*
@@ -281,7 +289,12 @@ class ReceptionistUsers extends Component
 
             $companyId = Auth::user()->company_id;
 
-            $query = User::query()
+            /*
+            |--------------------------------------------------------------------------
+            | BASE QUERY (reused for both stats and results)
+            |--------------------------------------------------------------------------
+            */
+            $baseQuery = User::query()
                 ->where('company_id', $companyId)
                 ->whereHas('role', function ($q) {
                     $q->where('roles.name', 'Receptionist');
@@ -289,15 +302,32 @@ class ReceptionistUsers extends Component
 
             /*
             |--------------------------------------------------------------------------
+            | STATS — lightweight DB counts, not loading all rows
+            |--------------------------------------------------------------------------
+            */
+            $totalCount    = (clone $baseQuery)->count();
+            $activeCount   = (clone $baseQuery)->where('status', 'active')->count();
+            $inactiveCount = (clone $baseQuery)->where('status', 'inactive')->count();
+
+            $stats = [
+                ['label' => 'Total Receptionists', 'value' => $totalCount,    'key' => 'all'],
+                ['label' => 'Active',               'value' => $activeCount,   'key' => 'active'],
+                ['label' => 'Inactive',             'value' => $inactiveCount, 'key' => 'inactive'],
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
             | SEARCH
             |--------------------------------------------------------------------------
             */
-            if (!empty($this->search)) {
+            $query = clone $baseQuery;
 
-                $query->where(function ($q) {
-                    $q->where('users.full_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('users.email', 'like', '%' . $this->search . '%')
-                      ->orWhere('users.phone_number', 'like', '%' . $this->search . '%');
+            if (!empty($this->search)) {
+                $search = $this->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('users.full_name', 'like', '%' . $search . '%')
+                      ->orWhere('users.email', 'like', '%' . $search . '%')
+                      ->orWhere('users.phone_number', 'like', '%' . $search . '%');
                 });
             }
 
@@ -310,43 +340,16 @@ class ReceptionistUsers extends Component
                 $query->where('status', $this->statusFilter);
             }
 
-            $receptionists = $query
-                ->latest()
-                ->get();
-
             /*
             |--------------------------------------------------------------------------
-            | STATS
+            | PAGINATED RESULTS (15 per page)
             |--------------------------------------------------------------------------
             */
-            $stats = [
-                [
-                    'label' => 'Total Receptionists',
-                    'value' => $receptionists->count(),
-                    'key' => 'all',
-                ],
-                [
-                    'label' => 'Active',
-                    'value' => $receptionists
-                        ->where('status', 'active')
-                        ->count(),
-                    'key' => 'active',
-                ],
-                [
-                    'label' => 'Inactive',
-                    'value' => $receptionists
-                        ->where('status', 'inactive')
-                        ->count(),
-                    'key' => 'inactive',
-                ],
-            ];
+            $receptionists = $query->latest()->paginate(15);
 
             return view(
                 'livewire.pages.superadmin.receptionist-users',
-                [
-                    'receptionists' => $receptionists,
-                    'stats' => $stats,
-                ]
+                compact('receptionists', 'stats')
             );
 
         } catch (\Exception $e) {
@@ -362,24 +365,11 @@ class ReceptionistUsers extends Component
             return view(
                 'livewire.pages.superadmin.receptionist-users',
                 [
-                    'receptionists' => collect([]),
-
+                    'receptionists' => User::where('user_id', 0)->paginate(15),
                     'stats' => [
-                        [
-                            'label' => 'Total Receptionists',
-                            'value' => 0,
-                            'key' => 'all',
-                        ],
-                        [
-                            'label' => 'Active',
-                            'value' => 0,
-                            'key' => 'active',
-                        ],
-                        [
-                            'label' => 'Inactive',
-                            'value' => 0,
-                            'key' => 'inactive',
-                        ],
+                        ['label' => 'Total Receptionists', 'value' => 0, 'key' => 'all'],
+                        ['label' => 'Active',               'value' => 0, 'key' => 'active'],
+                        ['label' => 'Inactive',             'value' => 0, 'key' => 'inactive'],
                     ],
                 ]
             );

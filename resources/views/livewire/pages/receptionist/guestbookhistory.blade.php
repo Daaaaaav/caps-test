@@ -277,16 +277,16 @@
                                             <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
                                                 <span>
                                                     @if($e->deleted_at)
-                                                        <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">DELETED</span>
+                                                        <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
                                                     @else
-                                                        <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">ACTIVE</span>
+                                                        <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
                                                     @endif
                                                 </span>
                                                 <div class="flex gap-1.5 font-medium">
                                                     <button wire:click="openEdit({{ $e->guestbook_id }})"
                                                             wire:loading.attr="disabled"
                                                             class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
-                                                        Edit
+                                                        {{ __('app.edit') }}
                                                     </button>
                                                     @if(!$e->deleted_at)
                                                         <button wire:click="delete({{ $e->guestbook_id }})"
@@ -297,7 +297,7 @@
                                                         <button wire:click="restore({{ $e->guestbook_id }})"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-[#4E653D] border border-emerald-200 hover:bg-emerald-100 focus:outline-none transition">
-                                                            Restore
+                                                            {{ __('app.restore') }}
                                                         </button>
                                                         <button wire:click="destroyForever({{ $e->guestbook_id }})"
                                                                 wire:confirm="{{ __(`app.delete_permanent_confirm`) }}"
@@ -322,7 +322,7 @@
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ __(`app.check_in_out_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                                                 <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
@@ -359,9 +359,9 @@
                                                     <td class="h-12 px-4 text-gray-900 hidden lg:table-cell font-semibold">{{ $e->petugas_penjaga }}</td>
                                                     <td class="h-12 px-4">
                                                         @if($e->deleted_at)
-                                                            <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">DELETED</span>
+                                                            <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
                                                         @else
-                                                            <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">ACTIVE</span>
+                                                            <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
                                                         @endif
                                                     </td>
                                                     <td class="h-12 px-4 text-right">
@@ -370,7 +370,7 @@
                                                                     wire:loading.attr="disabled"
                                                                     wire:target="openEdit({{ $e->guestbook_id }})"
                                                                     class="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-[#4E653D] transition-colors"
-                                                                    title="Edit">
+                                                                    title="{{ __('app.edit') }}">
                                                                 <x-heroicon-o-pencil-square class="w-4 h-4" />
                                                             </button>
                                                             @if(!$e->deleted_at)
@@ -387,7 +387,7 @@
                                                                         wire:loading.attr="disabled"
                                                                         wire:target="restore({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-[#4E653D] hover:bg-emerald-50 transition-colors"
-                                                                        title="Restore">
+                                                                        title="{{ __('app.restore') }}">
                                                                     <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                                                                 </button>
                                                                 <button wire:click="destroyForever({{ $e->guestbook_id }})"
@@ -415,7 +415,7 @@
                     @if($latest->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
                             <x-heroicon-o-user-group class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
-                            Belum ada kunjungan aktif hari ini.
+                            {{ __('app.no_active_visits') }}
                         </div>
                     @else
                         <div class="px-4 sm:px-6 py-5 bg-gray-50/30">
@@ -470,7 +470,7 @@
                                                     </div>
                                                     <div class="flex items-center gap-1.5 min-w-0">
                                                         <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span class="truncate font-semibold text-emerald-600">Masuk: {{ fmtTime($r->jam_in) }}</span>
+                                                        <span class="truncate font-semibold text-emerald-600">{{ __('app.check_in') }}: {{ fmtTime($r->jam_in) }}</span>
                                                     </div>
                                                     @if($r->petugas_penjaga)
                                                         <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
@@ -485,13 +485,13 @@
                                                 <button wire:click="openEdit({{ $r->guestbook_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
-                                                    Edit
+                                                    {{ __('app.edit') }}
                                                 </button>
                                                 <button wire:click="setJamKeluarNow({{ $r->guestbook_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm">
                                                     <x-heroicon-o-arrow-right-start-on-rectangle class="w-3.5 h-3.5" />
-                                                    <span>Keluar</span>
+                                                    <span>{{ __('app.check_out_btn') }}</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -508,7 +508,7 @@
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ __(`app.institution_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.purpose_col`) }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jam Masuk</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.check_in_time') }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
                                                 <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
@@ -542,16 +542,16 @@
                                                                     wire:loading.attr="disabled"
                                                                     wire:target="openEdit({{ $r->guestbook_id }})"
                                                                     class="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-[#4E653D] transition-colors"
-                                                                    title="Edit">
+                                                                    title="{{ __('app.edit') }}">
                                                                 <x-heroicon-o-pencil-square class="w-4 h-4" />
                                                             </button>
                                                             <button wire:click="setJamKeluarNow({{ $r->guestbook_id }})"
                                                                     wire:loading.attr="disabled"
                                                                     wire:target="setJamKeluarNow({{ $r->guestbook_id }})"
                                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm"
-                                                                    title="Set jam keluar sekarang">
+                                                                    title="{{ __('app.check_out_btn') }}">
                                                                 <x-heroicon-o-arrow-right-start-on-rectangle class="w-3.5 h-3.5" />
-                                                                <span wire:loading.remove wire:target="setJamKeluarNow({{ $r->guestbook_id }})">Keluar</span>
+                                                                <span wire:loading.remove wire:target="setJamKeluarNow({{ $r->guestbook_id }})">{{ __('app.check_out_btn') }}</span>
                                                                 <span wire:loading wire:target="setJamKeluarNow({{ $r->guestbook_id }})">...</span>
                                                             </button>
                                                         </div>

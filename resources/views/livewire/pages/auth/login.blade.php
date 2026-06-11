@@ -39,12 +39,11 @@
                 <form x-data="{
                     showPassword: false,
                     submitLogin() {
-                        if (@js(config('services.system.captcha_enabled'))) {
-                            const token = (typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
-                            this.$wire.set('captcha', token);
-                        }
-
-                        this.$wire.login();
+                        const captchaEnabled = @js(config('services.system.captcha_enabled'));
+                        const token = (captchaEnabled && typeof grecaptcha !== 'undefined')
+                            ? grecaptcha.getResponse()
+                            : '';
+                        this.$wire.login(token);
                     }
                 }" x-on:submit.prevent="submitLogin()" class="space-y-8">
                     <div class="group">
@@ -175,7 +174,8 @@
 <script>
     @if(config('services.system.captcha_enabled'))
     window.onCaptchaSuccess = function(token) {
-        $wire.set('captcha', token);
+        // Token is read directly via grecaptcha.getResponse() on submit.
+        // Nothing to do here — kept as a named callback required by data-callback.
     };
 
     window.onCaptchaExpired = function() {

@@ -97,7 +97,7 @@
                                         ];
                                     @endphp
                                     <span class="px-3 py-1 text-xs rounded-full font-medium {{ $statusColors[$statusValue] ?? 'bg-[#eef1e8] text-[#4E653D]' }}">
-                                        {{ ucfirst($statusValue) }}
+                                        {{ __('app.' . $statusValue) }}
                                     </span>
                                 </td>
                             </tr>
@@ -129,7 +129,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Room Bookings',
+                    label: '{{ __('app.room_bookings_label') }}',
                     data: data,
                     backgroundColor: '#4E653D',
                     borderRadius: 6,
@@ -142,8 +142,8 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Bookings' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: '{{ __('app.bookings_axis') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date') }}' } }
                 }
             }
         });

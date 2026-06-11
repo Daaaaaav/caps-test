@@ -211,6 +211,17 @@ class MeetingSchedule extends Component
     }
     
     // Livewire Watchers (updated* methods)
+    public function updatedDeptQueryOffline(): void
+    {
+        // Re-render will filter $departmentsOffline via render() automatically.
+        // Reset user selection if dept changes while filtering.
+    }
+
+    public function updatedDeptQueryOnline(): void
+    {
+        // Re-render will filter $departmentsOnline via render() automatically.
+    }
+
     public function updatedOnlineDepartmentId($val): void
     {
         $deptId = (int) ($val ?: 0);

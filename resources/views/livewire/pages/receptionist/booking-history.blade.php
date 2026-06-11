@@ -104,7 +104,7 @@
                                             {{ $activeTab === 'done'
                                                 ? 'bg-[#4E653D] text-white shadow-sm'
                                                 : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Done
+                                    {{ __('app.done') }}
                                 </button>
                                 <button type="button"
                                         wire:click="setTab('rejected')"
@@ -112,7 +112,7 @@
                                             {{ $activeTab === 'rejected'
                                                 ? 'bg-[#4E653D] text-white shadow-sm'
                                                 : 'text-gray-700 hover:bg-gray-200' }}">
-                                    Rejected
+                                    {{ __('app.rejected') }}
                                 </button>
                             </div>
 
@@ -145,7 +145,7 @@
                                 @php $activeRoom = collect($roomsOptions)->firstWhere('id', $roomFilterId); @endphp
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                     <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
-                                    <span>Room: {{ $activeRoom['label'] ?? 'Unknown' }}</span>
+                                    <span>{{ __('app.room') }}: {{ $activeRoom['label'] ?? __('app.no_data') }}</span>
                                     <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">×</button>
                                 </span>
                             @else
@@ -163,7 +163,7 @@
                                         {{ $typeScope === 'all'
                                             ? 'bg-[#4E653D] text-white shadow-sm'
                                             : 'text-gray-700 hover:bg-gray-200' }}">
-                                All
+                                {{ __('app.all') }}
                             </button>
                             <button type="button"
                                     wire:click="setTypeScope('offline')"
@@ -171,7 +171,7 @@
                                         {{ $typeScope === 'offline'
                                             ? 'bg-[#4E653D] text-white shadow-sm'
                                             : 'text-gray-700 hover:bg-gray-200' }}">
-                                Offline
+                                {{ __('app.offline') }}
                             </button>
                             <button type="button"
                                     wire:click="setTypeScope('online')"
@@ -179,7 +179,7 @@
                                         {{ $typeScope === 'online'
                                             ? 'bg-[#4E653D] text-white shadow-sm'
                                             : 'text-gray-700 hover:bg-gray-200' }}">
-                                Online
+                                {{ __('app.online') }}
                             </button>
                         </div>
                     </div>
@@ -277,11 +277,11 @@
                                                             </span>
                                                             {{-- Status (Done) --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex-shrink-0">
-                                                                DONE
+                                                                {{ strtoupper(__('app.done')) }}
                                                             </span>
                                                             @if($row->deleted_at)
                                                                 <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 flex-shrink-0">
-                                                                    DELETED
+                                                                    {{ strtoupper(__('app.deleted')) }}
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -322,18 +322,18 @@
                                                                     <a href="{{ $meetingUrl }}" target="_blank"
                                                                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] hover:bg-[#352018] shadow-sm">
                                                                         <x-heroicon-o-link class="w-3.5 h-3.5"/>
-                                                                        Join link
+                                                                        {{ __('app.join_link') }}
                                                                     </a>
                                                                 @endif
                                                                 @if($meetingCode)
                                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                                                                        Code:
+                                                                        {{ __('app.meeting_code_label') }}:
                                                                         <span class="font-mono">{{ $meetingCode }}</span>
                                                                     </span>
                                                                 @endif
                                                                 @if($meetingPassword)
                                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                                                                        Pass:
+                                                                        {{ __('app.password') }}:
                                                                         <span class="font-mono">{{ $meetingPassword }}</span>
                                                                     </span>
                                                                 @endif
@@ -368,7 +368,7 @@
                                                         wire:click="edit({{ $row->bookingroom_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="{{ $btnBlk }} px-4 py-2">
-                                                    Edit
+                                                    {{ __('app.edit') }}
                                                 </button>
 
                                                 @if(!$row->deleted_at)
@@ -378,7 +378,7 @@
                                                             wire:loading.attr="disabled"
                                                             wire:target="destroy"
                                                             class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition">
-                                                        Delete
+                                                        {{ __('app.delete') }}
                                                     </button>
                                                 @else
                                                     {{-- RESTORE BUTTON --}}
@@ -387,7 +387,7 @@
                                                             wire:loading.attr="disabled"
                                                             wire:target="restore"
                                                             class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
-                                                        Restore
+                                                        {{ __('app.restore') }}
                                                     </button>
                                                 @endif
                                             </div>
@@ -463,7 +463,7 @@
                                                                     wire:click="edit({{ $row->bookingroom_id }})"
                                                                     wire:loading.attr="disabled"
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                Edit
+                                                                {{ __('app.edit') }}
                                                             </button>
                                                             @if(!$row->deleted_at)
                                                                 <button type="button"
@@ -471,14 +471,14 @@
                                                                         wire:confirm="{{ __(`app.delete_booking_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                    Delete
+                                                                    {{ __('app.delete') }}
                                                                 </button>
                                                             @else
                                                                 <button type="button"
                                                                         wire:click="restore({{ $row->bookingroom_id }})"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition">
-                                                                    Restore
+                                                                    {{ __('app.restore') }}
                                                                 </button>
                                                             @endif
                                                         </div>
@@ -549,13 +549,13 @@
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full border flex-shrink-0 {{ $isOnline ? 'border-emerald-300 text-emerald-700 bg-emerald-50' : 'border-blue-300 text-blue-700 bg-blue-50' }}">
                                                                 {{ $isOnline ? 'ONLINE' : 'OFFLINE' }}
                                                             </span>
-                                                            {{-- Status (Rejected) --}}
+                                            {{-- Status (Rejected) --}}
                                                             <span class="text-[11px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 flex-shrink-0">
-                                                                REJECTED
+                                                                {{ strtoupper(__('app.rejected')) }}
                                                             </span>
                                                             @if($row->deleted_at)
                                                                 <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 flex-shrink-0">
-                                                                    DELETED
+                                                                    {{ strtoupper(__('app.deleted')) }}
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -596,18 +596,18 @@
                                                                     <a href="{{ $meetingUrl }}" target="_blank"
                                                                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] hover:bg-[#352018] shadow-sm">
                                                                         <x-heroicon-o-link class="w-3.5 h-3.5"/>
-                                                                        Join link
+                                                                        {{ __('app.join_link') }}
                                                                     </a>
                                                                 @endif
                                                                 @if($meetingCode)
                                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                                                                        Code:
+                                                                        {{ __('app.meeting_code_label') }}:
                                                                         <span class="font-mono">{{ $meetingCode }}</span>
                                                                     </span>
                                                                 @endif
                                                                 @if($meetingPassword)
                                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                                                                        Pass:
+                                                                        {{ __('app.password') }}:
                                                                         <span class="font-mono">{{ $meetingPassword }}</span>
                                                                     </span>
                                                                 @endif
@@ -627,7 +627,7 @@
                                                         @endif
                                                         @if($row->book_reject)
                                                             <div class="mt-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-lg p-2">
-                                                                <span class="font-medium">Alasan penolakan:</span> {{ $row->book_reject }}
+                                                                <span class="font-medium">{{ __('app.rejection_reason_label') }}:</span> {{ $row->book_reject }}
                                                             </div>
                                                         @endif
                                                     </div>
@@ -637,12 +637,12 @@
                                             {{-- 5. BOTTOM ACTIONS --}}
                                             <div class="pt-3 border-t border-gray-100 flex justify-end gap-3 items-center">
                                                 <span class="text-[11px] text-gray-500 mr-auto">No. {{ $rejectedRows->firstItem() + $loop->index }}</span>
-                                                                          {{-- EDIT BUTTON --}}
+                                                {{-- EDIT BUTTON --}}
                                                 <button type="button"
                                                         wire:click="edit({{ $row->bookingroom_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="{{ $btnBlk }} px-4 py-2">
-                                                    Edit
+                                                    {{ __('app.edit') }}
                                                 </button>
 
                                                 @if(!$row->deleted_at)
@@ -652,7 +652,7 @@
                                                             wire:loading.attr="disabled"
                                                             wire:target="destroy"
                                                             class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition">
-                                                        Delete
+                                                        {{ __('app.delete') }}
                                                     </button>
                                                 @else
                                                     {{-- RESTORE BUTTON --}}
@@ -661,7 +661,7 @@
                                                             wire:loading.attr="disabled"
                                                             wire:target="restore"
                                                             class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
-                                                        Restore
+                                                        {{ __('app.restore') }}
                                                     </button>
                                                 @endif
                                             </div>
@@ -718,7 +718,7 @@
                                                     <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($row->start_time) }}–{{ fmtTime($row->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         <div class="text-xs text-rose-600 font-medium italic truncate max-w-xs" title="{{ $row->book_reject }}">
-                                                            {{ $row->book_reject ?? 'No reason provided' }}
+                                                            {{ $row->book_reject ?? __('app.no_reason_provided') }}
                                                         </div>
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
@@ -727,7 +727,7 @@
                                                                     wire:click="edit({{ $row->bookingroom_id }})"
                                                                     wire:loading.attr="disabled"
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                Edit
+                                                                {{ __('app.edit') }}
                                                             </button>
                                                             @if(!$row->deleted_at)
                                                                 <button type="button"
@@ -735,14 +735,14 @@
                                                                         wire:confirm="{{ __(`app.delete_booking_confirm`) }}"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                    Delete
+                                                                    {{ __('app.delete') }}
                                                                 </button>
                                                             @else
                                                                 <button type="button"
                                                                         wire:click="restore({{ $row->bookingroom_id }})"
                                                                         wire:loading.attr="disabled"
                                                                         class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition">
-                                                                    Restore
+                                                                    {{ __('app.restore') }}
                                                                 </button>
                                                             @endif
                                                         </div>
@@ -773,8 +773,8 @@
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
                     <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">Filter by Room</h3>
-                        <p class="text-xs text-gray-500 mt-1">Klik salah satu ruangan untuk mem-filter daftar history.</p>
+                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_room_label') }}</h3>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('app.click_room_filter_history') }}</p>
                     </div>
 
                     <div class="px-4 py-3 max-h-64 overflow-y-auto">
@@ -785,12 +785,12 @@
                                     {{ is_null($roomFilterId) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                             <span class="flex items-center gap-2">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">
-                                    All
+                                    {{ __('app.all') }}
                                 </span>
-                                <span>All Rooms</span>
+                                <span>{{ __('app.all_rooms') }}</span>
                             </span>
                             @if(is_null($roomFilterId))
-                                <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                             @endif
                         </button>
 
@@ -809,7 +809,7 @@
                                         <span class="truncate">{{ $r['label'] }}</span>
                                     </span>
                                     @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                     @endif
                                 </button>
                             @empty
@@ -836,7 +836,7 @@
                                 <x-heroicon-o-pencil class="w-4 h-4 text-primary" />
                             </div>
                             <h3 class="font-bold text-foreground text-base tracking-tight">
-                                {{ $modalMode === 'create' ? 'Create' : 'Edit' }} History Item
+                                {{ $modalMode === 'create' ? __('app.create') : __('app.edit') }} {{ __('app.history_item') }}
                             </h3>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="$set('showModal', false)">✕</button>
@@ -848,13 +848,13 @@
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.type') }}</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.booking_type">
-                                    <option value="bookingroom">Booking Room</option>
-                                    <option value="meeting">Meeting</option>
-                                    <option value="onlinemeeting">Online Meeting</option>
+                                    <option value="bookingroom">{{ __('app.booking_room_option') }}</option>
+                                    <option value="meeting">{{ __('app.meeting_option') }}</option>
+                                    <option value="onlinemeeting">{{ __('app.online_meeting_option') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Status</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.status_label') }}</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.status">
                                     <option value="completed">{{ __('app.done') }}</option>
                                     <option value="rejected">{{ __('app.rejected') }}</option>
@@ -863,7 +863,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Meeting Title</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.meeting_title_label') }}</label>
                             <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.meeting_title">
                             @error('form.meeting_title')
                                 <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p>
@@ -887,9 +887,9 @@
 
                         @if(in_array($form['booking_type'] ?? null, ['bookingroom','meeting']))
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Room</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.room_label') }}</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.room_id">
-                                    <option value="">— Select room —</option>
+                                    <option value="">{{ __('app.select_room_ph') }}</option>
                                     @foreach(($rooms ?? []) as $r)
                                         <option value="{{ $r['id'] }}">{{ $r['name'] }}</option>
                                     @endforeach
@@ -900,7 +900,7 @@
                             </div>
                         @else
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Online Provider</label>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.online_provider_label') }}</label>
                                 <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="form.online_provider">
                                     <option value="zoom">Zoom</option>
                                     <option value="google_meet">Google Meet</option>
@@ -961,7 +961,7 @@
                 <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                     <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                         <div>
-                            <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter & Recent</h3>
+                            <h3 class="text-sm font-semibold tracking-tight text-foreground">{{ __('app.filter_and_recent') }}</h3>
                             <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_room_recent') }}</p>
                         </div>
                         <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeFilterModal">✕</button>
@@ -969,7 +969,7 @@
 
                     <div class="p-5 space-y-4 overflow-y-auto flex-1">
                         <div>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">Filter by Room</h4>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">{{ __('app.filter_by_room_label') }}</h4>
 
                             <button type="button"
                                     wire:click="clearRoomFilter"
@@ -977,12 +977,12 @@
                                         {{ is_null($roomFilterId) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
                                 <span class="flex items-center gap-2">
                                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">
-                                        All
+                                        {{ __('app.all') }}
                                     </span>
-                                    <span>All Rooms</span>
+                                    <span>{{ __('app.all_rooms') }}</span>
                                 </span>
                                 @if(is_null($roomFilterId))
-                                    <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                    <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                 @endif
                             </button>
 
@@ -1000,7 +1000,7 @@
                                             <span class="truncate">{{ $r['label'] }}</span>
                                         </span>
                                         @if($active)
-                                            <span class="text-[10px] uppercase tracking-wide opacity-80">Active</span>
+                                            <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
                                         @endif
                                     </button>
                                 @empty
@@ -1014,7 +1014,7 @@
                         <button type="button"
                                 class="w-full h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-colors shadow-sm"
                                 wire:click="closeFilterModal">
-                            Apply & Close
+                            {{ __('app.apply_close') }}
                         </button>
                     </div>
                 </div>

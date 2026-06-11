@@ -83,12 +83,17 @@
                                             'stored'  => 'bg-[#eef1e8] text-[#4E653D]',
                                             'done'    => 'bg-green-100 text-green-700',
                                         ];
+                                        $statusLabels = [
+                                            'pending' => __('app.pending'),
+                                            'stored'  => __('app.stored'),
+                                            'done'    => __('app.done'),
+                                        ];
                                     @endphp
                                     <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusColors[$s] ?? 'bg-[#eef1e8] text-[#4E653D]' }}">
-                                        {{ ucfirst($s) }}
+                                        {{ $statusLabels[$s] ?? $s }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-[#5a6e4a]">{{ $delivery->created_at?->format('M d, Y H:i') }}</td>
+                                <td class="px-6 py-4 text-[#5a6e4a]">{{ $delivery->created_at?->format('d/m/Y H:i') }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -118,7 +123,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Deliveries',
+                    label: '{{ __('app.deliveries') }}',
                     data: data,
                     backgroundColor: '#4E653D',
                     borderRadius: 6,
@@ -131,8 +136,8 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Deliveries' } },
-                    x: { title: { display: true, text: 'Date' } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: '{{ __('app.deliveries') }}' } },
+                    x: { title: { display: true, text: '{{ __('app.date_label') }}' } }
                 }
             }
         });

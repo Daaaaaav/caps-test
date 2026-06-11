@@ -89,7 +89,7 @@
                         <div class="flex flex-wrap items-center gap-3 self-start sm:self-auto">
                             {{-- Tabs --}}
                             <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium">
-                                @foreach(['pending'=>'Pending','approved'=>'Approved','on_progress'=>'On Progress','returned'=>'Returned'] as $key=>$lbl)
+                                @foreach(['pending'=>__('app.pending'),'approved'=>__('app.approved'),'on_progress'=>__('app.on_progress'),'returned'=>__('app.returned')] as $key=>$lbl)
                                     <button type="button"
                                             wire:click="$set('statusTab','{{ $key }}')"
                                             class="px-3.5 py-1 rounded-full transition {{ $statusTab === $key ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
@@ -205,12 +205,12 @@
                                     $beforeC = $photoCounts[$b->vehiclebooking_id]['before'] ?? 0;
                                     $afterC  = $photoCounts[$b->vehiclebooking_id]['after']  ?? 0;
                                     $statusColors = [
-                                        'pending'      => ['bg'=>'bg-amber-100','text'=>'text-amber-800','label'=>'Pending'],
-                                        'approved'     => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>'Approved'],
-                                        'on_progress'  => ['bg'=>'bg-blue-100','text'=>'text-blue-800','label'=>'On Progress'],
-                                        'returned'     => ['bg'=>'bg-indigo-100','text'=>'text-indigo-800','label'=>'Returned'],
-                                        'rejected'     => ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>'Rejected'],
-                                        'completed'    => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>'Completed'],
+                                        'pending'      => ['bg'=>'bg-amber-100','text'=>'text-amber-800','label'=>__('app.pending')],
+                                        'approved'     => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.approved')],
+                                        'on_progress'  => ['bg'=>'bg-blue-100','text'=>'text-blue-800','label'=>__('app.on_progress')],
+                                        'returned'     => ['bg'=>'bg-indigo-100','text'=>'text-indigo-800','label'=>__('app.returned')],
+                                        'rejected'     => ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>__('app.rejected')],
+                                        'completed'    => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')],
                                     ];
                                     $statusStyle = $statusColors[$b->status] ?? ['bg'=>'bg-gray-100','text'=>'text-gray-800','label'=>ucfirst($b->status)];
                                 @endphp
@@ -311,7 +311,7 @@
                                                     wire:loading.attr="disabled"
                                                     wire:target="confirmReject({{ $b->vehiclebooking_id }})"
                                                     class="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition">
-                                                Reject
+                                                {{ __('app.reject') }}
                                             </button>
  
                                             {{-- Approve Button (Primary Style) --}}
@@ -320,7 +320,7 @@
                                                     wire:loading.attr="disabled"
                                                     wire:target="approve({{ $b->vehiclebooking_id }})"
                                                     class="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
-                                                Approve
+                                                {{ __('app.approve') }}
                                             </button>
                                         @elseif($b->status === 'on_progress')
                                             {{-- Mark Returned Button --}}
@@ -329,7 +329,7 @@
                                                     wire:loading.attr="disabled"
                                                     wire:target="markReturned({{ $b->vehiclebooking_id }})"
                                                     class="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
-                                                Mark Returned
+                                                {{ __('app.mark_returned') }}
                                             </button>
                                         @elseif($b->status === 'returned')
                                             {{-- Mark Done Button (Conditional styling based on after photos) --}}
@@ -345,7 +345,7 @@
                                                         wire:target="markDone({{ $b->vehiclebooking_id }})"
                                                         class="px-4 py-1.5 text-xs font-medium rounded-lg {{ $afterC === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm' }}"
                                                         @disabled($afterC === 0)>
-                                                    Mark Done
+                                                    {{ __('app.mark_done') }}
                                                 </button>
                                             </div>
                                         @endif
@@ -416,22 +416,22 @@
                                                         @if($b->status === 'pending')
                                                             <button type="button" wire:click.stop="confirmReject({{ $b->vehiclebooking_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
-                                                                Reject
+                                                                {{ __('app.reject') }}
                                                             </button>
                                                             <button type="button" wire:click.stop="approve({{ $b->vehiclebooking_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
-                                                                Approve
+                                                                {{ __('app.approve') }}
                                                             </button>
                                                         @elseif($b->status === 'on_progress')
                                                             <button type="button" wire:click.stop="markReturned({{ $b->vehiclebooking_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
-                                                                Mark Returned
+                                                                {{ __('app.mark_returned') }}
                                                             </button>
                                                         @elseif($b->status === 'returned')
                                                             <button type="button" wire:click.stop="markDone({{ $b->vehiclebooking_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg {{ $afterC === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-[#4E653D] text-white hover:bg-[#354C2B] transition' }}"
                                                                 @disabled($afterC === 0)>
-                                                                Mark Done
+                                                                {{ __('app.mark_done') }}
                                                             </button>
                                                         @else
                                                             <span class="text-xs text-gray-400 capitalize">{{ str_replace('_', ' ', $b->status) }}</span>
@@ -564,7 +564,7 @@
                     <div class="p-5 border-t border-border bg-muted/10">
                         <button type="button" class="w-full h-10 rounded-lg bg-[#4E653D] text-white text-xs font-semibold hover:bg-[#354C2B] transition shadow-sm"
                                 wire:click="closeFilterModal">
-                            Close
+                            {{ __('app.close') }}
                         </button>
                     </div>
                 </div>
