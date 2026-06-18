@@ -63,6 +63,7 @@ return [
     'verify_otp_title'  => 'VERIFIKASI KODE OTP',
     'otp_sent_to'       => 'Kami telah mengirim kode 6 digit ke',
     'otp_expires_in'    => 'Kode kedaluwarsa dalam',
+    'otp_expired'       => 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.',
     'enter_otp'         => 'Masukkan Kode OTP',
     'email_address'     => 'Alamat Email',
     'enter_email'       => 'Masukkan alamat email Anda',

@@ -65,6 +65,7 @@ return [
     'verify_otp_title'  => 'VERIFY OTP CODE',
     'otp_sent_to'       => "We've sent a 6-digit code to",
     'otp_expires_in'    => 'Code expires in',
+    'otp_expired'       => 'OTP code has expired. Please request a new one.',
     'enter_otp'         => 'Enter OTP Code',
     'email_address'     => 'Email Address',
     'enter_email'       => 'Enter your email address',

@@ -118,7 +118,29 @@
                 </form>
             @else
                 {{-- OTP VERIFICATION FORM --}}
-                <form wire:submit.prevent="verifyOtp" class="space-y-8">
+                <form wire:submit.prevent="verifyOtp" class="space-y-8"
+                    x-data="{
+                        seconds: {{ $otpExpiresIn }},
+                        timer: null,
+                        expired: false,
+                        get minutes() { return Math.floor(this.seconds / 60); },
+                        get secs() { return String(this.seconds % 60).padStart(2, '0'); },
+                        startTimer() {
+                            clearInterval(this.timer);
+                            this.expired = false;
+                            this.timer = setInterval(() => {
+                                if (this.seconds > 0) {
+                                    this.seconds--;
+                                } else {
+                                    this.expired = true;
+                                    clearInterval(this.timer);
+                                }
+                            }, 1000);
+                        }
+                    }"
+                    x-init="startTimer()"
+                    x-on:otp-resent.window="seconds = {{ $otpExpiresIn }}; startTimer()">
+
                     <div class="text-center mb-6">
                         <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
                             <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,12 +164,20 @@
                     </div>
 
                     <div class="text-center text-sm text-gray-600">
-                        {{ __('app.otp_expires_in') }} <span class="font-semibold text-gray-900">{{ floor($otpExpiresIn / 60) }}:{{ str_pad($otpExpiresIn % 60, 2, '0', STR_PAD_LEFT) }}</span>
+                        <template x-if="!expired">
+                            <span>
+                                {{ __('app.otp_expires_in') }}
+                                <span class="font-semibold text-gray-900" x-text="`${minutes}:${secs}`"></span>
+                            </span>
+                        </template>
+                        <template x-if="expired">
+                            <span class="font-semibold text-red-600">{{ __('app.otp_expired') }}</span>
+                        </template>
                     </div>
 
                     <button type="submit"
                         class="w-full rounded-3xl bg-primary text-primary-foreground py-4 px-6 font-medium tracking-wide hover:bg-primary/95 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/30 transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        wire:loading.attr="disabled">
+                        wire:loading.attr="disabled" :disabled="expired">
                         <span wire:loading.remove wire:target="verifyOtp"> {{ __('app.verify_otp') }} </span>
                         <span wire:loading wire:target="verifyOtp"> {{ __('app.verifying') }} </span>
                     </button>

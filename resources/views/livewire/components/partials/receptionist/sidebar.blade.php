@@ -3,7 +3,7 @@
     collapsible="mobile"
     @mouseenter="sidebarCollapsed = false"
     @mouseleave="sidebarCollapsed = true"
-    class="bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30"
+    class="bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30 z-50"
 >
     <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true, desktop only) -->
     <div x-show="sidebarCollapsed" class="sidebar-collapsed-container max-lg:hidden flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">

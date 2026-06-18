@@ -240,6 +240,7 @@ class Login extends Component
 
         if ($result['success']) {
             $this->otpExpiresIn = 300;
+            $this->dispatch('otp-resent');
             session()->flash('message', 'New OTP code sent to your email.');
         } else {
             session()->flash('error', $result['message']);
