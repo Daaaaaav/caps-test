@@ -1,6 +1,4 @@
 <flux:sidebar sticky collapsible="mobile" 
-    @mouseenter="sidebarCollapsed = false"
-    @mouseleave="sidebarCollapsed = true"
     class="bg-sidebar border-r border-sidebar-border lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30">
     
     <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true, desktop only) -->
@@ -10,6 +8,20 @@
             <img src="{{ $brandLogo }}" alt="Brand Logo" class="h-7 w-7 object-contain rounded-lg img-white drop-shadow-[0_0_8px_rgba(205,222,167,0.4)] transition-transform duration-300 hover:rotate-12" style="{{ $invertStyle }}" />
             <div class="sidebar-tooltip">{{ $brandName }}</div>
         </div>
+
+        <!-- Expand toggle -->
+        <button
+            @click.stop="sidebarCollapsed = false"
+            class="sidebar-collapsed-item group mb-1"
+            title="Expand sidebar"
+        >
+            <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            <div class="sidebar-tooltip">Expand</div>
+        </button>
 
         <!-- Navigation Icons -->
         <nav class="flex-1 flex flex-col items-center gap-1.5 w-full">
@@ -208,6 +220,18 @@
                 name="{{ $brandName }}" 
                 class="text-white"
                 style="{{ $invertStyle }}" />
+            {{-- Collapse toggle (desktop only) --}}
+            <button
+                @click.stop="sidebarCollapsed = true"
+                class="max-lg:hidden ml-auto p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors focus:outline-none"
+                title="Collapse sidebar"
+            >
+                <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
 

@@ -38,6 +38,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed AI settings first (idempotent — safe to re-run)
+        $this->call(AISettingsSeeder::class);
+
         DB::transaction(function () {
             $now = Carbon::now();
 

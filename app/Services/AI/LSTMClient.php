@@ -2,19 +2,40 @@
 
 namespace App\Services\AI;
 
+use App\Models\AISettings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class LSTMClient
 {
     private string $baseUrl;
-    private int $timeout;
-    private int $minimumDataPoints = 45;
+    private int    $timeout;
+    private int    $minimumDataPoints;
 
     public function __construct()
     {
-        $this->baseUrl  = env('LSTM_SERVICE_URL', 'http://127.0.0.1:8001');
-        $this->timeout  = env('LSTM_SERVICE_TIMEOUT', 30);
+        $this->baseUrl           = env('LSTM_SERVICE_URL', 'http://127.0.0.1:8001');
+        $this->timeout           = (int) env('LSTM_SERVICE_TIMEOUT', 30);
+        $this->minimumDataPoints = AISettings::get('min_data_points', 45);
+    }
+
+    /**
+     * Build an HTTP client pre-configured for the LSTM service.
+     * When the service URL is an ngrok tunnel, the browser-warning bypass
+     * header is automatically injected so requests reach FastAPI directly.
+     */
+    private function http(): \Illuminate\Http\Client\PendingRequest
+    {
+        $headers = ['Accept' => 'application/json'];
+
+        // ngrok free-tier tunnels show a browser warning page unless this
+        // header is present. It has no effect on non-ngrok endpoints.
+        if (str_contains($this->baseUrl, 'ngrok')) {
+            $headers['ngrok-skip-browser-warning'] = '1';
+        }
+
+        return \Illuminate\Support\Facades\Http::timeout($this->timeout)
+            ->withHeaders($headers);
     }
 
     /**
@@ -23,7 +44,7 @@ class LSTMClient
     public function isAvailable(): bool
     {
         try {
-            $response = Http::timeout(2)->get($this->baseUrl . '/');
+            $response = $this->http()->timeout(2)->get($this->baseUrl . '/');
             return $response->successful();
         } catch (\Exception $e) {
             Log::warning('LSTM service unavailable', ['error' => $e->getMessage()]);
@@ -34,9 +55,9 @@ class LSTMClient
     /**
      * Generate AI forecast predictions.
      *
-     * @param array $timeSeries  Array of ['date' => 'Y-m-d', 'count' => int]
-     * @param int   $forecastDays
-     * @param bool  $useDummyData
+     * @param  array $timeSeries   Array of ['date' => 'Y-m-d', 'count' => int]
+     * @param  int   $forecastDays
+     * @param  bool  $useDummyData
      * @return array|null
      */
     public function predict(array $timeSeries, int $forecastDays = 7, bool $useDummyData = false): ?array
@@ -50,7 +71,7 @@ class LSTMClient
                 return null;
             }
 
-            $data = array_map(fn($p) => [
+            $data = array_map(fn ($p) => [
                 'date'  => $p['date'],
                 'count' => (float) $p['count'],
             ], $timeSeries);
@@ -59,9 +80,11 @@ class LSTMClient
                 'data'           => $data,
                 'forecast_days'  => $forecastDays,
                 'use_dummy_data' => $useDummyData,
+                // Pass all LSTM hyperparameters from the database
+                'lstm_config'    => AISettings::group('lstm'),
             ];
 
-            $response = Http::timeout($this->timeout)
+            $response = $this->http()
                 ->post($this->baseUrl . '/predict', $payload);
 
             if (!$response->successful()) {
@@ -95,9 +118,9 @@ class LSTMClient
 
         } catch (\Exception $e) {
             Log::error('LSTM prediction failed', [
-                'error'        => $e->getMessage(),
-                'url'          => $this->baseUrl,
-                'forecast_days'=> $forecastDays,
+                'error'         => $e->getMessage(),
+                'url'           => $this->baseUrl,
+                'forecast_days' => $forecastDays,
             ]);
             return null;
         }
@@ -106,8 +129,8 @@ class LSTMClient
     /**
      * Generate a 21-day (3-week) forecast.
      *
-     * @param array $timeSeries
-     * @param bool  $useDummyData
+     * @param  array $timeSeries
+     * @param  bool  $useDummyData
      * @return array|null
      */
     public function predict3Weeks(array $timeSeries = [], bool $useDummyData = false): ?array
@@ -118,7 +141,7 @@ class LSTMClient
                 $timeSeries   = [['date' => date('Y-m-d'), 'count' => 0]];
             }
 
-            $data = array_map(fn($p) => [
+            $data = array_map(fn ($p) => [
                 'date'  => $p['date'],
                 'count' => (float) $p['count'],
             ], $timeSeries);
@@ -127,9 +150,10 @@ class LSTMClient
                 'data'           => $data,
                 'forecast_days'  => 21,
                 'use_dummy_data' => $useDummyData,
+                'lstm_config'    => AISettings::group('lstm'),
             ];
 
-            $response = Http::timeout($this->timeout)
+            $response = $this->http()
                 ->post($this->baseUrl . '/predict-3weeks', $payload);
 
             if (!$response->successful()) {
@@ -154,7 +178,7 @@ class LSTMClient
     public function getDemo(): ?array
     {
         try {
-            $response = Http::timeout($this->timeout)->get($this->baseUrl . '/demo');
+            $response = $this->http()->get($this->baseUrl . '/demo');
 
             if (!$response->successful()) {
                 Log::warning('LSTM demo endpoint failed', ['status' => $response->status()]);
@@ -186,6 +210,7 @@ class LSTMClient
 
     /**
      * Simple moving-average fallback when LSTM is unavailable.
+     * All magic numbers are read from ai_settings.
      */
     private function simpleMovingAverage(array $timeSeries, int $forecastDays): array
     {
@@ -198,8 +223,15 @@ class LSTMClient
             ];
         }
 
-        $windowSize = min(7, count($timeSeries));
-        $recentData = array_slice($timeSeries, -$windowSize);
+        // Read fallback config from DB (with hardcoded defaults as last resort)
+        $windowSize     = AISettings::get('ma_window', 7);
+        $weekendFactor  = AISettings::get('ma_weekend_factor', 0.9);
+        $lowerMult      = AISettings::get('ma_lower_bound', 0.8);
+        $upperMult      = AISettings::get('ma_upper_bound', 1.2);
+        $fixedConfidence = AISettings::get('ma_confidence', 0.60);
+
+        $windowSize = min((int) $windowSize, count($timeSeries));
+        $recentData = array_slice($timeSeries, -(int) $windowSize);
         $avgCount   = array_sum(array_column($recentData, 'count')) / $windowSize;
 
         // Simple trend: slope over the window
@@ -217,9 +249,9 @@ class LSTMClient
             $nextDate   = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
             $prediction = $avgCount + ($trend * $i);
 
-            // Weekend adjustment
+            // Weekend demand adjustment
             if (date('N', strtotime($nextDate)) >= 6) {
-                $prediction *= 0.9;
+                $prediction *= (float) $weekendFactor;
             }
 
             $prediction = max(0, round($prediction, 1));
@@ -227,18 +259,18 @@ class LSTMClient
             $predictions[] = [
                 'date'        => $nextDate,
                 'predicted'   => $prediction,
-                'lower_bound' => max(0, round($prediction * 0.8, 1)),
-                'upper_bound' => round($prediction * 1.2, 1),
-                'confidence'  => 0.60,
+                'lower_bound' => max(0, round($prediction * (float) $lowerMult, 1)),
+                'upper_bound' => round($prediction * (float) $upperMult, 1),
+                'confidence'  => (float) $fixedConfidence,
             ];
         }
 
         return [
-            'method'       => 'fallback',
-            'model'        => 'Simple Moving Average',
-            'metrics'      => ['rmse' => 0, 'mae' => 0, 'mape' => 0],
-            'predictions'  => $predictions,
-            'features_used'=> ['moving_average', 'trend_estimation', 'weekend_adjustment'],
+            'method'        => 'fallback',
+            'model'         => 'Simple Moving Average',
+            'metrics'       => ['rmse' => 0, 'mae' => 0, 'mape' => 0],
+            'predictions'   => $predictions,
+            'features_used' => ['moving_average', 'trend_estimation', 'weekend_adjustment'],
         ];
     }
 }

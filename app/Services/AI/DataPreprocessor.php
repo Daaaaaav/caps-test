@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\AISettings;
 use App\Models\BookingRoom;
 use App\Models\VehicleBooking;
 use App\Models\Guestbook;
@@ -208,9 +209,9 @@ class DataPreprocessor
         if ($days > 0) {
             $query->where('created_at', '>=', now()->subDays($days));
         } else {
-            // Default: use the last 730 days (2 years) — matches the seeder window
-            // and avoids a long sparse prefix that confuses the LSTM
-            $query->where('created_at', '>=', now()->subDays(730));
+            // Default: use history_days from ai_settings (falls back to 730 days / 2 years)
+            $historyDays = (int) AISettings::get('history_days', 730);
+            $query->where('created_at', '>=', now()->subDays($historyDays));
         }
 
         $data = $query
@@ -226,7 +227,7 @@ class DataPreprocessor
         // Build a zero-filled daily series from the query window start to today
         // Use the query's actual start date (730 days ago by default) rather than
         // the earliest DB record, to avoid a long sparse prefix of zeros
-        $windowDays = $days > 0 ? $days : 730;
+        $windowDays = $days > 0 ? $days : (int) AISettings::get('history_days', 730);
         $startDate  = now()->subDays($windowDays)->startOfDay();
         $endDate    = Carbon::today();
         $totalDays  = $startDate->diffInDays($endDate) + 1;

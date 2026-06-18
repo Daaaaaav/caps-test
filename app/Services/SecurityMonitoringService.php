@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\AISettings;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class SecurityMonitoringService
 {
-    private const FORM_SPAM_THRESHOLD = 10;
-    private const FORM_SPAM_WINDOW_SECONDS = 60;
+    // Fallback values used only if the ai_settings table is not yet seeded
+    private const FORM_SPAM_THRESHOLD_DEFAULT      = 10;
+    private const FORM_SPAM_WINDOW_SECONDS_DEFAULT = 60;
 
     /**
      * Log form activity and inspect payload for abuse signatures.
@@ -80,16 +82,19 @@ class SecurityMonitoringService
 
     private static function trackFormSpam(string $form, string $ip): void
     {
-        $key = sprintf('form-spam:%s:%s', $form, $ip);
-        RateLimiter::hit($key, self::FORM_SPAM_WINDOW_SECONDS);
+        $threshold     = (int)   AISettings::get('spam_threshold',      self::FORM_SPAM_THRESHOLD_DEFAULT);
+        $windowSeconds = (int)   AISettings::get('spam_window_seconds', self::FORM_SPAM_WINDOW_SECONDS_DEFAULT);
+
+        $key      = sprintf('form-spam:%s:%s', $form, $ip);
+        RateLimiter::hit($key, $windowSeconds);
 
         $attempts = RateLimiter::attempts($key);
-        if ($attempts >= self::FORM_SPAM_THRESHOLD) {
+        if ($attempts >= $threshold) {
             Log::warning('FORM_SPAM_DETECTED', [
-                'ip' => $ip,
-                'form' => $form,
-                'attempts' => $attempts,
-                'window_seconds' => self::FORM_SPAM_WINDOW_SECONDS,
+                'ip'             => $ip,
+                'form'           => $form,
+                'attempts'       => $attempts,
+                'window_seconds' => $windowSeconds,
             ]);
         }
     }

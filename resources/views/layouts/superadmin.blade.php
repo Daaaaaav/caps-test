@@ -34,7 +34,7 @@ $invertStyle = 'filter: brightness(0) invert(1);';
 
 <body class="min-h-screen bg-background text-foreground font-sans"
     x-data="{
-        sidebarCollapsed: true,
+        sidebarCollapsed: false,
         isMobile: window.innerWidth < 1024,
         init() {
             const handler = () => { this.isMobile = window.innerWidth < 1024; };

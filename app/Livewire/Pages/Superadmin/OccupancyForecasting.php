@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\BookingRoom;
 use App\Models\VehicleBooking;
 use App\Models\Guestbook;
+use App\Models\AISettings;
 use App\Services\AI\LSTMClient;
 use App\Services\WeatherService;
 use Carbon\Carbon;
@@ -116,25 +117,35 @@ class OccupancyForecasting extends Component
 
     private function movingAverageForecast(array $history, int $days): array
     {
+        // All magic numbers read from ai_settings table
+        $window      = (int)   AISettings::get('ma_window',         7);
+        $lowerMult   = (float) AISettings::get('ma_lower_bound',    0.8);
+        $upperMult   = (float) AISettings::get('ma_upper_bound',    1.2);
+        $confidence  = (float) AISettings::get('ma_confidence',     0.60);
+        $noiseFactor = (float) AISettings::get('ma_noise_factor',   0.1);
+        $floorAvg    = (float) AISettings::get('ma_floor_avg',      3.0);
+
         if (empty($history)) {
-            $avg = 3;
+            $avg = $floorAvg;
         } else {
-            $window = array_slice($history, -14);
-            $avg    = array_sum(array_column($window, 'count')) / count($window);
+            $slice = array_slice($history, -$window);
+            $avg   = array_sum(array_column($slice, 'count')) / count($slice);
         }
 
         $lastDate = !empty($history) ? end($history)['date'] : date('Y-m-d');
         $forecast = [];
 
         for ($i = 1; $i <= $days; $i++) {
-            $date  = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
-            $noise = $avg * 0.1 * (mt_rand(-10, 10) / 10);
+            $date       = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
+            $noise      = $avg * $noiseFactor * (mt_rand(-10, 10) / 10);
+            $predicted  = round(max(0, $avg + $noise), 1);
+
             $forecast[] = [
                 'date'        => $date,
-                'predicted'   => round(max(0, $avg + $noise), 1),
-                'lower_bound' => round(max(0, $avg * 0.8), 1),
-                'upper_bound' => round($avg * 1.2, 1),
-                'confidence'  => 0.65,
+                'predicted'   => $predicted,
+                'lower_bound' => round(max(0, $avg * $lowerMult), 1),
+                'upper_bound' => round($avg * $upperMult, 1),
+                'confidence'  => $confidence,
             ];
         }
 
