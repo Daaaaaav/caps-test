@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Apply locale detection to every web request
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\WazuhSecurityMonitor::class,
         ]);
 
         $middleware->alias([

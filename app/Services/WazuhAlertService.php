@@ -151,7 +151,7 @@ class WazuhAlertService
             $parsed['message'] = trim($matches['message']);
         }
 
-        if (preg_match('/(?<title>LOGIN_FAILED|LOGIN_SUCCESS|FORM_SUBMIT|SQLI_DETECTED|XSS_DETECTED|FORM_SPAM_DETECTED)/', $raw, $matches) === 1) {
+        if (preg_match('/(?<title>LOGIN_FAILED|LOGIN_SUCCESS|FORM_SUBMIT|SQLI_DETECTED|XSS_DETECTED|FORM_SPAM_DETECTED|BRUTE_FORCE_DETECTED|FILE_UPLOAD_ATTACK|COMMAND_INJECTION)/', $raw, $matches) === 1) {
             $parsed['title'] = str_replace('_', ' ', $matches['title']);
         }
 
