@@ -27,6 +27,8 @@ $classes = [
         ->class($classes) 
     }}
     
+    inputmode="numeric"
+    pattern="[0-9]*"
     required
     maxlength="1"
     data-slot="otp-input"

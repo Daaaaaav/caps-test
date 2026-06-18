@@ -156,6 +156,7 @@
                     <div class="group">
                         <label for="otpCode" class="block text-sm font-medium text-gray-700 mb-3">{{ __('app.enter_otp') }}</label>
                         <input type="text" id="otpCode" wire:model.defer="otpCode" maxlength="6" 
+                            inputmode="numeric" pattern="[0-9]*"
                             class="w-full px-0 py-3 text-center text-2xl tracking-widest text-gray-900 placeholder-gray-400 border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-primary focus:ring-0 transition-all duration-300 group-hover:border-gray-400"
                             placeholder="000000" autofocus>
                         @error('otpCode')
