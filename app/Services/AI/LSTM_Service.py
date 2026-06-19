@@ -2,15 +2,19 @@ import numpy as np
 import pandas as pd
 import holidays
 import os
+import hashlib
+import json
+import pickle
+import logging
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.regularizers import l2
@@ -22,9 +26,12 @@ from sklearn.metrics import (
     mean_absolute_percentage_error
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title="LSTM Forecast Service",
-    version="2.1.0"
+    version="2.2.0"
 )
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
@@ -33,23 +40,39 @@ _origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
-    allow_origin_regex=r"https://.*\.ngrok-free\.app",  
+    allow_origin_regex=r"https://.*\.ngrok-free\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# HEALTH CHECK
+
+# ── MODEL CACHE DIRECTORY ────────────────────────────────────────────────────
+
+# Stored alongside this script; can be overridden via env var
+MODEL_DIR = os.getenv(
+    "LSTM_MODEL_DIR",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "model_cache")
+)
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+MODEL_PATH      = os.path.join(MODEL_DIR, "lstm_model.keras")
+SCALER_PATH     = os.path.join(MODEL_DIR, "scaler.pkl")
+FINGERPRINT_PATH = os.path.join(MODEL_DIR, "fingerprint.json")
+
+
+# ── HEALTH CHECK ─────────────────────────────────────────────────────────────
+
 @app.get("/")
 def health_check():
     return {
         "status":  "healthy",
         "service": "Improved LSTM Forecast Service",
-        "version": "2.1.0"
+        "version": "2.2.0"
     }
 
 
-# ── CONFIG MODEL (sent by Laravel, all values from ai_settings table) ────────
+# ── CONFIG MODEL ─────────────────────────────────────────────────────────────
 
 class LSTMConfig(BaseModel):
     lstm_units:          int   = Field(default=64,      ge=8,   le=512)
@@ -66,7 +89,7 @@ class LSTMConfig(BaseModel):
     confidence_max:      float = Field(default=0.92,    ge=0.0, le=1.0)
 
 
-# ── REQUEST MODELS ───────────────────────────────────────────────────────────
+# ── REQUEST MODELS ────────────────────────────────────────────────────────────
 
 class DataPoint(BaseModel):
     date: str
@@ -78,19 +101,92 @@ class RequestData(BaseModel):
     forecast_days: int = 7
     use_dummy_data: bool = False
     lstm_config: Optional[LSTMConfig] = None
+    force_retrain: bool = False  # set True to skip cache and retrain
 
     def get_config(self) -> LSTMConfig:
         return self.lstm_config if self.lstm_config is not None else LSTMConfig()
 
 
-# ── FEATURE ENGINEERING ──────────────────────────────────────────────────────
+# ── MODEL FINGERPRINTING ──────────────────────────────────────────────────────
+
+def _data_signature(df: pd.DataFrame) -> str:
+    """
+    A lightweight signature of the training dataset.
+    Uses the sorted date range + total count sum so we retrain when
+    new data arrives but not on every tiny fluctuation.
+    """
+    min_date  = str(df['date'].min())
+    max_date  = str(df['date'].max())
+    n_rows    = len(df)
+    total     = round(float(df['count'].sum()), 2)
+    return f"{min_date}|{max_date}|{n_rows}|{total}"
+
+
+def compute_fingerprint(cfg: LSTMConfig, df: pd.DataFrame) -> str:
+    """SHA-256 of (config JSON + data signature)."""
+    payload = json.dumps(cfg.dict(), sort_keys=True) + "|" + _data_signature(df)
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def load_fingerprint() -> Optional[str]:
+    if not os.path.exists(FINGERPRINT_PATH):
+        return None
+    try:
+        with open(FINGERPRINT_PATH, "r") as f:
+            return json.load(f).get("fingerprint")
+    except Exception:
+        return None
+
+
+def save_fingerprint(fp: str, trained_at: str, training_samples: int) -> None:
+    with open(FINGERPRINT_PATH, "w") as f:
+        json.dump({
+            "fingerprint":      fp,
+            "trained_at":       trained_at,
+            "training_samples": training_samples
+        }, f, indent=2)
+
+
+def load_fingerprint_meta() -> dict:
+    if not os.path.exists(FINGERPRINT_PATH):
+        return {}
+    try:
+        with open(FINGERPRINT_PATH, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+# ── SAVE / LOAD MODEL + SCALER ────────────────────────────────────────────────
+
+def save_model_and_scaler(model, scaler: MinMaxScaler) -> None:
+    model.save(MODEL_PATH)
+    with open(SCALER_PATH, "wb") as f:
+        pickle.dump(scaler, f)
+    logger.info("Model and scaler saved to %s", MODEL_DIR)
+
+
+def load_model_and_scaler():
+    """Returns (model, scaler) or (None, None) if cache is missing."""
+    if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
+        return None, None
+    try:
+        model = load_model(MODEL_PATH)
+        with open(SCALER_PATH, "rb") as f:
+            scaler = pickle.load(f)
+        logger.info("Loaded cached model from %s", MODEL_PATH)
+        return model, scaler
+    except Exception as e:
+        logger.warning("Failed to load cached model: %s", e)
+        return None, None
+
+
+# ── FEATURE ENGINEERING ───────────────────────────────────────────────────────
 
 def create_features(df):
-
     df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date')
 
-    # Calendar features
     df['day_of_week'] = df['date'].dt.dayofweek
     df['month']       = df['date'].dt.month
 
@@ -100,28 +196,21 @@ def create_features(df):
         .astype(int)
     )
 
-    # Retrieve Indonesian holidays
     id_holidays = holidays.ID()
-
     df['is_holiday'] = df['date'].apply(
         lambda x: 1 if x in id_holidays else 0
     )
 
-    # Lag features
-    df['lag_1'] = df['count'].shift(1)
-    df['lag_7'] = df['count'].shift(7)
-
-    # Rolling averages
+    df['lag_1']      = df['count'].shift(1)
+    df['lag_7']      = df['count'].shift(7)
     df['rolling_7']  = df['count'].rolling(window=7).mean()
     df['rolling_14'] = df['count'].rolling(window=14).mean()
 
-    # Remove NaN rows
     df = df.dropna().reset_index(drop=True)
-
     return df
 
 
-# ── PREPROCESSING ────────────────────────────────────────────────────────────
+# ── PREPROCESSING ─────────────────────────────────────────────────────────────
 
 FEATURE_COLUMNS = [
     'count',
@@ -136,31 +225,35 @@ FEATURE_COLUMNS = [
 ]
 
 
-def preprocess(df):
+def preprocess(df, scaler: Optional[MinMaxScaler] = None):
+    """
+    If a fitted scaler is provided (inference mode) use it directly.
+    Otherwise fit a new one (training mode).
+    Returns (scaled_array, scaler).
+    """
     features = df[FEATURE_COLUMNS]
-    scaler   = MinMaxScaler()
-    scaled   = scaler.fit_transform(features)
+    if scaler is None:
+        scaler = MinMaxScaler()
+        scaled = scaler.fit_transform(features)
+    else:
+        scaled = scaler.transform(features)
     return scaled, scaler
 
 
-# ── CREATE SEQUENCES (window from config) ────────────────────────────────────
+# ── CREATE SEQUENCES ──────────────────────────────────────────────────────────
 
 def create_sequences(data, window: int = 7):
-    X = []
-    y = []
-
+    X, y = [], []
     for i in range(len(data) - window):
         X.append(data[i:i + window])
-        y.append(data[i + window][0])  # target = count column
-
+        y.append(data[i + window][0])
     return np.array(X), np.array(y)
 
 
-# ── BUILD MODEL (uses dynamic config) ────────────────────────────────────────
+# ── BUILD MODEL ───────────────────────────────────────────────────────────────
 
 def build_model(input_shape, cfg: LSTMConfig):
     model = Sequential()
-
     model.add(
         LSTM(
             cfg.lstm_units,
@@ -169,37 +262,32 @@ def build_model(input_shape, cfg: LSTMConfig):
             recurrent_regularizer=l2(cfg.l2_regularization),
         )
     )
-
     model.add(Dropout(cfg.dropout_rate))
     model.add(Dense(1))
-
     model.compile(optimizer='adam', loss='mse')
     return model
 
 
-# ── CONFIDENCE SCORE ─────────────────────────────────────────────────────────
+# ── CONFIDENCE SCORE ──────────────────────────────────────────────────────────
 
 def compute_confidence(rmse: float, y_test: np.ndarray, cfg: LSTMConfig) -> float:
     data_range = float(np.max(y_test) - np.min(y_test))
     if data_range < 1e-6:
         return 0.5
-
     nrmse      = rmse / data_range
     confidence = max(cfg.confidence_min, min(cfg.confidence_max, 1.0 - nrmse))
     return round(confidence, 4)
 
 
-# ── FORECAST FUNCTION ────────────────────────────────────────────────────────
+# ── FORECAST ──────────────────────────────────────────────────────────────────
 
 def forecast(model, data, scaler, df, days: int = 7, window: int = 7):
-
     results     = []
     last_seq    = data[-window:].copy()
     last_date   = df['date'].max()
     id_holidays = holidays.ID()
 
     for i in range(days):
-
         pred_scaled = model.predict(
             last_seq.reshape(1, window, -1),
             verbose=0
@@ -211,8 +299,8 @@ def forecast(model, data, scaler, df, days: int = 7, window: int = 7):
         is_weekend = int(dow in [5, 6])
         is_holiday = int(next_date in id_holidays)
 
-        lag_1    = pred_scaled
-        lag_7    = last_seq[-7][0] if len(last_seq) > 7 else pred_scaled
+        lag_1      = pred_scaled
+        lag_7      = last_seq[-7][0] if len(last_seq) > 7 else pred_scaled
         rolling_7  = np.mean([x[0] for x in last_seq[-7:]])
         rolling_14 = (
             np.mean([x[0] for x in last_seq[-14:]])
@@ -235,74 +323,69 @@ def forecast(model, data, scaler, df, days: int = 7, window: int = 7):
     return results
 
 
-# ── DUMMY DATA GENERATOR ─────────────────────────────────────────────────────
+# ── DUMMY DATA GENERATOR ──────────────────────────────────────────────────────
 
 def generate_dummy_booking_data(days: int = 180):
     import random
-    from datetime import datetime
-
     data        = []
     start_date  = datetime.now() - timedelta(days=days)
     id_holidays = holidays.ID()
 
     for i in range(days):
-        date = start_date + timedelta(days=i)
-        dow  = date.weekday()
-
+        date  = start_date + timedelta(days=i)
+        dow   = date.weekday()
         count = 20
         if dow < 5:
             count += random.randint(5, 10)
         else:
             count += random.randint(-2, 5)
-
         if date in id_holidays:
             count += random.randint(15, 30)
-
         count += i * 0.03
         count += random.randint(-4, 4)
         count  = max(1, int(count))
-
-        data.append({
-            "date":  date.strftime("%Y-%m-%d"),
-            "count": float(count)
-        })
+        data.append({"date": date.strftime("%Y-%m-%d"), "count": float(count)})
 
     return data
 
 
-# ── MAIN PREDICTION ENDPOINT ─────────────────────────────────────────────────
+# ── CORE TRAIN-OR-LOAD LOGIC ──────────────────────────────────────────────────
 
-@app.post("/predict")
-def predict(request: RequestData):
+def _get_or_train_model(df: pd.DataFrame, cfg: LSTMConfig, force_retrain: bool = False):
+    """
+    Returns (model, scaler, scaled, X_train, y_train, X_test, y_test, from_cache).
 
-    cfg = request.get_config()
+    - If a saved model exists AND its fingerprint matches the current
+      config + data, it is loaded directly (no training).
+    - Otherwise the model is trained from scratch and the result is saved.
+    - force_retrain=True bypasses the fingerprint check entirely.
+    """
+    current_fp = compute_fingerprint(cfg, df)
+    saved_fp   = load_fingerprint()
 
-    # Use dummy data if requested
-    if request.use_dummy_data:
-        dummy_data = generate_dummy_booking_data(180)
-        df = pd.DataFrame(dummy_data)
-    else:
-        df = pd.DataFrame([d.dict() for d in request.data])
+    use_cache = (
+        not force_retrain
+        and saved_fp == current_fp
+        and os.path.exists(MODEL_PATH)
+        and os.path.exists(SCALER_PATH)
+    )
 
-    # Validate minimum rows (from config)
-    if len(df) < cfg.min_data_points:
-        return {
-            "error":       "Insufficient data",
-            "message":     (
-                f"Need at least {cfg.min_data_points} data points, "
-                f"got {len(df)}"
-            ),
-            "predictions": []
-        }
-
-    df             = create_features(df)
-    scaled, scaler = preprocess(df)
+    # Always build scaled data so we can run forecast() afterwards
+    df_feat        = create_features(df.copy())
+    scaled, scaler_fit = preprocess(df_feat)  # fresh fit for sequences
     X, y           = create_sequences(scaled, window=cfg.sequence_window)
+    split          = int(len(X) * 0.8)
+    X_train, X_test = X[:split], X[split:]
+    y_train, y_test = y[:split], y[split:]
 
-    split   = int(len(X) * 0.8)
-    X_train = X[:split];  X_test  = X[split:]
-    y_train = y[:split];  y_test  = y[split:]
+    if use_cache:
+        model, scaler = load_model_and_scaler()
+        if model is not None:
+            logger.info("Cache hit — skipping training.")
+            return model, scaler, scaled, X_train, y_train, X_test, y_test, True
 
+    # ── Train ────────────────────────────────────────────────────────────────
+    logger.info("Training new LSTM model (force=%s)…", force_retrain)
     model = build_model((X.shape[1], X.shape[2]), cfg)
 
     early_stop = EarlyStopping(
@@ -321,6 +404,41 @@ def predict(request: RequestData):
         verbose=0
     )
 
+    save_model_and_scaler(model, scaler_fit)
+    save_fingerprint(current_fp, datetime.now().isoformat(), int(len(X_train)))
+
+    return model, scaler_fit, scaled, X_train, y_train, X_test, y_test, False
+
+
+# ── MAIN PREDICTION ENDPOINT ──────────────────────────────────────────────────
+
+@app.post("/predict")
+def predict(request: RequestData):
+
+    cfg = request.get_config()
+
+    if request.use_dummy_data:
+        dummy_data = generate_dummy_booking_data(180)
+        df = pd.DataFrame(dummy_data)
+    else:
+        df = pd.DataFrame([d.dict() for d in request.data])
+
+    if len(df) < cfg.min_data_points:
+        return {
+            "error":       "Insufficient data",
+            "message":     (
+                f"Need at least {cfg.min_data_points} data points, "
+                f"got {len(df)}"
+            ),
+            "predictions": []
+        }
+
+    model, scaler, scaled, X_train, y_train, X_test, y_test, from_cache = \
+        _get_or_train_model(df, cfg, force_retrain=request.force_retrain)
+
+    # We need the feature-engineered df for forecast()
+    df_feat = create_features(df.copy())
+
     preds = model.predict(X_test, verbose=0)
 
     rmse = np.sqrt(mean_squared_error(y_test, preds))
@@ -328,14 +446,13 @@ def predict(request: RequestData):
     mape = mean_absolute_percentage_error(y_test, preds)
 
     future = forecast(
-        model, scaled, scaler, df,
+        model, scaled, scaler, df_feat,
         request.forecast_days,
         window=cfg.sequence_window
     )
 
-    # Historical floor
-    recent   = df['count'].tail(90)
-    nonzero  = recent[recent > 0]
+    recent    = df_feat['count'].tail(90)
+    nonzero   = recent[recent > 0]
     hist_floor = float(nonzero.mean()) if len(nonzero) > 0 else 0.0
 
     confidence_score = compute_confidence(rmse, y_test, cfg)
@@ -346,16 +463,12 @@ def predict(request: RequestData):
     rmse_real   = float(rmse) * count_range
 
     final = []
-
     for item in future:
         raw_pred = item["predicted"]
-
         if raw_pred < hist_floor * 0.1 and hist_floor > 0:
             raw_pred = hist_floor * 0.5
-
         lower = max(0.0, raw_pred - 1.96 * rmse_real)
         upper = raw_pred + 1.96 * rmse_real
-
         final.append({
             "date":        item["date"],
             "predicted":   round(raw_pred, 2),
@@ -367,7 +480,8 @@ def predict(request: RequestData):
     return {
         "model":            "Improved LSTM Forecast Model",
         "features_used":    FEATURE_COLUMNS,
-        "config_used":      cfg.dict(),          # echo back what was used
+        "config_used":      cfg.dict(),
+        "from_cache":       from_cache,        # tells caller whether training ran
         "metrics": {
             "rmse": round(float(rmse), 4),
             "mae":  round(float(mae),  4),
@@ -381,19 +495,13 @@ def predict(request: RequestData):
     }
 
 
-# ── 3-WEEK FORECAST ENDPOINT ─────────────────────────────────────────────────
+# ── 3-WEEK FORECAST ENDPOINT ──────────────────────────────────────────────────
 
 @app.post("/predict-3weeks")
 def predict_three_weeks(request: RequestData):
 
     cfg = request.get_config()
     request.forecast_days = 21
-
-    if (
-        not request.use_dummy_data
-        and len(request.data) < cfg.min_data_points
-    ):
-        pass  # proceed — will surface as an error in predict()
 
     result = predict(request)
 
@@ -429,23 +537,59 @@ def predict_three_weeks(request: RequestData):
 def demo_prediction():
 
     dummy_data = generate_dummy_booking_data(180)
-
     request = RequestData(
         data=[DataPoint(**d) for d in dummy_data],
         forecast_days=21,
         use_dummy_data=True
-        # lstm_config intentionally omitted — defaults apply
     )
-
     result = predict_three_weeks(request)
 
     return {
-        "title":               "LSTM Model Predictions (Based on Dummy Booking Counts) for the Following 3 Weeks",
-        "description":         (
-            "Uses holiday-aware forecasting, "
-            "lag features, and rolling averages"
-        ),
+        "title":                "LSTM Model Predictions (Based on Dummy Booking Counts) for the Following 3 Weeks",
+        "description":          "Uses holiday-aware forecasting, lag features, and rolling averages",
         "training_data_points": 180,
         "forecast_days":        21,
         **result
     }
+
+
+# ── MODEL INFO ENDPOINT ───────────────────────────────────────────────────────
+
+@app.get("/model-info")
+def model_info():
+    """Returns the current cache status without running any prediction."""
+    meta        = load_fingerprint_meta()
+    model_exists  = os.path.exists(MODEL_PATH)
+    scaler_exists = os.path.exists(SCALER_PATH)
+
+    model_size_kb = (
+        round(os.path.getsize(MODEL_PATH) / 1024, 1)
+        if model_exists else None
+    )
+
+    return {
+        "cache_directory":    MODEL_DIR,
+        "model_file":         MODEL_PATH,
+        "model_exists":       model_exists,
+        "model_size_kb":      model_size_kb,
+        "scaler_exists":      scaler_exists,
+        "last_trained_at":    meta.get("trained_at"),
+        "training_samples":   meta.get("training_samples"),
+        "fingerprint":        meta.get("fingerprint"),
+        "note": (
+            "Fingerprint changes when config or data changes, "
+            "triggering automatic retraining."
+        )
+    }
+
+
+# ── FORCE RETRAIN ENDPOINT ────────────────────────────────────────────────────
+
+@app.post("/retrain")
+def force_retrain(request: RequestData):
+    """
+    Same as /predict but always retrains regardless of cached fingerprint.
+    Useful after manually updating hyperparameters or after a large data refresh.
+    """
+    request.force_retrain = True
+    return predict(request)

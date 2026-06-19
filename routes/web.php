@@ -86,6 +86,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Lightweight endpoint to refresh the CSRF token for long-lived pages
+Route::get('/csrf-token-refresh', function () {
+    return response()->json(['token' => csrf_token()]);
+})->middleware('web');
+
 /*
 |--------------------------------------------------------------------------
 | Home: redirect authenticated users to their dashboard

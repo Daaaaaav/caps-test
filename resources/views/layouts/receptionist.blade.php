@@ -130,6 +130,31 @@ $invertStyle = 'filter: brightness(0) invert(1);';
     @livewireScripts
     @fluxScripts
     @vite('resources/js/app.js')
+
+    {{-- Refresh CSRF token periodically so long-lived pages don't get 419 Page Expired --}}
+    <script>
+        (function () {
+            function refreshCsrf() {
+                fetch('/csrf-token-refresh', { method: 'GET', credentials: 'same-origin' })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (!data || !data.token) return;
+                        // Update the meta tag
+                        const meta = document.querySelector('meta[name="csrf-token"]');
+                        if (meta) meta.setAttribute('content', data.token);
+                        // Update all hidden _token inputs on the page
+                        document.querySelectorAll('input[name="_token"]').forEach(el => el.value = data.token);
+                        // Update Livewire's CSRF header
+                        if (window.Livewire) {
+                            Livewire.navigate && document.dispatchEvent(new CustomEvent('livewire:csrf-refresh'));
+                        }
+                    })
+                    .catch(() => {});
+            }
+            // Refresh every 30 minutes
+            setInterval(refreshCsrf, 30 * 60 * 1000);
+        })();
+    </script>
 </body>
 
 </html>
