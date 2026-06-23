@@ -310,6 +310,9 @@
                                         $dir = $storedDirections[$row->delivery_id] ?? 'taken';
                                         $dirLabel = $dir === 'deliver' ? __('app.deliver') : __('app.taken');
                                         $actionLabel = $dir === 'deliver' ? __('app.delivered') : __('app.taken');
+                                    @endphp
+
+                                    <div wire:key="stor-{{ $row->delivery_id }}"
                                         class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
                                         
                                         <div class="space-y-3">
