@@ -52,6 +52,31 @@ $invertStyle = 'filter: brightness(0) invert(1);';
 
         <flux:spacer />
 
+        {{-- Language Toggle (Mobile Header) --}}
+        @php $isEnHeader = app()->getLocale() === 'en'; @endphp
+        <div x-data="{ open: false }" class="relative shrink-0">
+            <button @click.stop="open = !open" type="button"
+                class="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-semibold text-sidebar-foreground hover:bg-sidebar-accent border border-sidebar-border/50 transition-all">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span>{{ $isEnHeader ? 'EN' : 'ID' }}</span>
+            </button>
+            <div x-show="open" x-transition @click.outside="open = false"
+                class="absolute right-0 top-full mt-1.5 w-36 rounded-xl bg-sidebar border border-sidebar-border shadow-xl z-[9999] overflow-hidden"
+                style="display:none;">
+                <a href="{{ route('lang.switch', 'en') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors {{ $isEnHeader ? 'bg-sidebar-accent font-semibold text-sidebar-foreground' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground' }}">
+                    <span>🇬🇧</span><span>{{ __('app.english') }}</span>
+                    @if($isEnHeader)<svg class="w-3.5 h-3.5 ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>@endif
+                </a>
+                <a href="{{ route('lang.switch', 'id') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors {{ !$isEnHeader ? 'bg-sidebar-accent font-semibold text-sidebar-foreground' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground' }}">
+                    <span>🇮🇩</span><span>{{ __('app.indonesian') }}</span>
+                    @if(!$isEnHeader)<svg class="w-3.5 h-3.5 ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>@endif
+                </a>
+            </div>
+        </div>
+
         <flux:dropdown position="top" align="start">
             <flux:profile avatar-text="{{ strtoupper($initials) }}" class="shrink-0" />
             <flux:menu>
