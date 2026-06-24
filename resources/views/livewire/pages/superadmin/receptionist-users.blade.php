@@ -73,8 +73,8 @@
 
         {{-- ================= TABLE ================= --}}
         <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
-
-            <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[600px]">
                 
                 {{-- TABLE HEAD --}}
                 <thead class="bg-[#f0f4eb] text-[#7a8f6a] uppercase text-xs border-b">
@@ -152,6 +152,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             {{-- PAGINATION --}}
             @if($receptionists->hasPages())

@@ -98,6 +98,20 @@ class DatabaseSeeder extends Seeder
                 // === CUSTOM USERS ===
                     $customUsers = [
                         [
+                            'full_name' => 'Davina Amarina',
+                            'email' => 'davina.superadmin@gmail.com',
+                            'phone_number' => '081234567891',
+                            'role' => 'Superadmin',
+                            'department' => 'IT',
+                        ],
+                         [
+                            'full_name' => 'Clania Elmymora',
+                            'email' => 'clania.receptionist@gmail.com',
+                            'phone_number' => '081234567892',
+                            'role' => 'Receptionist',
+                            'department' => 'IT',
+                        ],
+                        [
                             'full_name' => 'Madoka Higuchi',
                             'email' => 'davinad828@gmail.com',
                             'phone_number' => '081234567890',

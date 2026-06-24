@@ -289,12 +289,18 @@
                     <p class="px-3 sm:px-4 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-2">{{ __('app.language') }}</p>
                     <div class="flex gap-2 px-3 sm:px-4">
                         <a href="{{ route('lang.switch', 'en') }}"
-                           class="flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all {{ $isEnMobile ? 'bg-primary text-white' : 'text-sidebar-foreground hover:bg-primary/10' }}">
-                            <span>🇬🇧</span> <span class="hidden sm:inline">{{ __('app.english') }}</span>
+                           class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all {{ $isEnMobile ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-sidebar-foreground hover:bg-primary/10 border border-sidebar-border/40' }}">
+                            <span>🇬🇧</span> <span>{{ __('app.english') }}</span>
+                            @if($isEnMobile)
+                                <svg class="w-3.5 h-3.5 ml-auto shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            @endif
                         </a>
                         <a href="{{ route('lang.switch', 'id') }}"
-                           class="flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all {{ !$isEnMobile ? 'bg-primary text-white' : 'text-sidebar-foreground hover:bg-primary/10' }}">
-                            <span>🇮🇩</span> <span class="hidden sm:inline">{{ __('app.indonesian') }}</span>
+                           class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all {{ !$isEnMobile ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-sidebar-foreground hover:bg-primary/10 border border-sidebar-border/40' }}">
+                            <span>🇮🇩</span> <span>{{ __('app.indonesian') }}</span>
+                            @if(!$isEnMobile)
+                                <svg class="w-3.5 h-3.5 ml-auto shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            @endif
                         </a>
                     </div>
                 </div>

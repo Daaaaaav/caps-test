@@ -61,7 +61,8 @@
                 <div class="px-6 py-4 border-b bg-[#f0f4eb]">
                     <h3 class="font-semibold text-[#2d3a24]">{{ __('app.recent_deliveries') }}</h3>
                 </div>
-                <table class="w-full text-sm">
+                <div class="overflow-x-auto">
+                <table class="w-full text-sm min-w-[500px]">
                     <thead class="bg-[#f0f4eb] text-[#7a8f6a] uppercase text-xs border-b">
                         <tr>
                             <th class="px-6 py-3 text-left font-medium">ID</th>
@@ -102,6 +103,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
         @endif
 
