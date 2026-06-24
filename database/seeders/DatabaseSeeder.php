@@ -97,6 +97,13 @@ class DatabaseSeeder extends Seeder
 
                 // === CUSTOM USERS ===
                     $customUsers = [
+                         [
+                            'full_name' => 'Vani',
+                            'email' => 'arvani527@gmail.com',
+                            'phone_number' => '081234567891',
+                            'role' => 'Receptionist',
+                            'department' => 'Administration',
+                        ],
                         [
                             'full_name' => 'Davina Amarina',
                             'email' => 'davina.superadmin@gmail.com',
@@ -157,7 +164,7 @@ class DatabaseSeeder extends Seeder
                                         'role_id' => $roles[$data['role']]->role_id,
                                         'full_name' => $data['full_name'],
                                         'phone_number' => $data['phone_number'],
-                                        'password' => Hash::make('test123'), // ✅ same password
+                                        'password' => Hash::make('test123'), 
                                         'is_agent' => 'no',
                                     ]
                                 );
