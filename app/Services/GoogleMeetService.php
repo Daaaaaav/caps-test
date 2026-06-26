@@ -23,7 +23,19 @@ class GoogleMeetService
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
         $this->client->setIncludeGrantedScopes(true);
-        $this->client->setScopes(explode(' ', env('GOOGLE_SCOPES')));
+
+        $scopes = trim((string) env('GOOGLE_SCOPES', ''));
+        $this->client->setScopes($scopes === '' ? [] : explode(' ', $scopes));
+    }
+
+    private function validateConfig(): void
+    {
+        if (empty(env('GOOGLE_CLIENT_ID'))
+            || empty(env('GOOGLE_CLIENT_SECRET'))
+            || empty(env('GOOGLE_REDIRECT_URI'))
+            || trim((string) env('GOOGLE_SCOPES', '')) === '') {
+            throw new \RuntimeException('Google API tidak dikonfigurasi dengan benar. Pastikan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, dan GOOGLE_SCOPES sudah diatur.');
+        }
     }
 
     private function tokenPath(int $userId): string
@@ -37,6 +49,7 @@ class GoogleMeetService
 
     public function getAuthUrl(): string
     {
+        $this->validateConfig();
         return $this->client->createAuthUrl();
     }
 
@@ -117,6 +130,7 @@ class GoogleMeetService
     //Boot client dengan token user tertentu (dipakai internal sebelum call API)
     private function bootWithTokensFor(int $userId): void
     {
+        $this->validateConfig();
         $path = $this->tokenPath($userId);
         if (!file_exists($path)) {
             throw new \RuntimeException('Google not connected. Please connect first.');

@@ -8,9 +8,9 @@ use Carbon\Carbon;
 class ZoomService
 {
     protected Client $http;
-    protected string $accountId;
-    protected string $clientId;
-    protected string $clientSecret;
+    protected ?string $accountId;
+    protected ?string $clientId;
+    protected ?string $clientSecret;
     protected string $userId;
 
     public function __construct()
@@ -22,8 +22,16 @@ class ZoomService
         $this->userId = env('ZOOM_USER_ID', 'me');
     }
 
+    protected function validateConfig(): void
+    {
+        if (empty($this->accountId) || empty($this->clientId) || empty($this->clientSecret)) {
+            throw new \RuntimeException('Zoom tidak dikonfigurasi dengan benar. Pastikan ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET sudah diatur.');
+        }
+    }
+
     protected function getAccessToken(): string
     {
+        $this->validateConfig();
         $resp = $this->http->post('/oauth/token', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode($this->clientId . ':' . $this->clientSecret),

@@ -456,7 +456,7 @@ return [
 
     // ── Vehicle Status ────────────────────────────────────────────────────────
     'vehicle_status_title'      => 'Status Kendaraan',
-    'vehicle_status_sub'        => 'Kelola peminjaman: Pending / Disetujui / Dalam Proses / Dikembalikan.',
+    'vehicle_status_sub'        => 'Kelola peminjaman: Pending / Disetujui / Dalam Proses / Dikembalikan / Terlambat Kembali.',
     'vehicle_bookings_list'     => 'Pemesanan Kendaraan',
     'vehicle_bookings_sub'      => 'Daftar peminjaman kendaraan.',
     'no_data_filter'            => 'Tidak ada data pada filter ini.',
@@ -468,6 +468,8 @@ return [
     'returned'                  => 'Dikembalikan',
     'completed'                 => 'Selesai',
     'cancelled'                 => 'Dibatalkan',
+    'late_return'               => 'Terlambat Kembali',
+    'overdue_by'                => 'Terlambat',
     'filter_by_vehicle'         => 'Filter berdasarkan Kendaraan',
     'all_vehicles'              => 'Semua Kendaraan',
 

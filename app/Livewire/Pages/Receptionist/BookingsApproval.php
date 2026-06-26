@@ -273,6 +273,13 @@ class BookingsApproval extends Component
         return app(GoogleMeetService::class)->isConnected(Auth::id());
     }
 
+    public function getZoomConfiguredProperty(): bool
+    {
+        return !empty(env('ZOOM_ACCOUNT_ID'))
+            && !empty(env('ZOOM_CLIENT_ID'))
+            && !empty(env('ZOOM_CLIENT_SECRET'));
+    }
+
     // ─────────────────── Detail Modal ────────────────────
 
     /**
@@ -329,7 +336,7 @@ class BookingsApproval extends Component
         $this->rejectReason    = '';
         $this->showRejectModal = true;
     }
-    
+
     /**
      * FIX: Added the missing public method.
      */

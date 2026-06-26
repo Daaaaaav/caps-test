@@ -468,7 +468,7 @@ return [
 
     // ── Vehicle Status ────────────────────────────────────────────────────────
     'vehicle_status_title'      => 'Vehicle Status',
-    'vehicle_status_sub'        => 'Manage loans: Pending / Approved / On Progress / Returned.',
+    'vehicle_status_sub'        => 'Manage loans: Pending / Approved / On Progress / Returned / Late Return.',
     'vehicle_bookings_list'     => 'Vehicle Bookings',
     'vehicle_bookings_sub'      => 'List of vehicle loans.',
     'no_data_filter'            => 'No data for this filter.',
@@ -480,6 +480,8 @@ return [
     'returned'                  => 'Returned',
     'completed'                 => 'Completed',
     'cancelled'                 => 'Cancelled',
+    'late_return'               => 'Late Return',
+    'overdue_by'                => 'Overdue by',
     'filter_by_vehicle'         => 'Filter by Vehicle',
     'all_vehicles'              => 'All Vehicles',
 

@@ -103,16 +103,16 @@
 
                             {{-- Layout Toggler --}}
                             <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
-                                <button type="button" 
-                                        wire:click="setViewMode('card')" 
+                                <button type="button"
+                                        wire:click="setViewMode('card')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'card' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Card View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                     </svg>
                                 </button>
-                                <button type="button" 
-                                        wire:click="setViewMode('table')" 
+                                <button type="button"
+                                        wire:click="setViewMode('table')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'table' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Table View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -227,6 +227,10 @@
                                             $meetingCode     = $b->online_meeting_code ?? null;
                                             $meetingPassword = $b->online_meeting_password ?? null;
 
+                                            $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
+                                            $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
+                                            $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
+
                                             $requesterName = $b->user?->name
                                                                 ?? $b->requester_name
                                                                 ?? null;
@@ -240,11 +244,11 @@
                                         {{-- START: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
                                         <div wire:key="pending-{{ $b->bookingroom_id }}"
                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
-                                            
+
                                             <div class="flex items-start gap-4">
                                                 {{-- 1. Avatar/Initial on the left --}}
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
-                                                
+
                                                 <div class="flex-1 min-w-0">
                                                     {{-- 2. TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -303,7 +307,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-                                                    
+
                                                     {{-- 5. Created Timestamp (Placed here to be near Requester info) --}}
                                                     <div class="text-[10px] text-gray-500 mt-2">
                                                         {{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
@@ -316,10 +320,15 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                
+
                                             </div>
-                                            
+
                                             {{-- 6. NEW: BOTTOM ACTIONS (Horizontally aligned, matching the image) --}}
+                                            @if($needsGoogleConnect || $needsZoomConfig)
+                                                <div class="w-full text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-3">
+                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
+                                                </div>
+                                            @endif
                                             <div class="pt-3 border-t border-gray-100 flex justify-end gap-3">
                                                                               {{-- DETAIL BUTTON (Using ghost style as in the image) --}}
                                                 <button type="button"
@@ -327,17 +336,18 @@
                                                     class="{{ $btnGhost }} px-4 py-2">
                                                     {{ __('app.detail') }}
                                                 </button>
-     
+
                                                 {{-- APPROVE BUTTON (Green) --}}
                                                 <button type="button"
                                                     wire:click="approve({{ $b->bookingroom_id }})"
                                                     wire:loading.attr="disabled"
                                                     wire:target="approve"
-                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm inline-flex items-center justify-center">
+                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
+                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm inline-flex items-center justify-center @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
                                                     <x-heroicon-o-check class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                     {{ __('app.approve') }}
                                                 </button>
-     
+
                                                 {{-- REJECT BUTTON (Red) --}}
                                                 <button type="button"
                                                     wire:click="openReject({{ $b->bookingroom_id }})"
@@ -376,6 +386,9 @@
                                                                 ?? $b->platform
                                                                 ?? $b->meeting_platform
                                                                 ?? ($isOnline ? 'Online Meeting' : null);
+                                                    $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
+                                                    $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
+                                                    $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
                                                     $requesterName = $b->user?->name
                                                                         ?? $b->requester_name
                                                                         ?? null;
@@ -411,24 +424,32 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
-                                                        <div class="flex items-center justify-end gap-2">
-                                                            <button type="button"
-                                                                wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                {{ __('app.detail') }}
-                                                            </button>
-                                                            <button type="button"
-                                                                wire:click="approve({{ $b->bookingroom_id }})"
-                                                                wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition">
-                                                                {{ __('app.approve') }}
-                                                            </button>
-                                                            <button type="button"
-                                                                wire:click="openReject({{ $b->bookingroom_id }})"
-                                                                wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                {{ __('app.reject') }}
-                                                            </button>
+                                                        <div class="flex flex-col items-end gap-2">
+                                                            @if($needsGoogleConnect || $needsZoomConfig)
+                                                                <div class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 max-w-sm text-right">
+                                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
+                                                                </div>
+                                                            @endif
+                                                            <div class="flex items-center justify-end gap-2">
+                                                                <button type="button"
+                                                                    wire:click="openDetailModal({{ $b->bookingroom_id }})"
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
+                                                                    {{ __('app.detail') }}
+                                                                </button>
+                                                                <button type="button"
+                                                                    wire:click="approve({{ $b->bookingroom_id }})"
+                                                                    wire:loading.attr="disabled"
+                                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
+                                                                    {{ __('app.approve') }}
+                                                                </button>
+                                                                <button type="button"
+                                                                    wire:click="openReject({{ $b->bookingroom_id }})"
+                                                                    wire:loading.attr="disabled"
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
+                                                                    {{ __('app.reject') }}
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -440,7 +461,7 @@
                         </div>
                     @endif
                 @endif
-                
+
                 {{-- ONGOING TAB (Original code remains for ongoing tab) --}}
                 @if($activeTab === 'ongoing')
                     @if($list->isEmpty())
@@ -481,7 +502,7 @@
                                             <div class="flex items-start gap-4">
                                                 {{-- Avatar/Initial on the left --}}
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
-                                                
+
                                                 <div class="flex-1 min-w-0">
                                                     {{-- TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -536,7 +557,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-                                                    
+
                                                     {{-- Reject Note (if any) --}}
                                                     @if($b->book_reject)
                                                         <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
@@ -544,7 +565,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                
+
                                                 {{-- RIGHT: Actions and Timestamp --}}
                                                 <div class="text-right shrink-0 space-y-2 pt-0.5">
                                                     <div class="flex flex-col gap-2 justify-end">
@@ -555,7 +576,7 @@
                                                             <x-heroicon-o-eye class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                             {{ __('app.detail') }}
                                                         </button>
-     
+
                                                         {{-- CANCEL BUTTON (for ongoing) --}}
                                                         <button type="button"
                                                             x-data
@@ -756,7 +777,7 @@
                             <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
                             <textarea wire:model.live="rejectReason"
                                 rows="4"
-                                class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" 
+                                class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                                 placeholder="Contoh: Jadwal bentrok dengan rapat lain / Ruangan tidak tersedia"
                                 required></textarea>
                             @error('rejectReason')
@@ -971,10 +992,10 @@
                             } catch (\Throwable) { /* ignore */ }
                         }
 
-                        $requirementsToDisplay = $detail->requirements->isNotEmpty() 
-                            ? $detail->requirements->pluck('name')->toArray() 
+                        $requirementsToDisplay = $detail->requirements->isNotEmpty()
+                            ? $detail->requirements->pluck('name')->toArray()
                             : [];
-                            
+
                         $loadedFromBugged = false;
                         if (empty($requirementsToDisplay) && !empty($buggedReqIds)) {
                             $requirementsToDisplay = Requirement::whereIn('id', $buggedReqIds)->pluck('name')->toArray();
@@ -1104,7 +1125,7 @@
                             <p class="text-xs text-amber-800 leading-relaxed whitespace-pre-wrap">{{ $detail->book_reject }}</p>
                         </div>
                         @endif
-                        
+
                         {{-- Special Notes --}}
                         <div class="space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
