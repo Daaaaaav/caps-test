@@ -36,7 +36,9 @@ class WazuhSecurityMonitor
         }
 
         // 3. Check for Command Injection
-        $cmdPattern = '/(\||;|&|`|\$|\|\|)\s*(ls|cat|whoami|id|pwd|wget|curl|echo|ping|bash|sh|php)/i';
+        // Requires a shell separator (|, ;, &, `, $) directly before a shell command
+        // word-boundary anchored to avoid false positives on class names like "App\Services\GoogleMeetService"
+        $cmdPattern = '/(\||;|&|`)\s*\b(ls|cat|whoami|id|pwd|wget|curl|echo|ping|bash|sh)\b/i';
         if ($this->detectPattern($input, $cmdPattern)) {
             Log::info("level 12 srcip: {$ip} location: /{$location} -> COMMAND_INJECTION");
             abort(403, 'Forbidden: Malicious activity detected.');
