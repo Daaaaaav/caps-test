@@ -33,7 +33,7 @@ class Bookingvehicle extends Component
     public string $odd_even_area = 'tidak';      // sesuaikan enum di DB
     public ?string $purpose_type = null;         // jenis keperluan
     public ?string $purpose_type_other = null;   // untuk opsi "lainnya"
-    public bool $terms_agreed = false;
+
 
     /** @var \Illuminate\Support\Collection */
     public $departments;
@@ -68,7 +68,6 @@ class Bookingvehicle extends Component
             'odd_even_area'        => ['nullable', 'string', 'max:50'],
             'purpose_type'         => ['nullable', 'string', 'max:50'],
             'purpose_type_other'   => ['required_if:purpose_type,lainnya', 'nullable', 'string', 'max:255'],
-            'terms_agreed'         => ['accepted'],
         ];
     }
 
@@ -175,37 +174,6 @@ class Bookingvehicle extends Component
             $this->purpose .= ' (Lainnya: '.$this->purpose_type_other.')';
         }
 
-        // ── Late-return block ──────────────────────────────────────────────
-        // Refuse any new booking for a vehicle that currently has an
-        // unresolved late_return booking. The receptionist must mark that
-        // overdue booking as returned before the vehicle can be booked again.
-        $blocker = VehicleBooking::findLateReturnBlocker((int) $this->vehicle_id);
-
-        if ($blocker) {
-            $tz         = $this->tz;
-            $overdueSince = \Carbon\Carbon::parse($blocker->end_at, $tz);
-            $diffMins   = (int) $overdueSince->diffInMinutes(now($tz));
-            $diffHours  = (int) $overdueSince->diffInHours(now($tz));
-            $diffDays   = (int) $overdueSince->diffInDays(now($tz));
-
-            if ($diffDays >= 1) {
-                $overdueLabel = $diffDays . ' day' . ($diffDays > 1 ? 's' : '');
-            } elseif ($diffHours >= 1) {
-                $overdueLabel = $diffHours . ' hour' . ($diffHours > 1 ? 's' : '');
-            } else {
-                $overdueLabel = $diffMins . ' minute' . ($diffMins !== 1 ? 's' : '');
-            }
-
-            $this->addError(
-                'vehicle_id',
-                'This vehicle cannot be booked — it has an unresolved late return '
-                . '(Booking #' . $blocker->vehiclebooking_id . ', overdue by ' . $overdueLabel . '). '
-                . 'Please mark it as returned first.'
-            );
-            return;
-        }
-        // ── end late-return block ──────────────────────────────────────────
-
         VehicleBooking::create([
             'vehicle_id'     => $this->vehicle_id,
             'company_id'     => $companyId,
@@ -242,7 +210,6 @@ class Bookingvehicle extends Component
             'odd_even_area',
             'purpose_type',
             'purpose_type_other',
-            'terms_agreed',
             'departmentSearch',
             'userSearch',
         ]);

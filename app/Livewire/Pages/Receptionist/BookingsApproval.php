@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\BookingRoom;
 use App\Models\Room;
-use App\Models\Requirement; // ADDED: Required for the temporary bug workaround in Blade
-use App\Services\GoogleMeetService;
-use App\Services\ZoomService;
+use App\Models\Requirement;
 use Carbon\Carbon;
 
 use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
@@ -48,11 +46,6 @@ class BookingsApproval extends Component
     // Mobile filter modal
     public bool $showFilterModal = false;
 
-    // Reject modal
-    public bool $showRejectModal = false;
-    public ?int $rejectId = null;
-    public string $rejectReason = '';
-
     // Reschedule modal
     public bool $showRescheduleModal = false;
     public ?int $rescheduleId = null;
@@ -71,6 +64,11 @@ class BookingsApproval extends Component
     public bool $showDetailModal = false;
     public ?int $selectedBookingId = null;
     public ?BookingRoom $selectedBookingDetail = null;
+
+    // Reject modal
+    public bool $showRejectModal = false;
+    public ?int $rejectId = null;
+    public string $rejectReason = '';
 
     private string $tz = 'Asia/Jakarta';
 
@@ -270,34 +268,18 @@ class BookingsApproval extends Component
 
     public function getGoogleConnectedProperty(): bool
     {
-        return app(GoogleMeetService::class)->isConnected(Auth::id());
+        return app(\App\Services\GoogleMeetService::class)->isConnected();
     }
 
-    public function getZoomConfiguredProperty(): bool
-    {
-        return !empty(config('zoom.account_id', env('ZOOM_ACCOUNT_ID')))
-            && !empty(config('zoom.client_id', env('ZOOM_CLIENT_ID')))
-            && !empty(config('zoom.client_secret', env('ZOOM_CLIENT_SECRET')));
-    }
-
-    // ─────────────────── Detail Modal ────────────────────
-
-    /**
-     * Computed property to retrieve the selected BookingRoom model instance with requirements and room.
-     */
     public function getBookingDetailProperty(): ?BookingRoom
     {
         if ($this->selectedBookingId) {
-            // Include soft-deleted for robustness, although usually unnecessary for approvals
             return BookingRoom::with(['room', 'requirements'])
                 ->find($this->selectedBookingId);
         }
         return null;
     }
 
-    /**
-     * Open the detail modal and fetch the selected booking detail.
-     */
     public function openDetailModal(int $id): void
     {
         $this->selectedBookingId = $id;
@@ -317,10 +299,6 @@ class BookingsApproval extends Component
         }
     }
 
-
-    /**
-     * Close the detail modal.
-     */
     public function closeDetailModal(): void
     {
         $this->showDetailModal = false;
@@ -328,26 +306,23 @@ class BookingsApproval extends Component
         $this->selectedBookingDetail = null;
     }
 
-    // ─────────────────── Reject ────────────────────
+    // ─────────────── Reject ───────────────
 
-    public function openReject(int $id): void
+    public function openRejectModal(int $id): void
     {
-        $this->rejectId        = $id;
-        $this->rejectReason    = '';
+        $this->rejectId = $id;
+        $this->rejectReason = '';
         $this->showRejectModal = true;
     }
 
-    /**
-     * FIX: Added the missing public method.
-     */
-    public function closeReject(): void
+    public function closeRejectModal(): void
     {
         $this->showRejectModal = false;
-        $this->rejectId        = null;
-        $this->rejectReason    = '';
+        $this->rejectId = null;
+        $this->rejectReason = '';
     }
 
-    public function confirmReject(): void
+    public function submitReject(): void
     {
         $this->validate([
             'rejectId'     => 'required|integer|exists:booking_rooms,bookingroom_id',
@@ -359,126 +334,26 @@ class BookingsApproval extends Component
                 /** @var BookingRoom $b */
                 $b = BookingRoom::lockForUpdate()->findOrFail($this->rejectId);
 
+                if ($b->status !== 'pending') {
+                    throw new \RuntimeException('Only pending bookings can be rejected.');
+                }
+
                 $b->status      = 'rejected';
-                $b->is_approve  = 0;
-                $b->approved_by = Auth::id();
                 $b->book_reject = $this->rejectReason;
-                $b->save();
-            });
-
-            $this->showRejectModal = false;
-            $this->dispatch('toast', type: 'info', title: 'Rejected', message: 'Booking ditolak dan alasan disimpan.');
-            $this->resetPage('pendingPage');
-            $this->resetPage('ongoingPage');
-        } catch (\Throwable $e) {
-            report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal menolak: ' . $e->getMessage());
-        }
-    }
-
-    public function reject(int $id): void
-    {
-        $this->openReject($id);
-    }
-
-    // ─────────────────── Approve ────────────────────
-
-    public function approve(int $id): void
-    {
-        try {
-            DB::transaction(function () use ($id) {
-                /** @var BookingRoom $b */
-                $b = BookingRoom::lockForUpdate()->findOrFail($id);
-
-                // OFFLINE checks
-                if (!in_array($b->booking_type, ['online_meeting', 'onlinemeeting'])) {
-                    if (!$b->room_id || !$b->date || !$b->start_time || !$b->end_time) {
-                        throw new \RuntimeException('Data ruangan/tanggal/waktu tidak lengkap.');
-                    }
-
-                    $start = $this->buildDt($b->date, $b->start_time);
-                    $end   = $this->buildDt($b->date, $b->end_time);
-                    if ($end->lte($start)) {
-                        throw new \RuntimeException('Waktu tidak valid (end <= start).');
-                    }
-
-                    $startExpr = "COALESCE(
-                        CASE WHEN start_time REGEXP '^[0-9]{4}-' THEN start_time END,
-                        CASE WHEN date       REGEXP '^[0-9]{4}-' THEN date END,
-                        CONCAT(date, ' ', start_time)
-                    )";
-                    $endExpr = "COALESCE(
-                        CASE WHEN end_time   REGEXP '^[0-9]{4}-' THEN end_time END,
-                        CASE WHEN date       REGEXP '^[0-9]{4}-' THEN date END,
-                        CONCAT(date, ' ', end_time)
-                    )";
-
-                    $overlapExists = BookingRoom::query()
-                        ->where('bookingroom_id', '!=', $b->bookingroom_id)
-                        ->where('status', 'approved')
-                        ->whereNotIn('booking_type', ['online_meeting', 'onlinemeeting'])
-                        ->where('room_id', $b->room_id)
-                        ->whereDate('date', $b->date)
-                        ->whereRaw("$startExpr < ?", [$end->toDateTimeString()])
-                        ->whereRaw("$endExpr > ?", [$start->toDateTimeString()])
-                        ->exists();
-
-                    if ($overlapExists) {
-                        throw new \RuntimeException('Jadwal bentrok dengan booking lain pada ruangan & tanggal yang sama.');
-                    }
-                }
-
-                // ONLINE: create link on approval if missing
-                if (in_array($b->booking_type, ['online_meeting','onlinemeeting']) && empty($b->online_meeting_url)) {
-                    $start = $this->buildDt($b->date, $b->start_time);
-                    $end   = $this->buildDt($b->date, $b->end_time);
-
-                    $provider = strtolower((string) $b->online_provider);
-                    $provider = str_replace([' ', '-'], '_', $provider);
-                    $isGoogle = str_starts_with($provider, 'google');
-
-                    if ($isGoogle) {
-                        if (!app(GoogleMeetService::class)->isConnected(Auth::id())) {
-                            throw new \RuntimeException('Google belum terhubung untuk pengguna ini.');
-                        }
-                        $meet = app(GoogleMeetService::class)->createMeet(
-                            $b->meeting_title,
-                            $start,
-                            $end,
-                            'Auto-created from KRBS approval'
-                        );
-                        $b->online_provider = 'google_meet';
-                    } else {
-                        $meet = app(ZoomService::class)->createMeeting(
-                            $b->meeting_title,
-                            $start,
-                            $end,
-                            'Auto-created from KRBS approval'
-                        );
-                        $b->online_provider = 'zoom';
-                    }
-
-                    $b->online_meeting_url      = $meet['url'] ?? null;
-                    $b->online_meeting_code     = $meet['code'] ?? null;
-                    $b->online_meeting_password = $meet['password'] ?? null;
-                }
-
-                // Approve
-                $b->status      = 'approved';
-                $b->is_approve  = 1;
                 $b->approved_by = Auth::id();
-                $b->book_reject = null;
+                $b->updated_at  = Carbon::now($this->tz)->toDateTimeString();
                 $b->save();
             });
 
-            $this->dispatch('toast', type: 'success', title: 'Approved', message: 'Booking disetujui.');
+            $this->closeRejectModal();
+            $this->dispatch('toast', type: 'success', title: 'Rejected', message: 'Booking has been rejected.', duration: 3000);
             $this->resetPage('pendingPage');
             $this->resetPage('ongoingPage');
         } catch (\RuntimeException $e) {
-            $this->dispatch('toast', type: 'warning', title: 'Tidak Bisa Disetujui', message: $e->getMessage());
+            $this->dispatch('toast', type: 'warning', title: 'Cannot Reject', message: $e->getMessage());
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Gagal menyetujui: ' . $e->getMessage());
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to reject booking: ' . $e->getMessage());
         }
     }
 
@@ -689,9 +564,6 @@ class BookingsApproval extends Component
             'pending',
             'ongoing',
             'recentCompleted'
-        ) + [
-            'zoomConfigured'   => $this->zoomConfigured,
-            'googleConnected'  => $this->googleConnected,
-        ]);
+        ));
     }
 }

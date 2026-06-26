@@ -449,20 +449,6 @@
                             </div>
                         @endif
 
-                        {{-- Terms --}}
-                        <div class="pt-2 md:col-span-3">
-                            <label class="inline-flex items-center gap-2.5 cursor-pointer group">
-                                <input
-                                    type="checkbox"
-                                    wire:model.defer="terms_agreed"
-                                    class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all"
-                                >
-                                <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">{{ __('app.terms_agree') }}</span>
-                            </label>
-                            @error('terms_agreed')
-                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
 
                     {{-- Submit Button --}}

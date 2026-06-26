@@ -24,59 +24,6 @@ class RoomApproval extends Component
     public int $perPending = 6;
     public int $perOngoing = 6;
 
-    public ?int $rejectId = null;
-    public string $reject_reason = ''; // UI only
-
-    public function approve(int $id): void
-    {
-        $row = BookingRoom::company(Auth::user()?->company_id)->find($id);
-        if (!$row)
-            return;
-
-        // processed already?
-        if ($row->status !== BookingRoom::ST_PENDING) {
-            $this->dispatch('toast', type: 'info', message: 'Booking sudah diproses.');
-            return;
-        }
-
-        $row->update([
-            'status' => BookingRoom::ST_APPROVED, // string 'approved'
-            'is_approve' => true,
-            'approved_by' => Auth::user()?->user_id ?? Auth::id(),
-        ]);
-
-        $this->dispatch('toast', type: 'success', message: 'Booking disetujui.');
-        $this->resetPage('pendingPage');
-        $this->resetPage('ongoingPage');
-    }
-
-    public function askReject(int $id): void
-    {
-        $this->rejectId = $id;
-        $this->reject_reason = '';
-    }
-
-    public function reject(): void
-    {
-        if (!$this->rejectId)
-            return;
-
-        $row = BookingRoom::company(Auth::user()?->company_id)->find($this->rejectId);
-        if ($row && $row->status === BookingRoom::ST_PENDING) {
-            $row->update([
-                'status' => BookingRoom::ST_REJECTED, // string 'rejected'
-                'is_approve' => false,
-                'approved_by' => Auth::user()?->user_id ?? Auth::id(),
-            ]);
-            $this->dispatch('toast', type: 'success', message: 'Booking ditolak.');
-        }
-
-        $this->rejectId = null;
-        $this->reject_reason = '';
-        $this->resetPage('pendingPage');
-        $this->resetPage('ongoingPage');
-    }
-
     /** Poller */
     public function tick(): void
     {

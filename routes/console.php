@@ -8,16 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-/*
-|--------------------------------------------------------------------------
-| Booking Auto-Approve Schedule
-|--------------------------------------------------------------------------
-| Every minute, promote pending room and vehicle bookings whose start time
-| has arrived:
-|   - Room bookings:    pending  →  approved    (= "ongoing" in this app)
-|   - Vehicle bookings: pending  →  on_progress (= "ongoing" in this app)
-*/
-Schedule::command('bookings:auto-approve')
-    ->everyMinute()
-    ->withoutOverlapping()
-    ->runInBackground();
+// Auto-approve pending bookings when their start time arrives
+Schedule::command('bookings:auto-approve')->everyMinute()->withoutOverlapping();
+
+// Auto-complete approved bookings when their end time passes (+1 min tolerance)
+Schedule::command('bookings:auto-complete')->everyMinute()->withoutOverlapping();

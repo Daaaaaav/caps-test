@@ -112,32 +112,13 @@ Route::get('/home', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Google OAuth (contoh / debug)
+| Google OAuth (Real Implementation)
 |--------------------------------------------------------------------------
 */
-Route::get('/google/oauth/init', function () {
-    $credPath = base_path(env('GOOGLE_OAUTH_CREDENTIALS_JSON', 'storage/app/google_oauth/credentials.json'));
-    $tokenPath = base_path(env('GOOGLE_OAUTH_TOKENS_PATH', 'storage/app/google_oauth/tokens.json'));
-
-    $client = new Google\Client();
-    $client->setApplicationName('KRBS Meet Creator');
-    $client->setScopes([Google\Service\Calendar::CALENDAR, Google\Service\Calendar::CALENDAR_EVENTS]);
-    $client->setAccessType('offline');
-    $client->setAuthConfig($credPath);
-    $client->setRedirectUri(url('/google/oauth/callback'));
-
-    if (!request()->has('code')) {
-        return redirect()->away($client->createAuthUrl());
-    }
-
-    $token = $client->fetchAccessTokenWithAuthCode(request('code'));
-    if (!is_dir(dirname($tokenPath)))
-        @mkdir(dirname($tokenPath), 0775, true);
-    file_put_contents($tokenPath, json_encode($token));
-    return 'Google OAuth tokens saved ✅';
+Route::middleware(['auth'])->group(function () {
+    Route::get('/google/auth', [\App\Http\Controllers\GoogleAuthController::class, 'auth'])->name('google.auth');
+    Route::get('/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'callback'])->name('google.callback');
 });
-
-Route::get('/google/oauth/callback', fn() => redirect('/google/oauth/init'));
 
 /*
 |--------------------------------------------------------------------------
@@ -158,21 +139,6 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/google/connect', fn(GoogleMeetService $svc) => redirect($svc->getAuthUrl()))
-        ->name('google.connect');
-
-    Route::get('/oauth2callback', function (Request $request) {
-        $code = $request->query('code');
-        if (!$code) {
-            abort(400, 'Missing authorization code');
-        }
-        app(GoogleMeetService::class)->handleCallback($code);
-        return redirect()->route('dashboard')->with('success', 'Google connected!');
-    })->name('google.callback');
-
-    Route::get('/google/debug-auth-url', function (GoogleMeetService $svc) {
-        return $svc->getAuthUrl();
-    });
 
     // ---------- Attachments API (Local Storage) ----------
     Route::prefix('attachments')->group(function () {

@@ -103,16 +103,16 @@
 
                             {{-- Layout Toggler --}}
                             <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
-                                <button type="button"
-                                        wire:click="setViewMode('card')"
+                                <button type="button" 
+                                        wire:click="setViewMode('card')" 
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'card' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Card View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                     </svg>
                                 </button>
-                                <button type="button"
-                                        wire:click="setViewMode('table')"
+                                <button type="button" 
+                                        wire:click="setViewMode('table')" 
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'table' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Table View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -200,11 +200,7 @@
                     </div>
                 </div>
 
-                @php
-                    $list = $activeTab === 'pending' ? $pending : $ongoing;
-                    $googleConnected = $googleConnected ?? false;
-                    $zoomConfigured = $zoomConfigured ?? false;
-                @endphp
+                @php $list = $activeTab === 'pending' ? $pending : $ongoing; @endphp
 
                 {{-- PENDING TAB (MODIFIED FOR IMAGE DESIGN) --}}
                 @if($activeTab === 'pending')
@@ -231,10 +227,6 @@
                                             $meetingCode     = $b->online_meeting_code ?? null;
                                             $meetingPassword = $b->online_meeting_password ?? null;
 
-                                            $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
-                                            $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
-                                            $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
-
                                             $requesterName = $b->user?->name
                                                                 ?? $b->requester_name
                                                                 ?? null;
@@ -248,11 +240,11 @@
                                         {{-- START: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
                                         <div wire:key="pending-{{ $b->bookingroom_id }}"
                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
-
+                                            
                                             <div class="flex items-start gap-4">
                                                 {{-- 1. Avatar/Initial on the left --}}
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
-
+                                                
                                                 <div class="flex-1 min-w-0">
                                                     {{-- 2. TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -311,7 +303,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-
+                                                    
                                                     {{-- 5. Created Timestamp (Placed here to be near Requester info) --}}
                                                     <div class="text-[10px] text-gray-500 mt-2">
                                                         {{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
@@ -324,43 +316,26 @@
                                                         </div>
                                                     @endif
                                                 </div>
-
+                                                
                                             </div>
-
-                                            {{-- 6. NEW: BOTTOM ACTIONS (Horizontally aligned, matching the image) --}}
-                                            @if($needsGoogleConnect || $needsZoomConfig)
-                                                <div class="w-full text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-3">
-                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
+                                            
+                                            {{-- 6. NEW: BOTTOM ACTIONS (Detail + Reject) --}}
+                                            <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                                    {{ __('app.pending') }}
+                                                </span>
+                                                <div class="flex items-center gap-2">
+                                                    <button type="button"
+                                                        wire:click="openRejectModal({{ $b->bookingroom_id }})"
+                                                        class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 focus:outline-none transition">
+                                                        {{ __('app.reject') ?? 'Reject' }}
+                                                    </button>
+                                                    <button type="button"
+                                                        wire:click="openDetailModal({{ $b->bookingroom_id }})"
+                                                        class="{{ $btnGhost }} px-4 py-2">
+                                                        {{ __('app.detail') }}
+                                                    </button>
                                                 </div>
-                                            @endif
-                                            <div class="pt-3 border-t border-gray-100 flex justify-end gap-3">
-                                                                              {{-- DETAIL BUTTON (Using ghost style as in the image) --}}
-                                                <button type="button"
-                                                    wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                    class="{{ $btnGhost }} px-4 py-2">
-                                                    {{ __('app.detail') }}
-                                                </button>
-
-                                                {{-- APPROVE BUTTON (Green) --}}
-                                                <button type="button"
-                                                    wire:click="approve({{ $b->bookingroom_id }})"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="approve"
-                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
-                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm inline-flex items-center justify-center @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
-                                                    <x-heroicon-o-check class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                    {{ __('app.approve') }}
-                                                </button>
-
-                                                {{-- REJECT BUTTON (Red) --}}
-                                                <button type="button"
-                                                    wire:click="openReject({{ $b->bookingroom_id }})"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="openReject"
-                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
-                                                    <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                    {{ __('app.reject') }}
-                                                </button>
                                             </div>
                                         </div>
                                         {{-- END: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
@@ -390,9 +365,6 @@
                                                                 ?? $b->platform
                                                                 ?? $b->meeting_platform
                                                                 ?? ($isOnline ? 'Online Meeting' : null);
-                                                    $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
-                                                    $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
-                                                    $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
                                                     $requesterName = $b->user?->name
                                                                         ?? $b->requester_name
                                                                         ?? null;
@@ -428,32 +400,20 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
-                                                        <div class="flex flex-col items-end gap-2">
-                                                            @if($needsGoogleConnect || $needsZoomConfig)
-                                                                <div class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 max-w-sm text-right">
-                                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
-                                                                </div>
-                                                            @endif
-                                                            <div class="flex items-center justify-end gap-2">
-                                                                <button type="button"
-                                                                    wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                    {{ __('app.detail') }}
-                                                                </button>
-                                                                <button type="button"
-                                                                    wire:click="approve({{ $b->bookingroom_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
-                                                                    {{ __('app.approve') }}
-                                                                </button>
-                                                                <button type="button"
-                                                                    wire:click="openReject({{ $b->bookingroom_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                    {{ __('app.reject') }}
-                                                                </button>
-                                                            </div>
+                                                        <div class="flex items-center justify-end gap-2">
+                                                            <span class="inline-flex items-center px-2 py-0.5 mr-2 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                                                {{ __('app.pending') }}
+                                                            </span>
+                                                            <button type="button"
+                                                                wire:click="openRejectModal({{ $b->bookingroom_id }})"
+                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
+                                                                {{ __('app.reject') ?? 'Reject' }}
+                                                            </button>
+                                                            <button type="button"
+                                                                wire:click="openDetailModal({{ $b->bookingroom_id }})"
+                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
+                                                                {{ __('app.detail') }}
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -465,7 +425,7 @@
                         </div>
                     @endif
                 @endif
-
+                
                 {{-- ONGOING TAB (Original code remains for ongoing tab) --}}
                 @if($activeTab === 'ongoing')
                     @if($list->isEmpty())
@@ -506,7 +466,7 @@
                                             <div class="flex items-start gap-4">
                                                 {{-- Avatar/Initial on the left --}}
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
-
+                                                
                                                 <div class="flex-1 min-w-0">
                                                     {{-- TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -561,7 +521,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-
+                                                    
                                                     {{-- Reject Note (if any) --}}
                                                     @if($b->book_reject)
                                                         <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
@@ -569,7 +529,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-
+                                                
                                                 {{-- RIGHT: Actions and Timestamp --}}
                                                 <div class="text-right shrink-0 space-y-2 pt-0.5">
                                                     <div class="flex flex-col gap-2 justify-end">
@@ -579,21 +539,6 @@
                                                             class="{{ $btnGhost }}">
                                                             <x-heroicon-o-eye class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                             {{ __('app.detail') }}
-                                                        </button>
-
-                                                        {{-- CANCEL BUTTON (for ongoing) --}}
-                                                        <button type="button"
-                                                            x-data
-                                                            @click="
-                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
-                                                                    $wire.openReschedule({{ $b->bookingroom_id }});
-                                                                }
-                                                            "
-                                                            wire:loading.attr="disabled"
-                                                            wire:target="openReschedule"
-                                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
-                                                            <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                            {{ __('app.cancel') }}
                                                         </button>
                                                     </div>
 
@@ -670,13 +615,6 @@
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                 {{ __('app.detail') }}
                                                             </button>
-                                                            <button type="button"
-                                                                x-data
-                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
-                                                                wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                {{ __('app.cancel') }}
-                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -752,68 +690,14 @@
             </aside>
         </div>
 
-        {{-- REJECT MODAL (Alasan wajib) --}}
-        @if($showRejectModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-            role="dialog" aria-modal="true"
-            wire:key="reject-modal"
-            wire:keydown.escape.window="closeReject">
-            {{-- Backdrop --}}
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReject"></div>
 
-            <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
-                <form wire:submit.prevent="confirmReject">
-                    {{-- Modal Header --}}
-                    <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
-                                <x-heroicon-o-x-circle class="w-4 h-4 text-destructive" />
-                            </div>
-                            <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking_title') }}</h3>
-                        </div>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeReject">✕</button>
-                    </div>
-
-                    {{-- Modal Body --}}
-                    <div class="p-6 space-y-4">
-                        <p class="text-xs text-muted-foreground">{{ __('app.reject_reason_required') }}</p>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
-                            <textarea wire:model.live="rejectReason"
-                                rows="4"
-                                class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
-                                placeholder="Contoh: Jadwal bentrok dengan rapat lain / Ruangan tidak tersedia"
-                                required></textarea>
-                            @error('rejectReason')
-                            <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    {{-- Modal Footer --}}
-                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
-                        <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5" wire:click="closeReject" wire:loading.attr="disabled" wire:target="confirmReject">
-                            <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
-                            <span>{{ __('app.cancel') }}</span>
-                        </button>
-                        <button type="submit"
-                            class="h-9 px-4 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold hover:bg-destructive/95 transition shadow-sm inline-flex items-center gap-1.5"
-                            wire:loading.attr="disabled" wire:target="confirmReject">
-                            <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
-                            <span>{{ __('app.reject') }}</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        @endif
 
         {{-- RESCHEDULE MODAL --}}
         @if($showRescheduleModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
+        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
 
-            <div class="relative bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
+            <div class="relative z-10 text-left bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
                 <form wire:submit.prevent="submitReschedule">
                     <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
                         <div>
@@ -947,14 +831,11 @@
 
         {{-- BOOKING DETAIL MODAL --}}
         @if ($showDetailModal && $selectedBookingDetail)
-        <div
-            class="fixed inset-0 z-[60] flex items-center justify-center p-4"
-            role="dialog" aria-modal="true"
-            wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}"
-            wire:keydown.escape.window="closeDetailModal">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
+        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}" wire:keydown.escape.window="closeDetailModal">
+            
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
 
-            <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100 flex flex-col max-h-[85vh]" tabindex="-1">
+                <div class="relative z-10 text-left w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
 
                 {{-- Modal Header --}}
                 <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
@@ -968,7 +849,7 @@
                 </div>
 
                 {{-- Modal Body --}}
-                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                <div class="p-6 space-y-4">
                     @php
                         $detail = $selectedBookingDetail;
                         $isOnline   = in_array($detail->booking_type, ['online_meeting','onlinemeeting']);
@@ -996,10 +877,10 @@
                             } catch (\Throwable) { /* ignore */ }
                         }
 
-                        $requirementsToDisplay = $detail->requirements->isNotEmpty()
-                            ? $detail->requirements->pluck('name')->toArray()
+                        $requirementsToDisplay = $detail->requirements->isNotEmpty() 
+                            ? $detail->requirements->pluck('name')->toArray() 
                             : [];
-
+                            
                         $loadedFromBugged = false;
                         if (empty($requirementsToDisplay) && !empty($buggedReqIds)) {
                             $requirementsToDisplay = Requirement::whereIn('id', $buggedReqIds)->pluck('name')->toArray();
@@ -1064,6 +945,7 @@
 
                         {{-- Type Details --}}
                         <div class="grid grid-cols-2 gap-4">
+                            @if (!$isOnline)
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-user-group class="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -1071,7 +953,6 @@
                                 </div>
                                 <p class="text-sm font-semibold text-foreground">{{ $detail->number_of_attendees }}</p>
                             </div>
-                            @if (!$isOnline)
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-building-office-2 class="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -1129,7 +1010,7 @@
                             <p class="text-xs text-amber-800 leading-relaxed whitespace-pre-wrap">{{ $detail->book_reject }}</p>
                         </div>
                         @endif
-
+                        
                         {{-- Special Notes --}}
                         <div class="space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -1152,5 +1033,47 @@
             </div>
         </div>
         @endif
+
+        {{-- REJECT MODAL --}}
+        @if($showRejectModal)
+        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeRejectModal"></div>
+
+            <div class="relative z-10 text-left bg-card border border-border shadow-2xl rounded-2xl w-full max-w-md overflow-hidden transform transition-all duration-300 scale-100">
+                <form wire:submit.prevent="submitReject">
+                    <div class="px-6 py-5 border-b border-border bg-rose-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                                <x-heroicon-o-x-circle class="w-4 h-4 text-rose-500" />
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking') ?? 'Reject Booking' }}</h3>
+                                <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.reject_reason_required') ?? 'Please provide a reason for rejection.' }}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeRejectModal">&#x2715;</button>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason') ?? 'Reason' }} <span class="text-destructive">*</span></label>
+                            <textarea rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all resize-none" wire:model.live="rejectReason" placeholder="{{ __('app.reject_reason_ph') ?? 'Enter reason for rejection...' }}" required></textarea>
+                            @error('rejectReason') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
+                        <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition" wire:click="closeRejectModal" wire:loading.attr="disabled" wire:target="submitReject">
+                            {{ __('app.cancel') }}
+                        </button>
+                        <button type="submit" class="h-9 px-4 rounded-lg bg-rose-500 text-white text-xs font-semibold hover:bg-rose-600 transition shadow-sm" wire:loading.attr="disabled" wire:target="submitReject">
+                            {{ __('app.reject') ?? 'Reject' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
     </main>
+
 </div>
