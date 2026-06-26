@@ -275,9 +275,9 @@ class BookingsApproval extends Component
 
     public function getZoomConfiguredProperty(): bool
     {
-        return !empty(config('zoom.account_id'))
-            && !empty(config('zoom.client_id'))
-            && !empty(config('zoom.client_secret'));
+        return !empty(config('zoom.account_id', env('ZOOM_ACCOUNT_ID')))
+            && !empty(config('zoom.client_id', env('ZOOM_CLIENT_ID')))
+            && !empty(config('zoom.client_secret', env('ZOOM_CLIENT_SECRET')));
     }
 
     // ─────────────────── Detail Modal ────────────────────

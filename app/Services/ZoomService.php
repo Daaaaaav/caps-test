@@ -16,17 +16,33 @@ class ZoomService
     public function __construct()
     {
         $this->http = new Client(['base_uri' => 'https://api.zoom.us']);
-        $this->accountId = config('zoom.account_id');
-        $this->clientId = config('zoom.client_id');
-        $this->clientSecret = config('zoom.client_secret');
-        $this->userId = config('zoom.user_id');
+
+        // Read directly from env() as a fallback so a stale config cache
+        // doesn't cause a TypeError at construction time.
+        $this->accountId    = config('zoom.account_id')    ?? env('ZOOM_ACCOUNT_ID')    ?? null;
+        $this->clientId     = config('zoom.client_id')     ?? env('ZOOM_CLIENT_ID')     ?? null;
+        $this->clientSecret = config('zoom.client_secret') ?? env('ZOOM_CLIENT_SECRET') ?? null;
+        $this->userId       = config('zoom.user_id')       ?? env('ZOOM_USER_ID', 'me') ?? 'me';
     }
 
     protected function validateConfig(): void
     {
-        if (empty($this->accountId) || empty($this->clientId) || empty($this->clientSecret)) {
-            throw new \RuntimeException('Zoom tidak dikonfigurasi dengan benar. Pastikan ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET sudah diatur.');
+        // Re-check env() directly as a last resort in case the config cache
+        // was built before the .env keys were populated.
+        $accountId    = $this->accountId    ?: env('ZOOM_ACCOUNT_ID');
+        $clientId     = $this->clientId     ?: env('ZOOM_CLIENT_ID');
+        $clientSecret = $this->clientSecret ?: env('ZOOM_CLIENT_SECRET');
+
+        if (empty($accountId) || empty($clientId) || empty($clientSecret)) {
+            throw new \RuntimeException(
+                'Zoom tidak dikonfigurasi dengan benar. Pastikan ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET sudah diatur.'
+            );
         }
+
+        // Sync back so getAccessToken() uses the resolved values.
+        $this->accountId    = $accountId;
+        $this->clientId     = $clientId;
+        $this->clientSecret = $clientSecret;
     }
 
     protected function getAccessToken(): string
