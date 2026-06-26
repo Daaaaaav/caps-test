@@ -49,4 +49,19 @@ return [
         'captcha_enabled' => $isSecureMode,
     ],
 
+    'zoom' => [
+        'account_id'    => env('ZOOM_ACCOUNT_ID'),
+        'client_id'     => env('ZOOM_CLIENT_ID'),
+        'client_secret' => env('ZOOM_CLIENT_SECRET'),
+        'user_id'       => env('ZOOM_USER_ID', 'me'),
+    ],
+
+    'google' => [
+        'credentials_path' => env('GOOGLE_APPLICATION_CREDENTIALS', 'storage/app/google/google-service-account.json'),
+        'client_secret_path' => env('GOOGLE_CLIENT_SECRET', 'storage/app/google/client_secret.json'),
+        'token_path'       => env('GOOGLE_TOKEN_PATH', 'storage/app/google/token.json'),
+        'calendar_id'      => env('GOOGLE_CALENDAR_ID', 'primary'),
+        'impersonate_email' => env('GOOGLE_IMPERSONATE_EMAIL'),
+    ],
+
 ];

@@ -3,10 +3,13 @@
 namespace App\Livewire\Pages\Receptionist;
 
 use App\Models\Requirement;
+use App\Services\GoogleMeetService;
+use App\Services\ZoomService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -42,7 +45,7 @@ class MeetingSchedule extends Component
     public ?int $offline_user_id = null;
     public array $usersByDeptOffline = [];
     public string $userQueryOffline = '';
-    public bool $informInfoOffline = false; // Property for Offline Info Dept Request
+
 
     /** ONLINE form state */
     public string $online_meeting_title = '';
@@ -52,7 +55,7 @@ class MeetingSchedule extends Component
     public ?string $online_end_time = null;
     public ?int $online_department_id = null;
     public ?int $online_user_id = null;
-    public bool $informInfoOnline = false; // Property for Online Info Dept Request
+
     public array $usersByDept = [];
     public string $userQueryOnline = '';
 
@@ -380,7 +383,6 @@ class MeetingSchedule extends Component
         // 1. Validation
         $this->validate();
         $this->validateNotesIfOther();
-        $this->validate(['informInfoOffline' => ['nullable', 'boolean']]); // Validate new property
 
         $cid = Auth::user()?->company_id;
 
@@ -439,7 +441,7 @@ class MeetingSchedule extends Component
                 ),
                 'booking_type'         => 'meeting',
                 'status'               => self::INITIAL_STATUS,
-                'requestinformation'   => $this->informInfoOffline ? 'request' : null,
+                'requestinformation'   => null,
                 ...(Schema::hasColumn('booking_rooms', 'is_approve') ? ['is_approve' => 0] : []),
                 'created_at'           => now(),
                 'updated_at'           => now(),
@@ -483,7 +485,6 @@ class MeetingSchedule extends Component
             'online_end_time'      => ['required', 'date_format:H:i', 'after:online_start_time'],
             'online_department_id' => ['nullable', 'integer'],
             'online_user_id'       => ['nullable', 'integer'],
-            'informInfoOnline'     => ['nullable', 'boolean'], // Validate new property
         ]);
 
         $cid = Auth::user()?->company_id;
@@ -506,30 +507,100 @@ class MeetingSchedule extends Component
             return;
         }
 
-        // 3. Database Insertion
-        DB::table('booking_rooms')->insert([
-            'company_id'             => $cid,
-            'user_id'                => $targetUserId,
-            'department_id'          => $this->online_department_id,
-            'meeting_title'          => $data['online_meeting_title'],
-            'booking_type'           => 'online_meeting',
-            'status'                 => self::INITIAL_STATUS,
+        // 3. Create meeting link immediately at submission
+        $meetingUrl = null;
+        $meetingCode = null;
+        $meetingPassword = null;
+        $meetingEventId = null;
+        $linkWarning = false;
+
+        $startCarbon = Carbon::parse($startAt, $this->tz);
+        $endCarbon   = Carbon::parse($endAt, $this->tz);
+        $provider    = $data['online_platform'];
+        $isGoogle    = str_starts_with($provider, 'google');
+
+        try {
+            if ($isGoogle) {
+                $svc = app(GoogleMeetService::class);
+                if ($svc->isConnected()) {
+                    $meet = $svc->createMeet(
+                        $data['online_meeting_title'],
+                        $startCarbon,
+                        $endCarbon,
+                        'Created from KRBS booking'
+                    );
+                    $meetingUrl      = $meet['url'] ?? null;
+                    $meetingCode     = $meet['code'] ?? null;
+                    $meetingPassword = $meet['password'] ?? null;
+                    $meetingEventId  = $meet['event_id'] ?? null;
+                } else {
+                    $linkWarning = true;
+                    Log::warning('GoogleMeetService: Service account not connected, skipping link creation.');
+                }
+            } else {
+                $zoomSvc = app(ZoomService::class);
+                if ($zoomSvc->isConfigured()) {
+                    $meet = $zoomSvc->createMeeting(
+                        $data['online_meeting_title'],
+                        $startCarbon,
+                        $endCarbon,
+                        'Created from KRBS booking'
+                    );
+                    $meetingUrl      = $meet['url'] ?? null;
+                    $meetingCode     = $meet['code'] ?? null;
+                    $meetingPassword = $meet['password'] ?? null;
+                    $meetingEventId  = $meet['code'] ?? null;
+                } else {
+                    $linkWarning = true;
+                    Log::warning('ZoomService: Credentials not configured, skipping link creation.');
+                }
+            }
+        } catch (\Throwable $e) {
+            $errorMsg = $e->getMessage();
+            
+            // For Google Meet API errors, extract the readable message
+            if ($e instanceof \Google\Service\Exception) {
+                $errDecoded = json_decode($e->getMessage(), true);
+                if (isset($errDecoded['error']['message'])) {
+                    $errorMsg = "Google Meet Error: " . $errDecoded['error']['message'];
+                    if (str_contains($errorMsg, 'Invalid conference type')) {
+                        $errorMsg .= " (Service Accounts need GOOGLE_IMPERSONATE_EMAIL with Domain-Wide Delegation enabled)";
+                    }
+                }
+            }
+
+            Log::error('Failed to create meeting link on submission: ' . $errorMsg);
+            $this->dispatch('toast', type: 'error', title: 'Integration Error', message: $errorMsg, duration: 8000);
+            return; // Abort booking if link creation fails
+        }
+
+        // 4. Database Insertion with meeting link
+        $bookingRoomPk = $this->pickColumn('booking_rooms', ['bookingroom_id', 'id'], 'bookingroom_id');
+
+        $bookingId = DB::table('booking_rooms')->insertGetId([
+            'company_id'              => $cid,
+            'user_id'                 => $targetUserId,
+            'department_id'           => $this->online_department_id,
+            'meeting_title'           => $data['online_meeting_title'],
+            'booking_type'            => 'online_meeting',
+            'status'                  => self::INITIAL_STATUS,
             ...(Schema::hasColumn('booking_rooms', 'is_approve') ? ['is_approve' => 0] : []),
-            'date'                   => $data['online_date'],
-            'start_time'             => $startAt,
-            'end_time'               => $endAt,
-            'online_provider'        => $data['online_platform'],
-            'online_meeting_url'     => null,
-            'online_meeting_code'    => null,
-            'online_meeting_password' => null,
-            'requestinformation'     => $this->informInfoOnline ? 'request' : null,
-            'created_at'             => now(),
-            'updated_at'             => now(),
-        ]);
+            'date'                    => $data['online_date'],
+            'start_time'              => $startAt,
+            'end_time'                => $endAt,
+            'online_provider'         => $provider,
+            'online_meeting_url'      => $meetingUrl,
+            'online_meeting_code'     => $meetingCode,
+            'online_meeting_password' => $meetingPassword,
+            'online_meeting_event_id' => $meetingEventId,
+            'requestinformation'      => null,
+            'created_at'              => now(),
+            'updated_at'              => now(),
+        ], $bookingRoomPk);
 
         $this->resetOnlineForm();
 
-        $this->dispatch('toast', type: 'success', title: 'Sukses', message: 'Meeting online disimpan.', duration: 3000);
+        $this->dispatch('toast', type: 'success', title: 'Sukses', message: 'Meeting online disimpan dengan link meeting.', duration: 3000);
         $this->js('window.location.reload()');
     }
 
@@ -538,14 +609,10 @@ class MeetingSchedule extends Component
     protected function detectGoogleConnected(): bool
     {
         try {
-            if (App::bound('App\Services\GoogleMeetService')) {
-                $svc = App::make('App\Services\GoogleMeetService');
-                if (method_exists($svc, 'connected'))   return (bool) $svc->connected();
-                if (method_exists($svc, 'isConnected')) return (bool) $svc->isConnected();
-            }
+            return app(GoogleMeetService::class)->isConnected();
         } catch (\Throwable) {
+            return false;
         }
-        return false;
     }
 
     private function resetOfflineForm(): void
@@ -565,7 +632,6 @@ class MeetingSchedule extends Component
         $this->offline_user_id    = null;
         $this->usersByDeptOffline = [];
         $this->userQueryOffline   = '';
-        $this->informInfoOffline  = false;
         $this->resetValidation();
     }
 
@@ -578,7 +644,6 @@ class MeetingSchedule extends Component
         $this->online_end_time      = null;
         $this->online_department_id = null;
         $this->online_user_id       = null;
-        $this->informInfoOnline     = false;
         $this->usersByDept          = [];
         $this->userQueryOnline      = '';
         $this->resetValidation();

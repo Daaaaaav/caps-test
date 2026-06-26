@@ -120,37 +120,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                {{-- 5. BOTTOM ACTIONS --}}
-                                <div class="pt-3 border-t border-gray-100 flex flex-col gap-3">
-                                    <div class="flex justify-end gap-3 items-center">
-                                        <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition"
-                                                 wire:click="askReject({{ $id }})" wire:loading.attr="disabled">
-                                            {{ __('app.reject') }}
-                                        </button>
-                                        <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm"
-                                                 wire:click="approve({{ $id }})" wire:loading.attr="disabled">
-                                            {{ __('app.approve') }}
-                                        </button>
-                                    </div>
-                                    
-                                    {{-- Reject box --}}
-                                    @if($rejectId === $id)
-                                        <div class="mt-2 bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
-                                            <textarea class="w-full h-20 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition"
-                                                      placeholder="{{ __('app.reject_reason_ph') }}" wire:model.defer="reject_reason"></textarea>
-                                            <div class="flex justify-end gap-2">
-                                                <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
-                                                        wire:click="$set('rejectId', null)">
-                                                    {{ __('app.cancel') }}
-                                                </button>
-                                                <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:ring-2 focus:ring-rose-500/20 transition shadow-sm"
-                                                        wire:click="reject">
-                                                    {{ __('app.send_rejection') }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endif
+                                                               {{-- 5. BOTTOM ACTIONS (Auto-Approve Notice) --}}
+                                <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                                        {{ __('app.pending') }}
+                                    </span>
+                                    <span class="text-[11px] text-muted-foreground italic">
+                                        Auto-approves at start time
+                                    </span>
                                 </div>
                             </div>
                         @empty
@@ -169,7 +146,7 @@
                                     <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                     <th class="px-6 py-3.5">{{ __('app.time') }}</th>
                                     <th class="px-6 py-3.5">{{ __('app.participants') }}</th>
-                                    <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                    <th class="px-6 py-3.5 text-right">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -187,34 +164,9 @@
                                         <td class="px-6 py-4 font-mono text-xs">{{ $m['time'] }}–{{ $m['time_end'] }}</td>
                                         <td class="px-6 py-4 font-medium text-gray-800">{{ $m['participants'] }}</td>
                                         <td class="px-6 py-4 text-right">
-                                            <div class="flex items-center justify-end gap-2">
-                                                <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition"
-                                                         wire:click="askReject({{ $id }})" wire:loading.attr="disabled">
-                                                    Reject
-                                                </button>
-                                                <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm"
-                                                         wire:click="approve({{ $id }})" wire:loading.attr="disabled">
-                                                    Approve
-                                                </button>
-                                            </div>
-
-                                            {{-- Reject box inside table row if active --}}
-                                            @if($rejectId === $id)
-                                                <div class="mt-2 bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2 text-left">
-                                                    <textarea class="w-full h-20 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition"
-                                                              placeholder="{{ __('app.reject_reason_ph') }}" wire:model.defer="reject_reason"></textarea>
-                                                    <div class="flex justify-end gap-2">
-                                                        <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4A2F24]/10 text-[#4A2F24] border border-[#4A2F24]/20 hover:bg-[#4A2F24]/20 focus:outline-none transition"
-                                                                wire:click="$set('rejectId', null)">
-                                                            {{ __('app.cancel') }}
-                                                        </button>
-                                                        <button type="button" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition shadow-sm"
-                                                                wire:click="reject">
-                                                            {{ __('app.send_rejection') }}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            @endif
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                                {{ __('app.pending') }}
+                                            </span>
                                         </td>
                                     </tr>
                                 @empty

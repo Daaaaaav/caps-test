@@ -23,6 +23,13 @@
                         : 'text-[#7a8f6a] hover:text-[#2d3a24]' }}">
                 AI Model
             </button>
+            <button wire:click="$set('activeTab', 'integrations')"
+                class="px-5 py-2 text-sm font-medium rounded-lg transition
+                    {{ $activeTab === 'integrations'
+                        ? 'bg-white text-[#2d3a24] shadow-sm'
+                        : 'text-[#7a8f6a] hover:text-[#2d3a24]' }}">
+                Integrations
+            </button>
         </div>
 
         {{-- ================================================================ --}}
@@ -258,6 +265,64 @@
             </form>
 
         @endif {{-- end ai tab --}}
+
+
+        {{-- ================================================================ --}}
+        {{-- INTEGRATIONS TAB                                                  --}}
+        {{-- ================================================================ --}}
+        @if($activeTab === 'integrations')
+            @inject('googleService', 'App\Services\GoogleMeetService')
+            @php $isGoogleConnected = $googleService->isConnected(); @endphp
+
+            <div class="bg-white border border-[#d4dfc8] rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-[#e4edd8] bg-[#f0f4eb]">
+                    <h2 class="text-base font-semibold text-[#2d3a24]">Google Meet Integration</h2>
+                    <p class="text-xs text-[#7a8f6a] mt-0.5">Connect a Google account to automatically generate Meet links for online bookings.</p>
+                </div>
+                
+                <div class="px-6 py-6 space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 {{ $isGoogleConnected ? 'bg-green-100 text-green-700' : 'bg-[#e8ede0] text-[#4E653D]' }} rounded-xl">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-medium text-[#2d3a24]">Google Calendar & Meet</h3>
+                                @if($isGoogleConnected)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-lg">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                        Connected
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 rounded-lg">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                                        Not Connected
+                                    </span>
+                                @endif
+                            </div>
+                            
+                            <p class="text-sm text-[#7a8f6a] mt-1 mb-4 leading-relaxed">
+                                @if($isGoogleConnected)
+                                    Your Google account is successfully connected. The booking system will automatically generate Google Meet links for all online meetings using this account in the background.
+                                @else
+                                    By connecting your Google account, the booking system will be able to automatically generate Google Meet links for online meetings. You only need to connect this once. The system will use this account in the background for all future bookings.
+                                @endif
+                            </p>
+                            
+                            <a href="{{ route('google.auth') }}"
+                               class="inline-flex items-center gap-2 px-6 py-2.5 {{ $isGoogleConnected ? 'bg-[#eef1e8] text-[#4E653D] hover:bg-[#dde4d4]' : 'bg-[#4A2F24] text-white hover:bg-[#3d2720] shadow-sm' }} text-sm font-medium rounded-xl transition">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                                </svg>
+                                {{ $isGoogleConnected ? 'Reconnect Google Account' : 'Connect Google Meet' }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif {{-- end integrations tab --}}
 
     </main>
 </div>

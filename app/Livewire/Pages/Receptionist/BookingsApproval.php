@@ -270,14 +270,14 @@ class BookingsApproval extends Component
 
     public function getGoogleConnectedProperty(): bool
     {
-        return app(GoogleMeetService::class)->isConnected(Auth::id());
+        return app(GoogleMeetService::class)->isConnected();
     }
 
     public function getZoomConfiguredProperty(): bool
     {
-        return !empty(config('zoom.account_id', env('ZOOM_ACCOUNT_ID')))
-            && !empty(config('zoom.client_id', env('ZOOM_CLIENT_ID')))
-            && !empty(config('zoom.client_secret', env('ZOOM_CLIENT_SECRET')));
+        return !empty(config('services.zoom.account_id', env('ZOOM_ACCOUNT_ID')))
+            && !empty(config('services.zoom.client_id', env('ZOOM_CLIENT_ID')))
+            && !empty(config('services.zoom.client_secret', env('ZOOM_CLIENT_SECRET')));
     }
 
     // ─────────────────── Detail Modal ────────────────────
@@ -437,7 +437,7 @@ class BookingsApproval extends Component
                     $isGoogle = str_starts_with($provider, 'google');
 
                     if ($isGoogle) {
-                        if (!app(GoogleMeetService::class)->isConnected(Auth::id())) {
+                        if (!app(GoogleMeetService::class)->isConnected()) {
                             throw new \RuntimeException('Google belum terhubung untuk pengguna ini.');
                         }
                         $meet = app(GoogleMeetService::class)->createMeet(

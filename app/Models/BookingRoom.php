@@ -48,6 +48,7 @@ class BookingRoom extends Model
         'online_meeting_url',
         'online_meeting_code',
         'online_meeting_password',
+        'online_meeting_event_id',
         'requestinformation',
         'book_reject' // Assuming this is also fillable for reschedule/reject logic
     ];

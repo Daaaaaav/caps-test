@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-background">
     @php
-        $card   = 'bg-card border border-border rounded-2xl shadow-xl overflow-hidden';
+        $card   = 'bg-card border border-border rounded-2xl shadow-xl overflow-visible';
         $label  = 'block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5';
         $input  = 'w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
         $btnBlk = 'inline-flex items-center justify-center gap-2 px-5 h-10 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60';
@@ -66,12 +66,14 @@
                     </div>
 
                     {{-- Room Combobox --}}
+                    {{-- Room Combobox --}}
                     <div>
                         <label class="{{ $label }}">{{ __('app.room') }}</label>
                         <div
                             x-data="{
                                 open: false,
                                 search: '',
+                                roomId: @entangle('form.room_id'),
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
                                     return @js(collect($rooms)->map(fn($r) => ['id' => $r['id'], 'label' => $r['name']])->values()->toArray()).filter(i =>
@@ -80,22 +82,26 @@
                                 },
                                 select(id, label) {
                                     this.search = label;
-                                    $wire.set('form.room_id', id);
+                                    this.roomId = id;
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
-                                    $wire.set('form.room_id', null);
+                                    this.roomId = null;
                                 }
                             }"
                             x-init="
-                                $watch('$wire.form.room_id', val => {
+                                $watch('roomId', val => {
                                     if (!val) { search = ''; }
                                     else {
                                         const found = @js(collect($rooms)->map(fn($r) => ['id' => $r['id'], 'label' => $r['name']])->values()->toArray()).find(i => i.id == val);
                                         if (found) search = found.label;
                                     }
                                 });
+                                if (roomId) {
+                                    const found = @js(collect($rooms)->map(fn($r) => ['id' => $r['id'], 'label' => $r['name']])->values()->toArray()).find(i => i.id == roomId);
+                                    if (found) search = found.label;
+                                }
                             "
                             class="relative"
                             @click.outside="open = false"
@@ -135,7 +141,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.form.room_id == item.id
+                                        :class="roomId == item.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'text-foreground hover:bg-muted cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -158,6 +164,7 @@
                             x-data="{
                                 open: false,
                                 search: '',
+                                deptId: @entangle('form.department_id').live,
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
                                     return @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).filter(i =>
@@ -166,22 +173,26 @@
                                 },
                                 select(id, label) {
                                     this.search = label;
-                                    $wire.set('form.department_id', id);
+                                    this.deptId = id;
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
-                                    $wire.set('form.department_id', null);
+                                    this.deptId = null;
                                 }
                             }"
                             x-init="
-                                $watch('$wire.form.department_id', val => {
+                                $watch('deptId', val => {
                                     if (!val) { search = ''; }
                                     else {
                                         const found = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).find(i => i.id == val);
                                         if (found) search = found.label;
                                     }
                                 });
+                                if (deptId) {
+                                    const found = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).find(i => i.id == deptId);
+                                    if (found) search = found.label;
+                                }
                             "
                             class="relative"
                             @click.outside="open = false"
@@ -221,7 +232,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.form.department_id == item.id
+                                        :class="deptId == item.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'text-foreground hover:bg-muted cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -244,23 +255,37 @@
                             x-data="{
                                 open: false,
                                 search: '',
+                                deptId: @entangle('form.department_id').live,
+                                userId: @entangle('offline_user_id').live,
+                                users: @entangle('usersByDeptOffline').live,
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
-                                    const list = ($wire.usersByDeptOffline || []).map(u => ({ id: u.id, label: u.name }));
+                                    const list = (this.users || []).map(u => ({ id: u.id, label: u.name }));
                                     return q ? list.filter(i => i.label.toLowerCase().includes(q)) : list;
                                 },
                                 select(id, label) {
                                     this.search = label;
-                                    $wire.set('offline_user_id', id);
+                                    this.userId = id;
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
-                                    $wire.set('offline_user_id', null);
+                                    this.userId = null;
                                 }
                             }"
                             x-init="
-                                $watch('$wire.form.department_id', () => { search = ''; $wire.set('offline_user_id', null); });
+                                $watch('deptId', () => { search = ''; userId = null; });
+                                $watch('userId', val => {
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = (users || []).find(u => u.id == val);
+                                        if (found) search = found.name;
+                                    }
+                                });
+                                if (userId) {
+                                    const found = (users || []).find(u => u.id == userId);
+                                    if (found) search = found.name;
+                                }
                             "
                             class="relative"
                             @click.outside="open = false"
@@ -269,13 +294,13 @@
                                 <input
                                     type="text"
                                     x-model="search"
-                                    @focus="if ($wire.form.department_id) open = true"
-                                    @input="if ($wire.form.department_id) open = true"
+                                    @focus="if (deptId) open = true"
+                                    @input="if (deptId) open = true"
                                     @keydown.escape="open = false"
                                     @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
                                     autocomplete="off"
                                     placeholder="{{ __('app.search_user_offline_ph') }}"
-                                    :disabled="!$wire.form.department_id"
+                                    :disabled="!deptId"
                                     class="{{ $input }} pr-8 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
                                 >
                                 <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
@@ -301,7 +326,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.offline_user_id == item.id
+                                        :class="userId == item.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'text-foreground hover:bg-muted cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -383,17 +408,7 @@
                     </div>
                 @endif
                 
-                {{-- Inform Information Dept Checkbox for OFFLINE --}}
-                <div class="pt-4">
-                    <label class="inline-flex items-center gap-2.5 cursor-pointer group">
-                        <input type="checkbox" wire:model.defer="informInfoOffline"
-                            class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
-                        <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">
-                            {{ __('app.inform_info_dept') }}
-                        </span>
-                    </label>
-                    @error('informInfoOffline') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
-                </div>
+
 
                 <div class="pt-5 border-t border-border bg-muted/5 -mx-6 -mb-6 p-6 flex items-center justify-end">
                     <button type="submit" class="inline-flex items-center gap-2 {{ $btnBlk }}" wire:loading.attr="disabled">
@@ -463,6 +478,7 @@
                             x-data="{
                                 open: false,
                                 search: '',
+                                deptId: @entangle('online_department_id').live,
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
                                     return @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).filter(i =>
@@ -471,22 +487,26 @@
                                 },
                                 select(id, label) {
                                     this.search = label;
-                                    $wire.set('online_department_id', id);
+                                    this.deptId = id;
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
-                                    $wire.set('online_department_id', null);
+                                    this.deptId = null;
                                 }
                             }"
                             x-init="
-                                $watch('$wire.online_department_id', val => {
+                                $watch('deptId', val => {
                                     if (!val) { search = ''; }
                                     else {
                                         const found = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).find(i => i.id == val);
                                         if (found) search = found.label;
                                     }
                                 });
+                                if (deptId) {
+                                    const found = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).find(i => i.id == deptId);
+                                    if (found) search = found.label;
+                                }
                             "
                             class="relative"
                             @click.outside="open = false"
@@ -526,7 +546,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.online_department_id == item.id
+                                        :class="deptId == item.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'text-foreground hover:bg-muted cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -549,23 +569,37 @@
                             x-data="{
                                 open: false,
                                 search: '',
+                                deptId: @entangle('online_department_id').live,
+                                userId: @entangle('online_user_id').live,
+                                users: @entangle('usersByDept').live,
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
-                                    const list = ($wire.usersByDept || []).map(u => ({ id: u.id, label: u.name }));
+                                    const list = (this.users || []).map(u => ({ id: u.id, label: u.name }));
                                     return q ? list.filter(i => i.label.toLowerCase().includes(q)) : list;
                                 },
                                 select(id, label) {
                                     this.search = label;
-                                    $wire.set('online_user_id', id);
+                                    this.userId = id;
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
-                                    $wire.set('online_user_id', null);
+                                    this.userId = null;
                                 }
                             }"
                             x-init="
-                                $watch('$wire.online_department_id', () => { search = ''; $wire.set('online_user_id', null); });
+                                $watch('deptId', () => { search = ''; userId = null; });
+                                $watch('userId', val => {
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = (users || []).find(u => u.id == val);
+                                        if (found) search = found.name;
+                                    }
+                                });
+                                if (userId) {
+                                    const found = (users || []).find(u => u.id == userId);
+                                    if (found) search = found.name;
+                                }
                             "
                             class="relative"
                             @click.outside="open = false"
@@ -574,13 +608,13 @@
                                 <input
                                     type="text"
                                     x-model="search"
-                                    @focus="if ($wire.online_department_id) open = true"
-                                    @input="if ($wire.online_department_id) open = true"
+                                    @focus="if (deptId) open = true"
+                                    @input="if (deptId) open = true"
                                     @keydown.escape="open = false"
                                     @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
                                     autocomplete="off"
                                     placeholder="{{ __('app.search_user_online_ph') }}"
-                                    :disabled="!$wire.online_department_id"
+                                    :disabled="!deptId"
                                     class="{{ $input }} pr-8 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
                                 >
                                 <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
@@ -606,7 +640,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.online_user_id == item.id
+                                        :class="userId == item.id
                                             ? 'bg-primary text-primary-foreground'
                                             : 'text-foreground hover:bg-muted cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -642,17 +676,7 @@
                         </div>
                     </div>
 
-                    {{-- Inform Information Dept Checkbox for ONLINE --}}
-                    <div>
-                        <label class="inline-flex items-center gap-2.5 cursor-pointer group">
-                            <input type="checkbox" wire:model.defer="informInfoOnline"
-                                class="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 bg-background transition-all">
-                            <span class="text-xs text-muted-foreground font-semibold group-hover:text-primary transition-colors">
-                                {{ __('app.inform_info_dept') }}
-                            </span>
-                        </label>
-                        @error('informInfoOnline') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
-                    </div>
+
 
                     <div class="pt-5 flex items-center justify-end">
                         <button type="submit" class="inline-flex items-center gap-2 {{ $btnBlk }}" wire:loading.attr="disabled">

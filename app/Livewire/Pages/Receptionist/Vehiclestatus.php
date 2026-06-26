@@ -28,7 +28,7 @@ class Vehiclestatus extends Component
     public string $q = '';
     public ?int $vehicleFilter = null;
     public ?string $selectedDate = null;   // YYYY-MM-DD
-    public string $statusTab = 'pending';  // pending | approved | on_progress | returned | late_return
+    public string $statusTab = 'pending';  // pending | approved | on_progress | returned
     public string $sortFilter = 'recent';  // recent | oldest | nearest
     public int $perPage = 10;
     public bool $includeDeleted = false;
@@ -288,8 +288,8 @@ class Vehiclestatus extends Component
                 $b = VehicleBooking::lockForUpdate()
                     ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
-                if (!in_array($b->status, ['approved', 'on_progress', 'late_return'], true)) {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} cannot be marked as returned from status '{$b->status}'.");
+                if (!in_array($b->status, ['approved', 'on_progress'], true)) {
+                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} is not yet on progress.");
                 }
                 $b->status = 'returned';
                 $b->save();
@@ -303,43 +303,6 @@ class Vehiclestatus extends Component
             report($e);
             $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to update: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Return a human-readable overdue duration string for a late_return booking.
-     * e.g. "2 days 3 hours", "45 minutes"
-     */
-    public function overdueDuration(VehicleBooking $booking): string
-    {
-        if ($booking->status !== 'late_return' || !$booking->end_at) {
-            return '';
-        }
-
-        $end  = \Carbon\Carbon::parse($booking->end_at, $this->tz);
-        $now  = \Carbon\Carbon::now($this->tz);
-        $diff = $now->diff($end);
-
-        $days    = (int) $diff->days;
-        $hours   = (int) $diff->h;
-        $minutes = (int) $diff->i;
-
-        if ($days >= 1) {
-            $label = $days . 'd';
-            if ($hours > 0) {
-                $label .= ' ' . $hours . 'h';
-            }
-            return $label;
-        }
-
-        if ($hours >= 1) {
-            $label = $hours . 'h';
-            if ($minutes > 0) {
-                $label .= ' ' . $minutes . 'm';
-            }
-            return $label;
-        }
-
-        return max(1, $minutes) . 'm';
     }
 
     public function markDone(int $id): void

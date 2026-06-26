@@ -6,211 +6,173 @@ use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 
 class GoogleMeetService
 {
-    private Client $client;
+    private ?Client $client = null;
+    private string $calendarId;
 
     public function __construct()
     {
-        $this->client = new Client();
-        $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
-        $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-        $this->client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
-        $this->client->setAccessType('offline');
-        $this->client->setPrompt('consent');
-        $this->client->setIncludeGrantedScopes(true);
-
-        $scopes = trim((string) env('GOOGLE_SCOPES', ''));
-        $this->client->setScopes($scopes === '' ? [] : explode(' ', $scopes));
-    }
-
-    private function validateConfig(): void
-    {
-        if (empty(env('GOOGLE_CLIENT_ID'))
-            || empty(env('GOOGLE_CLIENT_SECRET'))
-            || empty(env('GOOGLE_REDIRECT_URI'))
-            || trim((string) env('GOOGLE_SCOPES', '')) === '') {
-            throw new \RuntimeException('Google API tidak dikonfigurasi dengan benar. Pastikan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, dan GOOGLE_SCOPES sudah diatur.');
-        }
-    }
-
-    private function tokenPath(int $userId): string
-    {
-        $dir = storage_path('app/google_tokens');
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0775, true);
-        }
-        return $dir . DIRECTORY_SEPARATOR . "user_{$userId}.json";
-    }
-
-    public function getAuthUrl(): string
-    {
-        $this->validateConfig();
-        return $this->client->createAuthUrl();
-    }
-
-    //Dipanggil saat callback OAuth Google (kamu sudah punya ini)
-    public function handleCallback(string $code): void
-    {
-        $token = $this->client->fetchAccessTokenWithAuthCode($code);
-
-        if (isset($token['error'])) {
-            throw new \RuntimeException('OAuth error: ' . $token['error'] . (!empty($token['error_description']) ? ' - ' . $token['error_description'] : ''));
-        }
-        if (!isset($token['access_token'])) {
-            throw new \RuntimeException('Invalid token from Google: missing access_token.');
-        }
-
-        // If Google didn’t send refresh_token this time, keep the old one (common behavior)
-        $path = $this->tokenPath(\Auth::id());
-        if (empty($token['refresh_token']) && file_exists($path)) {
-            $old = json_decode(file_get_contents($path), true) ?: [];
-            if (!empty($old['refresh_token'])) {
-                $token['refresh_token'] = $old['refresh_token'];
-            }
-        }
-
-        File::put($path, json_encode($token, JSON_PRETTY_PRINT));
+        $this->calendarId = config('services.google.calendar_id', 'primary');
     }
 
     /**
-     * Cek apakah user sudah connect Google dan token valid (auto-refresh kalau expire).
-     * Return true jika siap dipakai untuk call API.
+     * Boot the Google Client using OAuth credentials if available, falling back to service account.
+     */
+    private function bootClient(): Client
+    {
+        if ($this->client !== null) {
+            return $this->client;
+        }
+
+        $this->client = new Client();
+        $this->client->setAccessType('offline');
+        $this->client->setScopes([
+            Calendar::CALENDAR,
+            Calendar::CALENDAR_EVENTS,
+        ]);
+
+        $tokenPath = config('services.google.token_path', 'storage/app/google/token.json');
+        if (!str_starts_with($tokenPath, '/')) {
+            $tokenPath = base_path($tokenPath);
+        }
+
+        $clientSecretPath = config('services.google.client_secret_path', 'storage/app/google/client_secret.json');
+        if (!str_starts_with($clientSecretPath, '/')) {
+            $clientSecretPath = base_path($clientSecretPath);
+        }
+
+        // 1. Try OAuth 2.0 flow (if token exists)
+        if (file_exists($tokenPath) && file_exists($clientSecretPath)) {
+            $this->client->setAuthConfig($clientSecretPath);
+            
+            $accessToken = json_decode(file_get_contents($tokenPath), true);
+            $this->client->setAccessToken($accessToken);
+
+            // Refresh the token if it's expired
+            if ($this->client->isAccessTokenExpired()) {
+                if ($this->client->getRefreshToken()) {
+                    $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
+                    // Save the new token
+                    file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
+                } else {
+                    throw new \RuntimeException("Google OAuth token is expired and no refresh token is available. Please re-authenticate.");
+                }
+            }
+            return $this->client;
+        }
+
+        // 2. Fallback to Service Account flow
+        $credentialsPath = config('services.google.credentials_path', 'storage/app/google/google-service-account.json');
+        if (!str_starts_with($credentialsPath, '/')) {
+            $credentialsPath = base_path($credentialsPath);
+        }
+
+        if (!file_exists($credentialsPath)) {
+            throw new \RuntimeException("Neither OAuth token ({$tokenPath}) nor Service Account JSON ({$credentialsPath}) found.");
+        }
+
+        $this->client->setAuthConfig($credentialsPath);
+
+        $impersonate = config('services.google.impersonate_email');
+        if (!empty($impersonate)) {
+            $this->client->setSubject($impersonate);
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * Check if the Google service is connected (either OAuth token or Service Account exists).
      */
     public function isConnected(?int $userId = null): bool
     {
-        $userId = $userId ?? Auth::id();
-        if (!$userId)
+        try {
+            $tokenPath = config('services.google.token_path', 'storage/app/google/token.json');
+            if (!str_starts_with($tokenPath, '/')) {
+                $tokenPath = base_path($tokenPath);
+            }
+            if (file_exists($tokenPath)) {
+                return true;
+            }
+
+            $credentialsPath = config('services.google.credentials_path', 'storage/app/google/google-service-account.json');
+            if (!str_starts_with($credentialsPath, '/')) {
+                $credentialsPath = base_path($credentialsPath);
+            }
+            return file_exists($credentialsPath);
+        } catch (\Throwable) {
             return false;
-
-        $path = $this->tokenPath($userId);
-        if (!file_exists($path)) {
-            return false;
-        }
-
-        $token = json_decode(file_get_contents($path), true);
-        if (!is_array($token) || empty($token['access_token'])) {
-            return false;
-        }
-
-        $this->client->setAccessToken($token);
-
-        if (!$this->client->getRefreshToken() && !empty($token['refresh_token'])) {
-            $this->client->refreshToken($token['refresh_token']);
-            $this->client->setAccessToken(array_merge($token, $this->client->getAccessToken()));
-        }
-
-        if ($this->client->isAccessTokenExpired()) {
-            $refreshToken = $this->client->getRefreshToken() ?: ($token['refresh_token'] ?? null);
-            if (!$refreshToken) {
-
-                return false;
-            }
-            $new = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
-            if (isset($new['error'])) {
-                return false;
-            }
-
-            $merged = array_merge($token, array_filter($new));
-            if (empty($merged['refresh_token'])) {
-                $merged['refresh_token'] = $refreshToken;
-            }
-
-            file_put_contents($path, json_encode($merged, JSON_PRETTY_PRINT));
-            $this->client->setAccessToken($merged);
-        }
-
-        return true;
-    }
-
-    //Boot client dengan token user tertentu (dipakai internal sebelum call API)
-    private function bootWithTokensFor(int $userId): void
-    {
-        $this->validateConfig();
-        $path = $this->tokenPath($userId);
-        if (!file_exists($path)) {
-            throw new \RuntimeException('Google not connected. Please connect first.');
-        }
-
-        $token = json_decode(file_get_contents($path), true);
-        if (!is_array($token) || !isset($token['access_token'])) {
-            throw new \RuntimeException('Invalid token format in storage. Please reconnect Google.');
-        }
-
-        $this->client->setAccessType('offline');
-        $this->client->setAccessToken($token);
-
-        if (!$this->client->getRefreshToken() && !empty($token['refresh_token'])) {
-            $this->client->refreshToken($token['refresh_token']);
-            $this->client->setAccessToken(array_merge($token, $this->client->getAccessToken()));
-        }
-
-        if ($this->client->isAccessTokenExpired()) {
-            $refreshToken = $this->client->getRefreshToken() ?: ($token['refresh_token'] ?? null);
-            if (!$refreshToken) {
-                throw new \RuntimeException('Missing refresh_token. Remove app access in Google Account, then connect again.');
-            }
-
-            $new = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
-            if (isset($new['error'])) {
-                throw new \RuntimeException('Failed refreshing token: ' . $new['error']);
-            }
-
-            $merged = array_merge($token, array_filter($new));
-            if (empty($merged['refresh_token']))
-                $merged['refresh_token'] = $refreshToken;
-
-            file_put_contents($path, json_encode($merged, JSON_PRETTY_PRINT));
-            $this->client->setAccessToken($merged);
         }
     }
 
-    //Create an event with a Google Meet link.
-    //Optionally pass attendees' emails to auto-invite people.
+    /**
+     * Create a Google Calendar event with a Google Meet link.
+     *
+     * @return array{url: string|null, code: string|null, password: string|null, event_id: string|null}
+     */
+    public function createMeet(
+        string $summary,
+        Carbon $start,
+        Carbon $end,
+        ?string $description = null,
+        array $attendeesEmails = []
+    ): array {
+        $client = $this->bootClient();
+        $service = new Calendar($client);
 
-    public function createMeet(string $summary, Carbon $start, Carbon $end, ?string $description = null, array $attendeesEmails = []): array
-    {
-        $userId = Auth::id();
-        $this->bootWithTokensFor($userId);
-
-        $service = new Calendar($this->client);
-        $calendarId = env('GOOGLE_CALENDAR_ID', 'primary');
-
+        $tz = config('app.timezone', 'Asia/Jakarta');
         $attendees = array_map(fn($e) => ['email' => trim($e)], $attendeesEmails);
 
         $event = new Event([
-            'summary' => $summary,
+            'summary'     => $summary,
             'description' => $description,
-            'start' => [
-                'dateTime' => $start->copy()->timezone(config('app.timezone', 'Asia/Jakarta'))->toRfc3339String(),
-                'timeZone' => config('app.timezone', 'Asia/Jakarta'),
+            'start'       => [
+                'dateTime' => $start->copy()->timezone($tz)->toRfc3339String(),
+                'timeZone' => $tz,
             ],
-            'end' => [
-                'dateTime' => $end->copy()->timezone(config('app.timezone', 'Asia/Jakarta'))->toRfc3339String(),
-                'timeZone' => config('app.timezone', 'Asia/Jakarta'),
+            'end'         => [
+                'dateTime' => $end->copy()->timezone($tz)->toRfc3339String(),
+                'timeZone' => $tz,
             ],
-            'attendees' => $attendees,
+            'attendees'      => $attendees,
             'conferenceData' => [
                 'createRequest' => [
                     'conferenceSolutionKey' => ['type' => 'hangoutsMeet'],
-                    'requestId' => (string) Str::uuid(),
+                    'requestId'            => (string) Str::uuid(),
                 ],
             ],
         ]);
 
-        $created = $service->events->insert($calendarId, $event, [
+        $created = $service->events->insert($this->calendarId, $event, [
             'conferenceDataVersion' => 1,
-            'sendUpdates' => empty($attendees) ? 'none' : 'all',
+            'sendUpdates'           => empty($attendees) ? 'none' : 'all',
         ]);
 
         return [
-            'url' => $created->hangoutLink ?? null,
-            'code' => null,
+            'url'      => $created->hangoutLink ?? null,
+            'code'     => null,
             'password' => null,
+            'event_id' => $created->id ?? null,
         ];
+    }
+
+    /**
+     * Delete a Google Calendar event (to cancel a meeting).
+     */
+    public function deleteMeet(string $eventId): bool
+    {
+        try {
+            $client = $this->bootClient();
+            $service = new Calendar($client);
+            $service->events->delete($this->calendarId, $eventId);
+            return true;
+        } catch (\Throwable $e) {
+            report($e);
+            return false;
+        }
     }
 }

@@ -289,7 +289,32 @@ chmod +x scripts/run_wazuh_web_test.sh scripts/wazuh_test_simulation.sh
 ./scripts/run_wazuh_web_test.sh
 ```
 
-## 7. Useful Commands
+```
+
+## 7. Integrations (Google Meet & Zoom)
+
+The system supports automatic generation of online meeting links for Google Meet and Zoom when booking rooms.
+
+### Google Meet Setup
+The system uses Google OAuth 2.0 to support both free Gmail accounts and Google Workspace accounts.
+1. Create an OAuth Client ID (Web Application) in Google Cloud Console.
+2. Add your deployment URL (`https://your-domain.com/google/callback`) and local URL (`http://127.0.0.1:8000/google/callback`) to the Authorized Redirect URIs.
+3. Download the credentials as `client_secret.json` and place it in `storage/app/google/`.
+4. Add your email to the **Test users** list in Google Cloud (if the app is in Testing mode).
+5. Login as a Superadmin in the application, go to **Settings > Integrations**, and click **Connect Google Meet**.
+
+### Zoom Setup
+The system uses Zoom Server-to-Server OAuth.
+1. Create a Server-to-Server OAuth app in the [Zoom App Marketplace](https://marketplace.zoom.us/).
+2. Copy your credentials into `.env`:
+   ```env
+   ZOOM_ACCOUNT_ID=your_account_id
+   ZOOM_CLIENT_ID=your_client_id
+   ZOOM_CLIENT_SECRET=your_client_secret
+   ```
+3. Ensure the app is activated in the marketplace.
+
+## 8. Useful Commands
 
 ```bash
 php artisan test
@@ -297,15 +322,16 @@ php artisan optimize:clear
 tail -f storage/logs/laravel.log
 ```
 
-## 8. Notes
+## 9. Notes
 
 - **Production**: Use Docker deployment (section 2) for production environments
 - **Development**: Use Docker development (section 3) or native setup (section 4)
 - **AI Services**: LSTM service auto-starts in Docker deployment, manual start for local dev
 - **Security**: Keep secrets and real credentials out of git
 - **Wazuh**: Optional security monitoring, update PROJECT_PATH in scripts if needed
+- **Integrations**: Make sure to renew Zoom Server-to-Server tokens or Google OAuth test status if they expire.
 
-## 9. Project Structure
+## 10. Project Structure
 
 ```
 KRB-System/
@@ -329,7 +355,7 @@ KRB-System/
 └── DEPLOYMENT.md          # Full deployment documentation
 ```
 
-## 10. Support
+## 11. Support
 
 For issues or questions:
 
@@ -338,6 +364,6 @@ For issues or questions:
 3. **Check Logs**: `docker-compose logs -f` or `tail -f storage/logs/laravel.log`
 4. **Verify Services**: `docker-compose ps`
 
-## 11. License
+## 12. License
 
 This project is part of the KRB System.
