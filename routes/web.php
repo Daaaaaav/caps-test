@@ -167,7 +167,18 @@ Route::middleware(['auth'])->group(function () {
             abort(400, 'Missing authorization code');
         }
         app(GoogleMeetService::class)->handleCallback($code);
-        return redirect()->route('dashboard')->with('success', 'Google connected!');
+
+        // Redirect based on the logged-in user's role
+        $user = Auth::user();
+        $roleName = $user->role->name ?? $user->role ?? null;
+
+        $redirect = match ($roleName) {
+            'Superadmin'   => route('superadmin.settings'),
+            'Receptionist' => route('receptionist.bookings'),
+            default        => route('login'),
+        };
+
+        return redirect($redirect)->with('success', 'Google berhasil terhubung!');
     })->name('google.callback');
 
     Route::get('/google/debug-auth-url', function (GoogleMeetService $svc) {

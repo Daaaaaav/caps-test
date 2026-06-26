@@ -971,86 +971,91 @@
                 <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     @php
                         $detail = $selectedBookingDetail;
-                        $isOnline   = in_array($detail->booking_type, ['online_meeting','onlinemeeting']);
+                        $isOnline = in_array($detail->booking_type, ['online_meeting', 'onlinemeeting']);
+
                         $statusClass = [
-                            'approved' => 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-                            'pending' => 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-                            'rejected' => 'bg-rose-500/10 text-rose-600 border-rose-500/20',
+                            'approved'  => 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+                            'pending'   => 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+                            'rejected'  => 'bg-rose-500/10 text-rose-600 border-rose-500/20',
                             'completed' => 'bg-blue-500/10 text-blue-600 border-blue-500/20',
                             'cancelled' => 'bg-gray-500/10 text-gray-600 border-gray-500/20',
                         ];
-                        $status = strtoupper($detail->status ?? 'Cancelled');
                         $mono = 'text-[10px] font-semibold text-muted-foreground/60 bg-muted/50 border border-border/40 px-2 py-0.5 rounded font-mono uppercase tracking-wider';
 
-                        // DATA BUG CHECK: Check if special_notes looks like a raw ID array (e.g., "[1, 2]")
-                        $isSpecialNotesBugged = preg_match('/^\[\s*\w+/', trim($detail->special_notes ?? ''));
+                        // Requester: prefer user relation, fall back to stored name fields
+                        $requesterName = $detail->user?->full_name
+                            ?? $detail->user?->name
+                            ?? '—';
 
-                        // START: Requirement Workaround Logic
-                        $buggedReqIds = [];
-                        if ($isSpecialNotesBugged) {
-                            try {
-                                $data = json_decode($detail->special_notes, true);
-                                if (is_array($data) && count($data) > 0 && is_numeric($data[0] ?? null)) {
-                                    $buggedReqIds = array_map('intval', $data);
-                                }
-                            } catch (\Throwable) { /* ignore */ }
-                        }
+                        // Department: prefer the direct department relation, fall back through user's department
+                        $departmentName = $detail->department?->department_name
+                            ?? $detail->user?->department?->department_name
+                            ?? '—';
 
+                        // Booking type human label
+                        $bookingTypeLabel = match (strtolower((string) $detail->booking_type)) {
+                            'online_meeting', 'onlinemeeting' => 'Online Meeting',
+                            'meeting'                         => 'Offline Meeting',
+                            'hybrid'                          => 'Hybrid',
+                            default                           => ucfirst(str_replace('_', ' ', $detail->booking_type ?? 'Meeting')),
+                        };
+
+                        // Requirements: load from pivot relation (already eager-loaded)
                         $requirementsToDisplay = $detail->requirements->isNotEmpty()
-                            ? $detail->requirements->pluck('name')->toArray()
+                            ? $detail->requirements->pluck('name')->filter()->values()->toArray()
                             : [];
 
-                        $loadedFromBugged = false;
-                        if (empty($requirementsToDisplay) && !empty($buggedReqIds)) {
-                            $requirementsToDisplay = Requirement::whereIn('id', $buggedReqIds)->pluck('name')->toArray();
-                            if (!empty($requirementsToDisplay)) {
-                                $loadedFromBugged = true;
-                            }
-                        }
+                        // Clean special notes — just show the raw value, no fake-bug detection
+                        $specialNotes = trim((string) ($detail->special_notes ?? ''));
+
+                        // "Info dept request" flag
+                        $infoRequested = $detail->requestinformation === 'request';
                     @endphp
 
-                    {{-- Title and Status --}}
+                    {{-- Title, Status and Type --}}
                     <div class="pb-3 border-b border-border">
-                        <h4 class="text-base font-bold text-foreground mb-1.5 leading-tight">{{ $detail->meeting_title ?? 'Untitled Meeting' }}</h4>
+                        <h4 class="text-base font-bold text-foreground mb-2 leading-tight">
+                            {{ $detail->meeting_title ?? 'Untitled Meeting' }}
+                        </h4>
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $statusClass[strtolower($detail->status ?? 'cancelled')] ?? 'bg-muted text-muted-foreground border-border' }}">
-                                Status: {{ ucfirst(strtolower($status)) }}
+                                {{ ucfirst(strtolower($detail->status ?? 'unknown')) }}
                             </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200' }}">
+                                {{ $isOnline ? 'Online' : 'Offline' }}
+                            </span>
+                            @if ($infoRequested)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200">
+                                <x-heroicon-o-bell-alert class="w-3 h-3" />
+                                Info Requested
+                            </span>
+                            @endif
                             <span class="{{ $mono }}">ID: {{ $detail->bookingroom_id }}</span>
                         </div>
                     </div>
 
                     <div class="space-y-4">
-                        {{-- REQUIREMENT DETAILS --}}
-                        @if (!empty($requirementsToDisplay))
-                        <div class="p-3 bg-muted/20 border border-border/60 rounded-xl space-y-2">
-                            <div class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/90 flex items-center gap-1.5">
-                                <x-heroicon-o-check-badge class="w-4 h-4 text-primary" />
-                                <span>{{ __('app.requirements_list') }}:</span>
-                                @if ($loadedFromBugged)
-                                    <span class="text-[9px] text-rose-500 font-bold lowercase">(workaround loaded)</span>
-                                @endif
-                            </div>
 
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach ($requirementsToDisplay as $reqName)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-background text-foreground border border-border">
-                                    {{ $reqName ?? 'N/A' }}
-                                </span>
-                                @endforeach
+                        {{-- Requester & Department --}}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                    <x-heroicon-o-user class="w-3.5 h-3.5 text-muted-foreground/60" />
+                                    <span>{{ __('app.requester') }}</span>
+                                </div>
+                                <p class="text-sm font-semibold text-foreground">{{ $requesterName }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                    <x-heroicon-o-building-office class="w-3.5 h-3.5 text-muted-foreground/60" />
+                                    <span>{{ __('app.department') }}</span>
+                                </div>
+                                <p class="text-sm font-semibold text-foreground">{{ $departmentName }}</p>
                             </div>
                         </div>
-                        @else
-                            @if ($isSpecialNotesBugged)
-                            <div class="p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive">
-                                <p class="font-bold flex items-center gap-1.5"><x-heroicon-o-exclamation-triangle class="w-4 h-4 text-destructive" /> BUG DATA DETECTED</p>
-                                <p class="mt-1 leading-relaxed text-[11px] opacity-90">{{ __('app.bug_data_msg') }}</p>
-                            </div>
-                            @endif
-                        @endif
 
                         {{-- Date & Time --}}
-                        <div class="space-y-1">
+                        <div class="space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                 <x-heroicon-o-calendar class="w-3.5 h-3.5 text-muted-foreground/60" />
                                 <span>{{ __('app.booking_time_label') }}</span>
@@ -1062,14 +1067,16 @@
                             </p>
                         </div>
 
-                        {{-- Type Details --}}
-                        <div class="grid grid-cols-2 gap-4">
+                        {{-- Attendees + Room/Provider --}}
+                        <div class="grid grid-cols-2 gap-4 border-t border-border/40 pt-3">
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-user-group class="w-3.5 h-3.5 text-muted-foreground/60" />
                                     <span>{{ __('app.attendees_count') }}</span>
                                 </div>
-                                <p class="text-sm font-semibold text-foreground">{{ $detail->number_of_attendees }}</p>
+                                <p class="text-sm font-semibold text-foreground">
+                                    {{ $detail->number_of_attendees > 0 ? $detail->number_of_attendees : '—' }}
+                                </p>
                             </div>
                             @if (!$isOnline)
                             <div class="space-y-1">
@@ -1085,21 +1092,44 @@
                                     <x-heroicon-o-swatch class="w-3.5 h-3.5 text-muted-foreground/60" />
                                     <span>{{ __('app.online_provider_label') }}</span>
                                 </div>
-                                <p class="text-sm font-semibold text-foreground capitalize">{{ str_replace('_', ' ', $detail->online_provider ?? '—') }}</p>
+                                <p class="text-sm font-semibold text-foreground capitalize">
+                                    {{ str_replace('_', ' ', $detail->online_provider ?? '—') }}
+                                </p>
                             </div>
                             @endif
                         </div>
+
+                        {{-- Requirements --}}
+                        @if (!empty($requirementsToDisplay))
+                        <div class="p-3 bg-muted/20 border border-border/60 rounded-xl space-y-2 border-t border-border/40 pt-3">
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                <x-heroicon-o-check-badge class="w-3.5 h-3.5 text-muted-foreground/60" />
+                                <span>{{ __('app.requirements_list') }}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach ($requirementsToDisplay as $reqName)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-background text-foreground border border-border">
+                                    {{ $reqName }}
+                                </span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Online Specific Details --}}
                         @if ($isOnline)
                         <div class="grid grid-cols-2 gap-4 border-t border-border/40 pt-3">
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.meeting_code_label') }}</div>
-                                <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">{{ $detail->online_meeting_code ?: '—' }}</p>
+                                <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
+                                    {{ $detail->online_meeting_code ?: '—' }}
+                                </p>
                             </div>
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.password') }}</div>
-                                <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">{{ $detail->online_meeting_password ?: '—' }}</p>
+                                <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
+                                    {{ $detail->online_meeting_password ?: '—' }}
+                                </p>
                             </div>
                         </div>
 
@@ -1119,9 +1149,9 @@
                         </div>
                         @endif
 
-                        {{-- Reject Note --}}
+                        {{-- Reject / Reschedule Note --}}
                         @if ($detail->book_reject)
-                        <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-1">
+                        <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
                                 <x-heroicon-o-exclamation-triangle class="w-3.5 h-3.5" />
                                 <span>{{ __('app.reject_reason') }}</span>
@@ -1136,8 +1166,11 @@
                                 <x-heroicon-o-document-text class="w-3.5 h-3.5 text-muted-foreground/60" />
                                 <span>{{ __('app.special_notes_label') }}</span>
                             </div>
-                            <p class="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">{{ $detail->special_notes ?: '—' }}</p>
+                            <p class="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                                {{ $specialNotes !== '' ? $specialNotes : '—' }}
+                            </p>
                         </div>
+
                     </div>
                 </div>
 

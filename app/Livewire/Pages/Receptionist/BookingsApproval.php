@@ -288,8 +288,7 @@ class BookingsApproval extends Component
     public function getBookingDetailProperty(): ?BookingRoom
     {
         if ($this->selectedBookingId) {
-            // Include soft-deleted for robustness, although usually unnecessary for approvals
-            return BookingRoom::with(['room', 'requirements'])
+            return BookingRoom::with(['room', 'requirements', 'user.department', 'department'])
                 ->find($this->selectedBookingId);
         }
         return null;
@@ -645,21 +644,21 @@ class BookingsApproval extends Component
             'bookingroom_id', 'meeting_title', 'booking_type', 'online_provider',
             'online_meeting_url', 'online_meeting_code', 'online_meeting_password',
             'status', 'date', 'start_time', 'end_time', 'room_id',
-            'user_id', 'approved_by', 'book_reject', 'company_id', 'created_at', 'updated_at',
-            // Added for detail modal context:
-            'number_of_attendees', 'special_notes',
+            'user_id', 'department_id', 'approved_by', 'book_reject', 'company_id',
+            'created_at', 'updated_at', 'number_of_attendees', 'special_notes',
+            'requestinformation',
         ];
 
         $companyId = Auth::user()->company_id ?? null;
 
         $pending = BookingRoom::query()
-            ->with(['room', 'requirements'])
+            ->with(['room', 'requirements', 'user.department', 'department'])
             ->where('status', 'pending')
             ->tap(fn($q) => $this->applyCommonFilters($q, $companyId))
             ->paginate($this->perPending, $cols, 'pendingPage');
 
         $ongoing = BookingRoom::query()
-            ->with(['room', 'requirements'])
+            ->with(['room', 'requirements', 'user.department', 'department'])
             ->where('status', 'approved')
             ->tap(fn($q) => $this->applyCommonFilters($q, $companyId))
             ->paginate($this->perOngoing, $cols, 'ongoingPage');
