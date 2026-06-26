@@ -16,10 +16,10 @@ class ZoomService
     public function __construct()
     {
         $this->http = new Client(['base_uri' => 'https://api.zoom.us']);
-        $this->accountId = env('ZOOM_ACCOUNT_ID');
-        $this->clientId = env('ZOOM_CLIENT_ID');
-        $this->clientSecret = env('ZOOM_CLIENT_SECRET');
-        $this->userId = env('ZOOM_USER_ID', 'me');
+        $this->accountId = config('zoom.account_id');
+        $this->clientId = config('zoom.client_id');
+        $this->clientSecret = config('zoom.client_secret');
+        $this->userId = config('zoom.user_id');
     }
 
     protected function validateConfig(): void
