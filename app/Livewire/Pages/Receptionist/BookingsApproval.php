@@ -689,6 +689,9 @@ class BookingsApproval extends Component
             'pending',
             'ongoing',
             'recentCompleted'
-        ));
+        ) + [
+            'zoomConfigured'   => $this->zoomConfigured,
+            'googleConnected'  => $this->googleConnected,
+        ]);
     }
 }
