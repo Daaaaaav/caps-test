@@ -200,7 +200,11 @@
                     </div>
                 </div>
 
-                @php $list = $activeTab === 'pending' ? $pending : $ongoing; @endphp
+                @php
+                    $list = $activeTab === 'pending' ? $pending : $ongoing;
+                    $googleConnected = $googleConnected ?? false;
+                    $zoomConfigured = $zoomConfigured ?? false;
+                @endphp
 
                 {{-- PENDING TAB (MODIFIED FOR IMAGE DESIGN) --}}
                 @if($activeTab === 'pending')
