@@ -378,17 +378,17 @@ class Vehiclestatus extends Component
 
             $this->selectedBooking = $booking;
 
-            // Sort photos
-            $before = [];
-            $after = [];
-            foreach ($photos as $photo) {
-                if ($photo->photo_type === 'after') {
-                    $after[] = $photo;
-                } else {
-                    $before[] = $photo;
-                }
-            }
-            $this->selectedPhotos = ['before' => $before, 'after' => $after];
+            // // Sort photos
+            // $before = [];
+            // $after = [];
+            // foreach ($photos as $photo) {
+            //     if ($photo->photo_type === 'after') {
+            //         $after[] = $photo;
+            //     } else {
+            //         $before[] = $photo;
+            //     }
+            // }
+            // $this->selectedPhotos = ['before' => $before, 'after' => $after];
 
             $this->showDetailModal = true;
             $this->resetErrorBag();

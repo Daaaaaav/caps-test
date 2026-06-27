@@ -1,23 +1,23 @@
-<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+﻿<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
     @php
     use Carbon\Carbon;
     use App\Models\Requirement; // ADDED: Required for the temporary bug workaround
 
     if (!function_exists('fmtDate')) {
         function fmtDate($v) {
-            try { return $v ? Carbon::parse($v)->format('d M Y') : '—'; }
-            catch (\Throwable) { return '—'; }
+            try { return $v ? Carbon::parse($v)->format('d M Y') : 'ΓÇö'; }
+            catch (\Throwable) { return 'ΓÇö'; }
         }
     }
     if (!function_exists('fmtTime')) {
         function fmtTime($v) {
-            try { return $v ? Carbon::parse($v)->format('H.i') : '—'; }
+            try { return $v ? Carbon::parse($v)->format('H.i') : 'ΓÇö'; }
             catch (\Throwable) {
                 if (is_string($v)) {
                     if (preg_match('/^\d{2}:\d{2}/', $v)) return str_replace(':','.', substr($v,0,5));
                     if (preg_match('/^\d{2}\.\d{2}/', $v)) return substr($v,0,5);
                 }
-                return '—';
+                return 'ΓÇö';
             }
         }
     }
@@ -103,16 +103,16 @@
 
                             {{-- Layout Toggler --}}
                             <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
-                                <button type="button" 
-                                        wire:click="setViewMode('card')" 
+                                <button type="button"
+                                        wire:click="setViewMode('card')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'card' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Card View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                     </svg>
                                 </button>
-                                <button type="button" 
-                                        wire:click="setViewMode('table')" 
+                                <button type="button"
+                                        wire:click="setViewMode('table')"
                                         class="p-1.5 rounded-md transition-all {{ $viewMode === 'table' ? 'bg-white text-gray-800 shadow-sm border border-gray-200/40' : 'text-gray-400 hover:text-gray-600' }}"
                                         title="Table View">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -131,7 +131,7 @@
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                     <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
                                     <span>{{ __('app.room') }}: {{ $activeRoom['label'] ?? __('app.no_data') }}</span>
-                                    <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">×</button>
+                                    <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">├ù</button>
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
@@ -200,7 +200,11 @@
                     </div>
                 </div>
 
-                @php $list = $activeTab === 'pending' ? $pending : $ongoing; @endphp
+                @php
+                    $list = $activeTab === 'pending' ? $pending : $ongoing;
+                    $googleConnected = $googleConnected ?? false;
+                    $zoomConfigured = $zoomConfigured ?? false;
+                @endphp
 
                 {{-- PENDING TAB (MODIFIED FOR IMAGE DESIGN) --}}
                 @if($activeTab === 'pending')
@@ -228,7 +232,7 @@
                                         @php
                                             $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
                                             $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
-                                            $avatarChar = strtoupper(substr($b->meeting_title ?? '—', 0, 1));
+                                            $avatarChar = strtoupper(substr($b->meeting_title ?? 'ΓÇö', 0, 1));
 
                                             $platform = $b->online_meeting_platform
                                                         ?? $b->platform
@@ -238,6 +242,10 @@
                                             $meetingUrl      = $b->online_meeting_url ?? null;
                                             $meetingCode     = $b->online_meeting_code ?? null;
                                             $meetingPassword = $b->online_meeting_password ?? null;
+
+                                            $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
+                                            $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
+                                            $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
 
                                             $requesterName = $b->user?->name
                                                                 ?? $b->requester_name
@@ -252,11 +260,11 @@
                                         {{-- START: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
                                         <div wire:key="pending-{{ $b->bookingroom_id }}"
                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
-                                            
+
                                             <div class="flex items-start gap-4">
                                                 {{-- 1. Avatar/Initial on the left --}}
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
-                                                
+
                                                 <div class="flex-1 min-w-0">
                                                     {{-- 2. TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -284,7 +292,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -315,7 +323,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-                                                    
+
                                                     {{-- 5. Created Timestamp (Placed here to be near Requester info) --}}
                                                     <div class="text-[10px] text-gray-500 mt-2">
                                                         {{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y H:i') }}
@@ -328,25 +336,11 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                
+
                                             </div>
-                                            
-                                            {{-- 6. NEW: BOTTOM ACTIONS (Detail + Reject) --}}
-                                            <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
-                                                    {{ __('app.pending') }}
-                                                </span>
-                                                <div class="flex items-center gap-2">
-                                                    <button type="button"
-                                                        wire:click="openRejectModal({{ $b->bookingroom_id }})"
-                                                        class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 focus:outline-none transition">
-                                                        {{ __('app.reject') ?? 'Reject' }}
-                                                    </button>
-                                                    <button type="button"
-                                                        wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                        class="{{ $btnGhost }} px-4 py-2">
+
+                                            {{-- BOTTOM ACTIONS --}}
                                             <div class="pt-3 border-t border-gray-100 flex justify-end gap-3">
-                                                {{-- DETAIL BUTTON --}}
                                                 <button type="button"
                                                     wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                     class="{{ $btnGhost }} px-4 py-2">
@@ -362,10 +356,38 @@
                                                     <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                     {{ __('app.reject') }}
                                                 </button>
-                                            </div>  $platform = $b->online_meeting_platform
+                                            </div>
+                                        </div>
+                                        {{-- END: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
+                                    @endforeach
+                                </div>
+                            @else
+                                {{-- Pending Table Layout --}}
+                                <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
+                                                <th class="px-6 py-3.5">#</th>
+                                                <th class="px-6 py-3.5">{{ __('app.title_col') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.room_platform') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.date') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.time') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
+                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100">
+                                            @foreach($list as $b)
+                                                @php
+                                                    $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
+                                                    $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
+                                                    $platform = $b->online_meeting_platform
                                                                 ?? $b->platform
                                                                 ?? $b->meeting_platform
                                                                 ?? ($isOnline ? 'Online Meeting' : null);
+                                                    $provider = strtolower(str_replace([' ', '-'], '_', (string) $b->online_provider));
+                                                    $needsGoogleConnect = $isOnline && str_starts_with($provider, 'google') && !$googleConnected;
+                                                    $needsZoomConfig = $isOnline && !$needsGoogleConnect && !$zoomConfigured;
                                                     $requesterName = $b->user?->name
                                                                         ?? $b->requester_name
                                                                         ?? null;
@@ -391,7 +413,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -402,19 +424,17 @@
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
                                                         <div class="flex items-center justify-end gap-2">
-                                                            <span class="inline-flex items-center px-2 py-0.5 mr-2 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
-                                                                {{ __('app.pending') }}
-                                                            </span>
-                                                            <button type="button"
-                                                                wire:click="openRejectModal({{ $b->bookingroom_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                {{ __('app.reject') ?? 'Reject' }}
-                                                            </button>
-                                                            <button type="button"
-                                                                wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                {{ __('app.detail') }}
-                                                            </button>
+                                                                <button type="button"
+                                                                    wire:click="openDetailModal({{ $b->bookingroom_id }})"
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
+                                                                    {{ __('app.detail') }}
+                                                                </button>
+                                                                <button type="button"
+                                                                    wire:click="openReject({{ $b->bookingroom_id }})"
+                                                                    wire:loading.attr="disabled"
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
+                                                                    {{ __('app.reject') }}
+                                                                </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -426,7 +446,7 @@
                         </div>
                     @endif
                 @endif
-                
+
                 {{-- ONGOING TAB (Original code remains for ongoing tab) --}}
                 @if($activeTab === 'ongoing')
                     @if($list->isEmpty())
@@ -441,12 +461,16 @@
                                         @php
                                             $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
                                             $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
-                                            $avatarChar = strtoupper(substr($b->meeting_title ?? '—', 0, 1));
+                                            $avatarChar = strtoupper(substr($b->meeting_title ?? 'ΓÇö', 0, 1));
 
                                             $platform = $b->online_meeting_platform
                                                         ?? $b->platform
                                                         ?? $b->meeting_platform
                                                         ?? ($isOnline ? 'Online Meeting' : null);
+
+                                            $meetingUrl      = $b->online_meeting_url ?? null;
+                                            $meetingCode     = $b->online_meeting_code ?? null;
+                                            $meetingPassword = $b->online_meeting_password ?? null;
 
                                             $requesterName = $b->user?->name
                                                                 ?? $b->requester_name
@@ -457,6 +481,13 @@
                                                                 ?? $b->department_name
                                                                 ?? null;
                                         @endphp
+
+                                        <div wire:key="ongoing-{{ $b->bookingroom_id }}"
+                                            class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm hover:border-gray-300 transition">
+                                            <div class="flex items-start gap-4">
+                                                {{-- Avatar/Initial on the left --}}
+                                                <div class="{{ $icoAvatar }} mt-0.5">{{ $b->meeting_title ? $avatarChar : '?' }}</div>
+
                                                 <div class="flex-1 min-w-0">
                                                     {{-- TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
@@ -482,14 +513,14 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium text-gray-700">
-                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? '—' }}
+                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? 'ΓÇö' }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)
@@ -511,7 +542,7 @@
                                                             </span>
                                                         @endif
                                                     </div>
-                                                    
+
                                                     {{-- Reject Note (if any) --}}
                                                     @if($b->book_reject)
                                                         <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
@@ -519,7 +550,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                
+
                                                 {{-- RIGHT: Actions and Timestamp --}}
                                                 <div class="text-right shrink-0 space-y-2 pt-0.5">
                                                     <div class="flex flex-col gap-2 justify-end">
@@ -529,6 +560,21 @@
                                                             class="{{ $btnGhost }}">
                                                             <x-heroicon-o-eye class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                             {{ __('app.detail') }}
+                                                        </button>
+
+                                                        {{-- CANCEL BUTTON (for ongoing) --}}
+                                                        <button type="button"
+                                                            x-data
+                                                            @click="
+                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
+                                                                    $wire.openReschedule({{ $b->bookingroom_id }});
+                                                                }
+                                                            "
+                                                            wire:loading.attr="disabled"
+                                                            wire:target="openReschedule"
+                                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
+                                                            <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
+                                                            {{ __('app.cancel') }}
                                                         </button>
                                                     </div>
 
@@ -584,12 +630,12 @@
                                                             </span>
                                                         @else
                                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-semibold uppercase border border-blue-200">
-                                                                {{ $b->room?->room_name ?? '—' }}
+                                                                {{ $b->room?->room_name ?? 'ΓÇö' }}
                                                             </span>
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -604,6 +650,13 @@
                                                                 wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                 {{ __('app.detail') }}
+                                                            </button>
+                                                            <button type="button"
+                                                                x-data
+                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
+                                                                wire:loading.attr="disabled"
+                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
+                                                                {{ __('app.cancel') }}
                                                             </button>
                                                         </div>
                                                     </td>
@@ -680,14 +733,68 @@
             </aside>
         </div>
 
+        {{-- REJECT MODAL (Alasan wajib) --}}
+        @if($showRejectModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            role="dialog" aria-modal="true"
+            wire:key="reject-modal"
+            wire:keydown.escape.window="closeReject">
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReject"></div>
 
+            <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
+                <form wire:submit.prevent="confirmReject">
+                    {{-- Modal Header --}}
+                    <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                                <x-heroicon-o-x-circle class="w-4 h-4 text-destructive" />
+                            </div>
+                            <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking_title') }}</h3>
+                        </div>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeReject">Γ£ò</button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="p-6 space-y-4">
+                        <p class="text-xs text-muted-foreground">{{ __('app.reject_reason_required') }}</p>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason_ph') }} <span class="text-destructive">*</span></label>
+                            <textarea wire:model.live="rejectReason"
+                                rows="4"
+                                class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                                placeholder="Contoh: Jadwal bentrok dengan rapat lain / Ruangan tidak tersedia"
+                                required></textarea>
+                            @error('rejectReason')
+                            <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
+                        <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition inline-flex items-center gap-1.5" wire:click="closeReject" wire:loading.attr="disabled" wire:target="confirmReject">
+                            <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
+                            <span>{{ __('app.cancel') }}</span>
+                        </button>
+                        <button type="submit"
+                            class="h-9 px-4 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold hover:bg-destructive/95 transition shadow-sm inline-flex items-center gap-1.5"
+                            wire:loading.attr="disabled" wire:target="confirmReject">
+                            <x-heroicon-o-x-mark class="w-3.5 h-3.5" />
+                            <span>{{ __('app.reject') }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
 
         {{-- RESCHEDULE MODAL --}}
         @if($showRescheduleModal)
-        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
 
-            <div class="relative z-10 text-left bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
+            <div class="relative bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
                 <form wire:submit.prevent="submitReschedule">
                     <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
                         <div>
@@ -696,7 +803,7 @@
                                 {{ __('app.reschedule_reason_required') }}
                             </p>
                         </div>
-                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeReschedule">✕</button>
+                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeReschedule">Γ£ò</button>
                     </div>
 
                     <div class="p-6 space-y-4">
@@ -722,7 +829,7 @@
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.room') }} ({{ __('app.optional') }})</label>
                             <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleRoomId">
-                                <option value="">{{ __('app.select_room') }}…</option>
+                                <option value="">{{ __('app.select_room') }}ΓÇª</option>
                                 @foreach($roomsOptions as $r)
                                 <option value="{{ $r['id'] }}">{{ $r['label'] }}</option>
                                 @endforeach
@@ -760,7 +867,7 @@
                         <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter & Recent</h3>
                         <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_room_recent') }}</p>
                     </div>
-                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeFilterModal">✕</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeFilterModal">Γ£ò</button>
                 </div>
 
                 <div class="p-5 space-y-4 overflow-y-auto flex-1">
@@ -821,11 +928,14 @@
 
         {{-- BOOKING DETAIL MODAL --}}
         @if ($showDetailModal && $selectedBookingDetail)
-        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}" wire:keydown.escape.window="closeDetailModal">
-            
-            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
+        <div
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            role="dialog" aria-modal="true"
+            wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}"
+            wire:keydown.escape.window="closeDetailModal">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
 
-                <div class="relative z-10 text-left w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
+            <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100 flex flex-col max-h-[85vh]" tabindex="-1">
 
                 {{-- Modal Header --}}
                 <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
@@ -835,11 +945,11 @@
                         </div>
                         <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.detail_booking') }}</h3>
                     </div>
-                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeDetailModal">✕</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeDetailModal">Γ£ò</button>
                 </div>
 
                 {{-- Modal Body --}}
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     @php
                         $detail = $selectedBookingDetail;
                         $isOnline = in_array($detail->booking_type, ['online_meeting', 'onlinemeeting']);
@@ -856,30 +966,31 @@
                         // Requester: prefer user relation, fall back to stored name fields
                         $requesterName = $detail->user?->full_name
                             ?? $detail->user?->name
-                            ?? '—';
+                            ?? 'ΓÇö';
 
-                        // START: Requirement Workaround Logic
-                        $buggedReqIds = [];
-                        if ($isSpecialNotesBugged) {
-                            try {
-                                $data = json_decode($detail->special_notes, true);
-                                if (is_array($data) && count($data) > 0 && is_numeric($data[0] ?? null)) {
-                                    $buggedReqIds = array_map('intval', $data);
-                                }
-                            } catch (\Throwable) { /* ignore */ }
-                        }
+                        // Department: prefer the direct department relation, fall back through user's department
+                        $departmentName = $detail->department?->department_name
+                            ?? $detail->user?->department?->department_name
+                            ?? 'ΓÇö';
 
+                        // Booking type human label
+                        $bookingTypeLabel = match (strtolower((string) $detail->booking_type)) {
+                            'online_meeting', 'onlinemeeting' => 'Online Meeting',
+                            'meeting'                         => 'Offline Meeting',
+                            'hybrid'                          => 'Hybrid',
+                            default                           => ucfirst(str_replace('_', ' ', $detail->booking_type ?? 'Meeting')),
+                        };
+
+                        // Requirements: load from pivot relation (already eager-loaded)
                         $requirementsToDisplay = $detail->requirements->isNotEmpty()
-                            ? $detail->requirements->pluck('name')->toArray()
+                            ? $detail->requirements->pluck('name')->filter()->values()->toArray()
                             : [];
 
-                        $loadedFromBugged = false;
-                        if (empty($requirementsToDisplay) && !empty($buggedReqIds)) {
-                            $requirementsToDisplay = Requirement::whereIn('id', $buggedReqIds)->pluck('name')->toArray();
-                            if (!empty($requirementsToDisplay)) {
-                                $loadedFromBugged = true;
-                            }
-                        }
+                        // Clean special notes ΓÇö just show the raw value, no fake-bug detection
+                        $specialNotes = trim((string) ($detail->special_notes ?? ''));
+
+                        // "Info dept request" flag
+                        $infoRequested = $detail->requestinformation === 'request';
                     @endphp
 
                     {{-- Title, Status and Type --}}
@@ -933,27 +1044,28 @@
                             <p class="text-sm font-semibold text-foreground">
                                 {{ \Illuminate\Support\Carbon::parse($detail->date)->format('d M Y') }}
                                 <span class="text-muted-foreground/40 mx-1.5">/</span>
-                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} – {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
+                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} ΓÇô {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
                             </p>
                         </div>
 
-                        {{-- Type Details --}}
-                        <div class="grid grid-cols-2 gap-4">
+                        {{-- Attendees + Room/Provider --}}
+                        <div class="grid grid-cols-2 gap-4 border-t border-border/40 pt-3">
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-user-group class="w-3.5 h-3.5 text-muted-foreground/60" />
                                     <span>{{ __('app.attendees_count') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground">
-                                    {{ $detail->number_of_attendees > 0 ? $detail->number_of_attendees : '—' }}
+                                    {{ $detail->number_of_attendees > 0 ? $detail->number_of_attendees : 'ΓÇö' }}
                                 </p>
                             </div>
+                            @if (!$isOnline)
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                     <x-heroicon-o-building-office-2 class="w-3.5 h-3.5 text-muted-foreground/60" />
                                     <span>{{ __('app.meeting_room_label') }}</span>
                                 </div>
-                                <p class="text-sm font-semibold text-foreground">{{ $detail->room->room_name ?? '—' }}</p>
+                                <p class="text-sm font-semibold text-foreground">{{ $detail->room->room_name ?? 'ΓÇö' }}</p>
                             </div>
                             @else
                             <div class="space-y-1">
@@ -962,7 +1074,7 @@
                                     <span>{{ __('app.online_provider_label') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground capitalize">
-                                    {{ str_replace('_', ' ', $detail->online_provider ?? '—') }}
+                                    {{ str_replace('_', ' ', $detail->online_provider ?? 'ΓÇö') }}
                                 </p>
                             </div>
                             @endif
@@ -991,13 +1103,13 @@
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.meeting_code_label') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
-                                    {{ $detail->online_meeting_code ?: '—' }}
+                                    {{ $detail->online_meeting_code ?: 'ΓÇö' }}
                                 </p>
                             </div>
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.password') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
-                                    {{ $detail->online_meeting_password ?: '—' }}
+                                    {{ $detail->online_meeting_password ?: 'ΓÇö' }}
                                 </p>
                             </div>
                         </div>
@@ -1013,7 +1125,7 @@
                                 {{ $detail->online_meeting_url }}
                             </a>
                             @else
-                            <p class="text-xs text-muted-foreground">—</p>
+                            <p class="text-xs text-muted-foreground">ΓÇö</p>
                             @endif
                         </div>
                         @endif
@@ -1028,7 +1140,7 @@
                             <p class="text-xs text-amber-800 leading-relaxed whitespace-pre-wrap">{{ $detail->book_reject }}</p>
                         </div>
                         @endif
-                        
+
                         {{-- Special Notes --}}
                         <div class="space-y-1 border-t border-border/40 pt-3">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -1036,7 +1148,7 @@
                                 <span>{{ __('app.special_notes_label') }}</span>
                             </div>
                             <p class="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                                {{ $specialNotes !== '' ? $specialNotes : '—' }}
+                                {{ $specialNotes !== '' ? $specialNotes : 'ΓÇö' }}
                             </p>
                         </div>
 
@@ -1054,47 +1166,5 @@
             </div>
         </div>
         @endif
-
-        {{-- REJECT MODAL --}}
-        @if($showRejectModal)
-        <div class="fixed inset-0 z-[100] grid place-items-center p-4 sm:p-6" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeRejectModal"></div>
-
-            <div class="relative z-10 text-left bg-card border border-border shadow-2xl rounded-2xl w-full max-w-md overflow-hidden transform transition-all duration-300 scale-100">
-                <form wire:submit.prevent="submitReject">
-                    <div class="px-6 py-5 border-b border-border bg-rose-50/50 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
-                                <x-heroicon-o-x-circle class="w-4 h-4 text-rose-500" />
-                            </div>
-                            <div>
-                                <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking') ?? 'Reject Booking' }}</h3>
-                                <p class="text-xs text-muted-foreground mt-0.5">{{ __('app.reject_reason_required') ?? 'Please provide a reason for rejection.' }}</p>
-                            </div>
-                        </div>
-                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeRejectModal">&#x2715;</button>
-                    </div>
-
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.reject_reason') ?? 'Reason' }} <span class="text-destructive">*</span></label>
-                            <textarea rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all resize-none" wire:model.live="rejectReason" placeholder="{{ __('app.reject_reason_ph') ?? 'Enter reason for rejection...' }}" required></textarea>
-                            @error('rejectReason') <p class="text-xs text-destructive mt-1.5 font-medium">{{ $message }}</p> @enderror
-                        </div>
-                    </div>
-
-                    <div class="border-t border-border px-6 py-4 flex items-center justify-end gap-3 bg-muted/5">
-                        <button type="button" class="h-9 px-4 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/80 border border-border transition" wire:click="closeRejectModal" wire:loading.attr="disabled" wire:target="submitReject">
-                            {{ __('app.cancel') }}
-                        </button>
-                        <button type="submit" class="h-9 px-4 rounded-lg bg-rose-500 text-white text-xs font-semibold hover:bg-rose-600 transition shadow-sm" wire:loading.attr="disabled" wire:target="submitReject">
-                            {{ __('app.reject') ?? 'Reject' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        @endif
     </main>
-
 </div>
