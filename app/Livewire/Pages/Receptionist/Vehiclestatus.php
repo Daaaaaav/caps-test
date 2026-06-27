@@ -28,7 +28,7 @@ class Vehiclestatus extends Component
     public string $q = '';
     public ?int $vehicleFilter = null;
     public ?string $selectedDate = null;   // YYYY-MM-DD
-    public string $statusTab = 'pending';  // pending | approved | on_progress | returned | late_return
+    public string $statusTab = 'pending';  // pending | approved | on_progress | returned
     public string $sortFilter = 'recent';  // recent | oldest | nearest
     public int $perPage = 10;
     public bool $includeDeleted = false;
@@ -124,7 +124,10 @@ class Vehiclestatus extends Component
                 });
             })
             ->when($this->selectedDate, fn(Builder $q) => $q->whereDate('start_at', $this->selectedDate))
-            ->when($this->statusTab, fn(Builder $q) => $q->where('status', $this->statusTab))
+            ->when($this->statusTab, fn(Builder $q) => $this->statusTab === 'on_progress'
+                ? $q->whereIn('status', ['on_progress', 'late_return'])
+                : $q->where('status', $this->statusTab)
+            )
             ->when($this->sortFilter === 'recent', fn(Builder $q) => $q->orderByDesc('vehiclebooking_id'))
             ->when($this->sortFilter === 'oldest', fn(Builder $q) => $q->orderBy('vehiclebooking_id'))
             ->when($this->sortFilter === 'nearest', fn(Builder $q) => $q->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, NOW(), start_at))'))
@@ -306,17 +309,22 @@ class Vehiclestatus extends Component
     }
 
     /**
-     * Return a human-readable overdue duration string for a late_return booking.
-     * e.g. "2d 3h", "45m"
+     * Return a human-readable overdue duration string for a booking that is past its end_at.
+     * e.g. "2d 3h", "45m". Returns '' if the booking is not overdue.
      */
     public function overdueDuration(VehicleBooking $booking): string
     {
-        if ($booking->status !== 'late_return' || !$booking->end_at) {
+        if (!$booking->end_at) {
             return '';
         }
 
-        $end  = \Carbon\Carbon::parse($booking->end_at, $this->tz);
-        $now  = \Carbon\Carbon::now($this->tz);
+        $end = \Carbon\Carbon::parse($booking->end_at, $this->tz);
+        $now = \Carbon\Carbon::now($this->tz);
+
+        if (!$now->greaterThan($end)) {
+            return '';
+        }
+
         $diff = $now->diff($end);
 
         $days    = (int) $diff->days;

@@ -43,7 +43,7 @@ class VehicleBookingStatistics extends Component
             $totalBookings      = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->count();
             $pendingBookings    = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'pending')->count();
             $approvedBookings   = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'approved')->count();
-            $onProgressBookings = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->where('status', 'on_progress')->count();
+            $onProgressBookings = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->whereIn('status', ['on_progress', 'late_return'])->count();
             $completedBookings  = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->whereIn('status', ['completed', 'returned'])->count();
             $rejectedBookings   = VehicleBooking::where('company_id', $companyId)->where('created_at', '>=', $since)->whereIn('status', ['rejected', 'cancelled'])->count();
 
