@@ -92,7 +92,7 @@
                                 @foreach(['pending'=>__('app.pending'),'approved'=>__('app.approved'),'on_progress'=>__('app.on_progress'),'returned'=>__('app.returned'),'late_return'=>__('app.late_return')] as $key=>$lbl)
                                     <button type="button"
                                             wire:click="$set('statusTab','{{ $key }}')"
-                                            class="px-3.5 py-1 rounded-full transition {{ $statusTab === $key ? ($key === 'late_return' ? 'bg-orange-600 text-white shadow-sm' : 'bg-[#4E653D] text-white shadow-sm') : 'text-gray-700 hover:bg-gray-200' }}">
+                                            class="px-3.5 py-1 rounded-full transition {{ $statusTab === $key ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
                                         {{ $lbl }}
                                     </button>
                                 @endforeach
@@ -211,7 +211,7 @@
                                         'returned'     => ['bg'=>'bg-indigo-100','text'=>'text-indigo-800','label'=>__('app.returned')],
                                         'rejected'     => ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>__('app.rejected')],
                                         'completed'    => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')],
-                                        'late_return'  => ['bg'=>'bg-orange-600','text'=>'text-white','label'=>__('app.late_return')],
+                                        'late_return'  => ['bg'=>'bg-[#4E653D]','text'=>'text-white','label'=>__('app.late_return')],
                                     ];
                                     $statusStyle = $statusColors[$b->status] ?? ['bg'=>'bg-gray-100','text'=>'text-gray-800','label'=>ucfirst($b->status)];
                                     $overdue = $b->status === 'late_return' ? $this->overdueDuration($b) : null;
@@ -336,7 +336,7 @@
                                         @elseif($b->status === 'late_return')
                                             {{-- Overdue badge --}}
                                             @if($overdue)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#354C2B] bg-[#4E653D]/10 border border-[#4E653D]/30 px-2 py-0.5 rounded-full">
                                                     +{{ $overdue }}
                                                 </span>
                                             @endif
@@ -345,7 +345,7 @@
                                                     wire:click.stop="markReturned({{ $b->vehiclebooking_id }})"
                                                     wire:loading.attr="disabled"
                                                     wire:target="markReturned({{ $b->vehiclebooking_id }})"
-                                                    class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-orange-600 text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 disabled:opacity-60 transition shadow-sm">
+                                                    class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
                                                 {{ __('app.mark_returned') }}
                                             </button>
                                         @elseif($b->status === 'returned')
@@ -447,12 +447,12 @@
                                                         @elseif($b->status === 'late_return')
                                                             @php $overdueTable = $this->overdueDuration($b); @endphp
                                                             @if($overdueTable)
-                                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full mr-1">
+                                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#354C2B] bg-[#4E653D]/10 border border-[#4E653D]/30 px-2 py-0.5 rounded-full mr-1">
                                                                     +{{ $overdueTable }}
                                                                 </span>
                                                             @endif
                                                             <button type="button" wire:click.stop="markReturned({{ $b->vehiclebooking_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition">
+                                                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
                                                                 {{ __('app.mark_returned') }}
                                                             </button>
                                                         @elseif($b->status === 'returned')
