@@ -351,7 +351,7 @@
             {{-- RIGHT: SIDEBAR (DESKTOP / TABLET) --}}
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 {{-- Filter by Department & User --}}
-                <section class="{{ $card }}">
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-visible">
                     <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">{{ __('app.advanced_filters') }}</h3>
                         <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.filter_by_dept_user') }}</p>

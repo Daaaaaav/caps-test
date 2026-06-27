@@ -109,7 +109,16 @@ class DocPackHistory extends Component
         }
 
         if ($this->userId && Schema::hasColumn('deliveries', 'receptionist_id')) {
-            $q->where('receptionist_id', $this->userId);
+            $selectedUser = UserModel::find($this->userId);
+            $selectedName = $selectedUser ? $selectedUser->full_name : null;
+
+            $q->where(function ($qq) use ($selectedName) {
+                $qq->where('receptionist_id', $this->userId);
+                if ($selectedName) {
+                    $qq->orWhere('nama_pengirim', $selectedName)
+                       ->orWhere('nama_penerima', $selectedName);
+                }
+            });
         }
 
         if (trim($this->userQ) !== '' && Schema::hasColumn('deliveries', 'receptionist_id')) {
