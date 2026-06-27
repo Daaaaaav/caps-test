@@ -439,23 +439,24 @@
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     @foreach($list as $b)
                                         @php
-                                                    <td class="px-6 py-4 text-right">
-                                                        <div class="flex flex-col items-end gap-2">
-                                                            <div class="flex items-center justify-end gap-2">
-                                                                <button type="button"
-                                                                    wire:click="openDetailModal({{ $b->bookingroom_id }})"
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
-                                                                    {{ __('app.detail') }}
-                                                                </button>
-                                                                <button type="button"
-                                                                    wire:click="openReject({{ $b->bookingroom_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                    {{ __('app.reject') }}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
+                                            $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
+                                            $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
+                                            $avatarChar = strtoupper(substr($b->meeting_title ?? '—', 0, 1));
+
+                                            $platform = $b->online_meeting_platform
+                                                        ?? $b->platform
+                                                        ?? $b->meeting_platform
+                                                        ?? ($isOnline ? 'Online Meeting' : null);
+
+                                            $requesterName = $b->user?->name
+                                                                ?? $b->requester_name
+                                                                ?? null;
+
+                                            $requesterDept = $b->user?->department?->department_name
+                                                                ?? $b->user?->department?->dept_name
+                                                                ?? $b->department_name
+                                                                ?? null;
+                                        @endphp
                                                 <div class="flex-1 min-w-0">
                                                     {{-- TOP ROW: Title, Type, Status --}}
                                                     <div class="flex items-center justify-between gap-3 min-w-0 mb-2">
