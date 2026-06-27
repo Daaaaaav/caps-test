@@ -292,7 +292,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -413,7 +413,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -513,7 +513,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -635,7 +635,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -1044,7 +1044,7 @@
                             <p class="text-sm font-semibold text-foreground">
                                 {{ \Illuminate\Support\Carbon::parse($detail->date)->format('d M Y') }}
                                 <span class="text-muted-foreground/40 mx-1.5">/</span>
-                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} ΓÇô {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
+                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} – {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
                             </p>
                         </div>
 
