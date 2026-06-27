@@ -87,6 +87,7 @@
                                 x-data="{
                                     open: false,
                                     search: $wire.departmentSearch,
+                                    selectedId: null,
                                     get items() {
                                         const q = this.search.toLowerCase().trim();
                                         return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
@@ -100,11 +101,13 @@
                                     },
                                     select(id, label) {
                                         this.search = label;
+                                        this.selectedId = id;
                                         $wire.set('department_id', id);
                                         this.open = false;
                                     },
                                     clear() {
                                         this.search = '';
+                                        this.selectedId = null;
                                         $wire.set('department_id', null);
                                         $wire.set('departmentSearch', '');
                                     }
@@ -112,6 +115,7 @@
                                 x-init="
                                     $watch('search', val => $wire.set('departmentSearch', val));
                                     $watch('$wire.department_id', val => {
+                                        this.selectedId = val || null;
                                         if (!val) { search = ''; }
                                         else { search = selectedLabel; }
                                     });
@@ -156,7 +160,7 @@
                                     <template x-for="item in items" :key="item.id">
                                         <li
                                             @click="select(item.id, item.label)"
-                                            :class="$wire.department_id == item.id
+                                            :class="selectedId == item.id
                                                 ? 'bg-primary text-primary-foreground'
                                                 : 'text-foreground hover:bg-muted cursor-pointer'"
                                             class="px-3.5 py-2.5 cursor-pointer transition-colors"
@@ -186,6 +190,7 @@
                                 x-data="{
                                     open: false,
                                     search: '',
+                                    selectedId: null,
                                     get items() {
                                         const q = this.search.toLowerCase().trim();
                                         const list = ($wire.usersForCombobox || []);
@@ -193,19 +198,22 @@
                                     },
                                     select(id, label) {
                                         this.search = label;
+                                        this.selectedId = id;
                                         $wire.set('borrower_user_id', id);
                                         if (!$wire.borrower_name) $wire.set('borrower_name', label);
                                         this.open = false;
                                     },
                                     clear() {
                                         this.search = '';
+                                        this.selectedId = null;
                                         $wire.set('borrower_user_id', null);
                                         $wire.set('userSearch', '');
                                     }
                                 }"
                                 x-init="
                                     $watch('search', val => $wire.set('userSearch', val));
-                                    $watch('$wire.department_id', () => { search = ''; });
+                                    $watch('$wire.department_id', () => { search = ''; this.selectedId = null; });
+                                    $watch('$wire.borrower_user_id', val => { this.selectedId = val || null; });
                                 "
                                 class="relative"
                                 @click.outside="open = false"
@@ -248,7 +256,7 @@
                                     <template x-for="item in items" :key="item.id">
                                         <li
                                             @click="select(item.id, item.label)"
-                                            :class="$wire.borrower_user_id == item.id
+                                            :class="selectedId == item.id
                                                 ? 'bg-primary text-primary-foreground'
                                                 : 'text-foreground hover:bg-muted cursor-pointer'"
                                             class="px-3.5 py-2.5 cursor-pointer transition-colors"

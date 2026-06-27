@@ -365,6 +365,7 @@
                                 x-data="{
                                     open: false,
                                     search: '',
+                                    selectedId: null,
                                     get items() {
                                         const q = this.search.toLowerCase().trim();
                                         return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
@@ -373,16 +374,19 @@
                                     },
                                     select(id, label) {
                                         this.search = label;
+                                        this.selectedId = id;
                                         $wire.set('departmentId', id);
                                         this.open = false;
                                     },
                                     clear() {
                                         this.search = '';
+                                        this.selectedId = null;
                                         $wire.set('departmentId', null);
                                     }
                                 }"
                                 x-init="
                                     $watch('$wire.departmentId', val => {
+                                        this.selectedId = val || null;
                                         if (!val) { search = ''; }
                                         else {
                                             const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
@@ -423,7 +427,7 @@
                                     <template x-for="item in items" :key="item.id">
                                         <li
                                             @click="select(item.id, item.label)"
-                                            :class="$wire.departmentId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
                                             class="px-3.5 py-2.5 cursor-pointer transition-colors"
                                             x-text="item.label"
                                         ></li>
@@ -442,6 +446,7 @@
                                 x-data="{
                                     open: false,
                                     search: '',
+                                    selectedId: null,
                                     get items() {
                                         const q = this.search.toLowerCase().trim();
                                         const deptId = $wire.departmentId;
@@ -451,17 +456,20 @@
                                     },
                                     select(id, label) {
                                         this.search = label;
+                                        this.selectedId = id;
                                         $wire.set('userId', id);
                                         this.open = false;
                                     },
                                     clear() {
                                         this.search = '';
+                                        this.selectedId = null;
                                         $wire.set('userId', null);
                                     }
                                 }"
                                 x-init="
-                                    $watch('$wire.departmentId', () => { search = ''; $wire.set('userId', null); });
+                                    $watch('$wire.departmentId', () => { search = ''; this.selectedId = null; $wire.set('userId', null); });
                                     $watch('$wire.userId', val => {
+                                        this.selectedId = val || null;
                                         if (!val) { search = ''; }
                                         else {
                                             const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
@@ -502,7 +510,7 @@
                                     <template x-for="item in items" :key="item.id">
                                         <li
                                             @click="select(item.id, item.label)"
-                                            :class="$wire.userId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
                                             class="px-3.5 py-2.5 cursor-pointer transition-colors"
                                             x-text="item.label"
                                         ></li>
@@ -540,6 +548,7 @@
                             x-data="{
                                 open: false,
                                 search: '',
+                                selectedId: null,
                                 get items() {
                                     const q = this.search.toLowerCase().trim();
                                     return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
@@ -548,16 +557,19 @@
                                 },
                                 select(id, label) {
                                     this.search = label;
+                                    this.selectedId = id;
                                     $wire.set('departmentId', id);
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
+                                    this.selectedId = null;
                                     $wire.set('departmentId', null);
                                 }
                             }"
                             x-init="
                                 $watch('$wire.departmentId', val => {
+                                    this.selectedId = val || null;
                                     if (!val) { search = ''; }
                                     else {
                                         const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
@@ -598,7 +610,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.departmentId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
                                         x-text="item.label"
                                     ></li>
@@ -626,17 +638,20 @@
                                 },
                                 select(id, label) {
                                     this.search = label;
+                                    this.selectedId = id;
                                     $wire.set('userId', id);
                                     this.open = false;
                                 },
                                 clear() {
                                     this.search = '';
+                                    this.selectedId = null;
                                     $wire.set('userId', null);
                                 }
                             }"
                             x-init="
-                                $watch('$wire.departmentId', () => { search = ''; $wire.set('userId', null); });
+                                $watch('$wire.departmentId', () => { search = ''; this.selectedId = null; $wire.set('userId', null); });
                                 $watch('$wire.userId', val => {
+                                    this.selectedId = val || null;
                                     if (!val) { search = ''; }
                                     else {
                                         const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
@@ -677,7 +692,7 @@
                                 <template x-for="item in items" :key="item.id">
                                     <li
                                         @click="select(item.id, item.label)"
-                                        :class="$wire.userId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
                                         class="px-3.5 py-2.5 cursor-pointer transition-colors"
                                         x-text="item.label"
                                     ></li>
