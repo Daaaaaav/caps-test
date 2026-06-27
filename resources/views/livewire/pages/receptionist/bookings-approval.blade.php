@@ -341,17 +341,6 @@
                                                     {{ __('app.detail') }}
                                                 </button>
 
-                                                {{-- APPROVE BUTTON (Green) --}}
-                                                <button type="button"
-                                                    wire:click="approve({{ $b->bookingroom_id }})"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="approve"
-                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
-                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm inline-flex items-center justify-center @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
-                                                    <x-heroicon-o-check class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                    {{ __('app.approve') }}
-                                                </button>
-
                                                 {{-- REJECT BUTTON (Red) --}}
                                                 <button type="button"
                                                     wire:click="openReject({{ $b->bookingroom_id }})"
@@ -439,13 +428,6 @@
                                                                     wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                     {{ __('app.detail') }}
-                                                                </button>
-                                                                <button type="button"
-                                                                    wire:click="approve({{ $b->bookingroom_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
-                                                                    {{ __('app.approve') }}
                                                                 </button>
                                                                 <button type="button"
                                                                     wire:click="openReject({{ $b->bookingroom_id }})"
