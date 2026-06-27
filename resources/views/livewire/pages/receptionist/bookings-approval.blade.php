@@ -1166,50 +1166,38 @@
 <script>
 (function() {
     var errors = [];
-    window.addEventListener('error', function(e) {
-        errors.push('JS ERROR: ' + e.message + ' @ ' + (e.filename||'').split('/').pop() + ':' + e.lineno);
-        showBanner('error');
-    });
+    window.onerror = function(msg, src, line) { errors.push(msg + ' @ ' + (src||'').split('/').pop() + ':' + line); showBanner(); };
     function getBanner() {
-        var b = document.getElementById('__kiro_diag__');
-        if (!b) {
-            b = document.createElement('div');
-            b.id = '__kiro_diag__';
-            b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#0f172a;color:#7dd3fc;font-size:11px;font-family:monospace;padding:10px 14px;max-height:220px;overflow:auto;white-space:pre;line-height:1.7;border-top:2px solid #f87171;';
-            document.body.appendChild(b);
-        }
+        var b = document.getElementById('__kd__');
+        if (!b) { b = document.createElement('div'); b.id='__kd__'; b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#0f172a;color:#7dd3fc;font-size:11px;font-family:monospace;padding:8px 12px;max-height:200px;overflow:auto;white-space:pre;line-height:1.6;border-top:2px solid #f87171;'; document.body.appendChild(b); }
         return b;
     }
-    function showBanner(reason) {
-        var b = getBanner();
-        var lw = typeof window.Livewire !== 'undefined' ? 'YES v' + (window.Livewire.version||'?') : 'NOT FOUND';
-        var alpine = typeof window.Alpine !== 'undefined' ? 'YES v' + (window.Alpine.version||'?') : 'NOT FOUND';
-        var wireEls = document.querySelectorAll('[wire\\:id]').length;
-        b.textContent = [
-            '=== LIVEWIRE DIAGNOSTICS [' + (reason||'load') + '] ===',
-            'Livewire: ' + lw + '   Alpine: ' + alpine + '   wire:id elements: ' + wireEls,
-            errors.length ? '\nJS ERRORS:\n' + errors.join('\n') : 'No JS errors.'
-        ].join('\n');
+    function showBanner() {
+        var lw = window.Livewire ? 'YES' : 'NO'; var al = window.Alpine ? 'YES' : 'NO';
+        var wi = document.querySelectorAll('[wire\\:id]').length;
+        getBanner().textContent = 'LW:'+lw+' Alpine:'+al+' wire:id count:'+wi+'\n'+(errors.length?errors.join('\n'):'No JS errors');
     }
     document.addEventListener('click', function(e) {
         var el = document.elementFromPoint(e.clientX, e.clientY);
-        var b = getBanner();
-        var lw = typeof window.Livewire !== 'undefined' ? 'YES v' + (window.Livewire.version||'?') : 'NOT FOUND';
-        var alpine = typeof window.Alpine !== 'undefined' ? 'YES v' + (window.Alpine.version||'?') : 'NOT FOUND';
-        var wireEls = document.querySelectorAll('[wire\\:id]').length;
-        var wireClick = null;
-        var node = el;
-        while (node && node !== document.body) {
-            if (node.getAttribute && node.getAttribute('wire:click')) { wireClick = node.getAttribute('wire:click'); break; }
-            node = node.parentElement;
-        }
-        b.textContent = [
-            '=== CLICK @ (' + Math.round(e.clientX) + ',' + Math.round(e.clientY) + ') ===',
-            'Livewire: ' + lw + '   Alpine: ' + alpine + '   wire:id elements: ' + wireEls,
-            'Clicked: ' + el.tagName + '   wire:click found: ' + (wireClick || 'NONE'),
-            errors.length ? '\nJS ERRORS:\n' + errors.join('\n') : 'No JS errors.'
-        ].join('\n');
+        var wc = null; var n = el; while(n&&n!==document.body){if(n.getAttribute&&n.getAttribute('wire:click')){wc=n.getAttribute('wire:click');break;}n=n.parentElement;}
+        var lw = window.Livewire ? 'YES' : 'NO'; var al = window.Alpine ? 'YES' : 'NO';
+        var wi = document.querySelectorAll('[wire\\:id]').length;
+        getBanner().textContent = 'CLICK:'+el.tagName+' wire:click='+(wc||'NONE')+' LW:'+lw+' Al:'+al+' wire:id:'+wi+'\n'+(errors.length?errors.join('\n'):'No JS errors');
     }, true);
-    window.addEventListener('load', function() { showBanner('load'); });
+    var origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+        var p = origFetch.apply(this, arguments);
+        if (url && String(url).indexOf('livewire') !== -1) {
+            p.then(function(r) {
+                var b = getBanner();
+                b.textContent += '\nLW XHR: ' + String(url).split('/').pop() + ' status=' + r.status;
+            }).catch(function(err) {
+                getBanner().textContent += '\nLW XHR ERROR: ' + err;
+            });
+        }
+        return p;
+    };
+    window.addEventListener('load', showBanner);
 })();
 </script>
+>
