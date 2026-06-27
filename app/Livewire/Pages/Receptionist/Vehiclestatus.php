@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Models\VehicleBooking;
 use App\Models\Vehicle;
-use App\Models\VehicleBookingPhoto;
 
 use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
 
@@ -37,8 +36,6 @@ class Vehiclestatus extends Component
     public $vehicles;
     /** @var array<int,string> */
     public array $vehicleMap = [];
-    /** @var array<int,array{before:int,after:int}> */
-    public array $photoCounts = [];
 
     // Reject modal state
     public bool $showRejectModal = false;
@@ -133,36 +130,9 @@ class Vehiclestatus extends Component
             ->when($this->sortFilter === 'nearest', fn(Builder $q) => $q->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, NOW(), start_at))'))
             ->paginate($this->perPage);
 
-        $ids = $bookings->pluck('vehiclebooking_id')->all();
-        $this->photoCounts = $this->buildPhotoCounts($ids);
-
         return view('livewire.pages.receptionist.vehiclestatus', [
             'bookings' => $bookings,
         ]);
-    }
-
-    /**
-     * @param  array<int> $bookingIds
-     * @return array<int,array{before:int,after:int}>
-     */
-    protected function buildPhotoCounts(array $bookingIds): array
-    {
-        if (empty($bookingIds))
-            return [];
-        $rows = VehicleBookingPhoto::selectRaw('vehiclebooking_id, photo_type, COUNT(*) as c')
-            ->whereIn('vehiclebooking_id', $bookingIds)
-            ->groupBy('vehiclebooking_id', 'photo_type')
-            ->get();
-
-        $out = [];
-        foreach ($bookingIds as $id)
-            $out[$id] = ['before' => 0, 'after' => 0];
-        foreach ($rows as $r) {
-            $vb = (int) $r->vehiclebooking_id;
-            $type = $r->photo_type === 'after' ? 'after' : 'before';
-            $out[$vb][$type] = (int) $r->c;
-        }
-        return $out;
     }
 
     /* =========================
@@ -351,12 +321,6 @@ class Vehiclestatus extends Component
                     ->findOrFail($id);
                 if ($b->status !== 'returned') {
                     throw new \RuntimeException("Booking #{$b->vehiclebooking_id} has not been returned yet.");
-                }
-                $afterCount = VehicleBookingPhoto::where('vehiclebooking_id', $b->vehiclebooking_id)
-                    ->where('photo_type', 'after')
-                    ->count();
-                if ($afterCount < 1) {
-                    throw new \RuntimeException('Please upload at least 1 AFTER photo first.');
                 }
                 $b->status = 'completed';
                 $b->save();

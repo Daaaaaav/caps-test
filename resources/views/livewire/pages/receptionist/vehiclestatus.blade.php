@@ -202,8 +202,6 @@
                                 @php
                                     $vehicleName = $vehicleMap[$b->vehicle_id] ?? 'Unknown';
                                     $avatarChar  = strtoupper(substr($vehicleName, 0, 1));
-                                    $beforeC = $photoCounts[$b->vehiclebooking_id]['before'] ?? 0;
-                                    $afterC  = $photoCounts[$b->vehiclebooking_id]['after']  ?? 0;
                                     $statusColors = [
                                         'pending'      => ['bg'=>'bg-amber-100','text'=>'text-amber-800','label'=>__('app.pending')],
                                         'approved'     => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.approved')],
@@ -285,16 +283,8 @@
                                                     </div>
                                                 </div>
 
-                                                {{-- 4. BOTTOM LEFT: Photo Counts & Created Timestamp --}}
+                                                {{-- 4. BOTTOM LEFT: Created Timestamp --}}
                                                 <div class="text-[12px] text-gray-600 space-y-2">
-                                                    <div class="flex flex-wrap items-center gap-2">
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-50 border border-gray-200 text-[11px]">
-                                                            Before: <span class="font-semibold text-gray-800 pl-0.5">{{ $beforeC }}</span>
-                                                        </span>
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-50 border border-gray-200 text-[11px]">
-                                                            After: <span class="font-semibold text-gray-800 pl-0.5">{{ $afterC }}</span>
-                                                        </span>
-                                                    </div>
                                                     <div class="flex items-center gap-1 text-[10px] text-gray-500">
                                                         <x-heroicon-o-document-plus class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
                                                         <span>{{ __('app.created') }}: {{ optional($b->created_at)->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</span>
@@ -352,19 +342,13 @@
                                                 {{ __('app.mark_returned') }}
                                             </button>
                                         @elseif($b->status === 'returned')
-                                            {{-- Mark Done Button (Conditional styling based on after photos) --}}
+                                            {{-- Mark Done Button --}}
                                             <div class="flex items-center gap-2">
-                                                @if($afterC === 0)
-                                                    <span class="text-[11px] text-gray-500">
-                                                        {{ __('app.wait_after_photos') }}
-                                                    </span>
-                                                @endif
                                                 <button type="button"
                                                         wire:click.stop="markDone({{ $b->vehiclebooking_id }})"
                                                         wire:loading.attr="disabled"
                                                         wire:target="markDone({{ $b->vehiclebooking_id }})"
-                                                        class="px-4 py-1.5 text-xs font-medium rounded-lg {{ $afterC === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm' }}"
-                                                        @disabled($afterC === 0)>
+                                                        class="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm">
                                                     {{ __('app.mark_done') }}
                                                 </button>
                                             </div>
@@ -390,7 +374,6 @@
                                             <th class="px-6 py-3.5">{{ __('app.purpose') }}</th>
                                             <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                             <th class="px-6 py-3.5">{{ __('app.time') }}</th>
-                                            <th class="px-6 py-3.5">Photos</th>
                                             <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -406,8 +389,6 @@
                                         @forelse($bookings as $b)
                                             @php
                                                 $vehicleName = $vehicleMap[$b->vehicle_id] ?? 'Unknown';
-                                                $beforeC = $photoCounts[$b->vehiclebooking_id]['before'] ?? 0;
-                                                $afterC  = $photoCounts[$b->vehiclebooking_id]['after']  ?? 0;
                                                 $rowNo = ($bookings->firstItem() ?? 1) + $loop->index;
                                             @endphp
                                             <tr data-booking-id="{{ $b->vehiclebooking_id }}"
@@ -425,12 +406,6 @@
                                                 <td class="px-6 py-4 max-w-xs truncate font-medium text-gray-950" title="{{ $b->purpose }}">{{ $b->purpose ?? '—' }}</td>
                                                 <td class="px-6 py-4 font-medium">{{ fmtDate($b->start_at) }}</td>
                                                 <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_at) }}–{{ fmtTime($b->end_at) }}</td>
-                                                <td class="px-6 py-4 text-xs text-gray-500">
-                                                    <span class="inline-flex gap-1.5">
-                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">{{ __('app.borrow_date') }}: {{ $beforeC }}</span>
-                                                        <span class="px-1.5 py-0.5 rounded bg-gray-50 border border-gray-200">{{ __('app.return_date') }}: {{ $afterC }}</span>
-                                                    </span>
-                                                </td>
                                                 <td class="px-6 py-4 text-right">
                                                     <div class="flex items-center justify-end gap-2 font-medium">
                                                         @if($b->status === 'pending')
@@ -456,8 +431,7 @@
                                                             </button>
                                                         @elseif($b->status === 'returned')
                                                             <button type="button" wire:click.stop="markDone({{ $b->vehiclebooking_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg {{ $afterC === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-[#4E653D] text-white hover:bg-[#354C2B] transition' }}"
-                                                                @disabled($afterC === 0)>
+                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
                                                                 {{ __('app.mark_done') }}
                                                             </button>
                                                         @else
@@ -468,7 +442,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="px-6 py-12 text-center text-gray-500">{{ __('app.no_data_filter') }}</td>
+                                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">{{ __('app.no_data_filter') }}</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
