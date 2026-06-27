@@ -89,7 +89,7 @@
                         <div class="flex flex-wrap items-center gap-3 self-start sm:self-auto">
                             {{-- Tabs --}}
                             <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium">
-                                @foreach(['pending'=>__('app.pending'),'approved'=>__('app.approved'),'on_progress'=>__('app.on_progress'),'returned'=>__('app.returned')] as $key=>$lbl)
+                                @foreach(['pending'=>__('app.pending'),'approved'=>__('app.approved'),'on_progress'=>__('app.on_progress')] as $key=>$lbl)
                                     <button type="button"
                                             wire:click="$set('statusTab','{{ $key }}')"
                                             class="px-3.5 py-1 rounded-full transition {{ $statusTab === $key ? 'bg-[#4E653D] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200' }}">
@@ -333,25 +333,14 @@
                                                     +{{ $overdue }} late
                                                 </span>
                                             @endif
-                                            {{-- Mark Returned Button --}}
+                                            {{-- Mark Completed Button --}}
                                             <button type="button"
                                                     wire:click.stop="markReturned({{ $b->vehiclebooking_id }})"
                                                     wire:loading.attr="disabled"
                                                     wire:target="markReturned({{ $b->vehiclebooking_id }})"
                                                     class="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 disabled:opacity-60 transition shadow-sm">
-                                                {{ __('app.mark_returned') }}
+                                                {{ __('app.mark_done') }}
                                             </button>
-                                        @elseif($b->status === 'returned')
-                                            {{-- Mark Done Button --}}
-                                            <div class="flex items-center gap-2">
-                                                <button type="button"
-                                                        wire:click.stop="markDone({{ $b->vehiclebooking_id }})"
-                                                        wire:loading.attr="disabled"
-                                                        wire:target="markDone({{ $b->vehiclebooking_id }})"
-                                                        class="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm">
-                                                    {{ __('app.mark_done') }}
-                                                </button>
-                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -426,11 +415,6 @@
                                                                 </span>
                                                             @endif
                                                             <button type="button" wire:click.stop="markReturned({{ $b->vehiclebooking_id }})"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
-                                                                {{ __('app.mark_returned') }}
-                                                            </button>
-                                                        @elseif($b->status === 'returned')
-                                                            <button type="button" wire:click.stop="markDone({{ $b->vehiclebooking_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
                                                                 {{ __('app.mark_done') }}
                                                             </button>

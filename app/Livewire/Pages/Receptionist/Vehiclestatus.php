@@ -27,7 +27,7 @@ class Vehiclestatus extends Component
     public string $q = '';
     public ?int $vehicleFilter = null;
     public ?string $selectedDate = null;   // YYYY-MM-DD
-    public string $statusTab = 'pending';  // pending | approved | on_progress | returned
+    public string $statusTab = 'pending';  // pending | approved | on_progress
     public string $sortFilter = 'recent';  // recent | oldest | nearest
     public int $perPage = 10;
     public bool $includeDeleted = false;
@@ -121,10 +121,15 @@ class Vehiclestatus extends Component
                 });
             })
             ->when($this->selectedDate, fn(Builder $q) => $q->whereDate('start_at', $this->selectedDate))
-            ->when($this->statusTab, fn(Builder $q) => $this->statusTab === 'on_progress'
-                ? $q->whereIn('status', ['on_progress', 'late_return'])
-                : $q->where('status', $this->statusTab)
-            )
+            ->when($this->statusTab, function (Builder $q) {
+                // Sanitise: only allow valid active-workflow tabs
+                $tab = in_array($this->statusTab, ['pending', 'approved', 'on_progress'], true)
+                    ? $this->statusTab
+                    : 'pending';
+                return $tab === 'on_progress'
+                    ? $q->whereIn('status', ['on_progress', 'late_return'])
+                    : $q->where('status', $tab);
+            })
             ->when($this->sortFilter === 'recent', fn(Builder $q) => $q->orderByDesc('vehiclebooking_id'))
             ->when($this->sortFilter === 'oldest', fn(Builder $q) => $q->orderBy('vehiclebooking_id'))
             ->when($this->sortFilter === 'nearest', fn(Builder $q) => $q->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, NOW(), start_at))'))
@@ -262,13 +267,13 @@ class Vehiclestatus extends Component
                     ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
                 if (!in_array($b->status, ['approved', 'on_progress', 'late_return'], true)) {
-                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} cannot be marked as returned from status '{$b->status}'.");
+                    throw new \RuntimeException("Booking #{$b->vehiclebooking_id} cannot be completed from status '{$b->status}'.");
                 }
-                $b->status = 'returned';
+                $b->status = 'completed';
                 $b->save();
             });
 
-            $this->dispatch('toast', type: 'success', title: 'Returned', message: 'Status updated to Returned.');
+            $this->dispatch('toast', type: 'success', title: 'Completed', message: 'Booking marked as completed.');
             $this->resetPage();
         } catch (\RuntimeException $e) {
             $this->dispatch('toast', type: 'warning', title: 'Cannot Update', message: $e->getMessage());
@@ -314,6 +319,7 @@ class Vehiclestatus extends Component
 
     public function markDone(int $id): void
     {
+        // Kept for backward compatibility: any existing 'returned' records can still be completed.
         try {
             DB::transaction(function () use ($id) {
                 $b = VehicleBooking::lockForUpdate()
