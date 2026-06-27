@@ -224,10 +224,10 @@
                                                     @if($row->image)
                                                         <button type="button"
                                                             x-data
-                                                            @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                            @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($row->image)) }}' })"
                                                             class="w-full h-full block focus:outline-none focus:ring-2 focus:ring-[#4E653D]/40 rounded-xl"
                                                             title="Lihat foto penuh">
-                                                            <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
+                                                            <img src="{{ route('delivery.image', basename($row->image)) }}" alt="Bukti foto"
                                                                 class="w-full h-full object-cover">
                                                         </button>
                                                     @else
@@ -328,10 +328,10 @@
                                                     @if($row->image)
                                                         <button type="button"
                                                             x-data
-                                                            @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                            @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($row->image)) }}' })"
                                                             class="w-full h-full block focus:outline-none focus:ring-2 focus:ring-[#4E653D]/40 rounded-xl"
                                                             title="Lihat foto penuh">
-                                                            <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
+                                                            <img src="{{ route('delivery.image', basename($row->image)) }}" alt="Bukti foto"
                                                                 class="w-full h-full object-cover">
                                                         </button>
                                                     @else
@@ -442,9 +442,9 @@
                                                             @if($row->image)
                                                                 <button type="button"
                                                                     x-data
-                                                                    @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                                    @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($row->image)) }}' })"
                                                                     class="w-full h-full block focus:outline-none">
-                                                                    <img src="{{ Storage::disk('public')->url($row->image) }}" class="w-full h-full object-cover" alt="Bukti foto">
+                                                                    <img src="{{ route('delivery.image', basename($row->image)) }}" class="w-full h-full object-cover" alt="Bukti foto">
                                                                 </button>
                                                             @else
                                                                 {{ strtoupper(substr($row->item_name ?? 'P', 0, 1)) }}
@@ -497,9 +497,9 @@
                                                             @if($row->image)
                                                                 <button type="button"
                                                                     x-data
-                                                                    @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                                    @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($row->image)) }}' })"
                                                                     class="w-full h-full block focus:outline-none">
-                                                                    <img src="{{ Storage::disk('public')->url($row->image) }}" class="w-full h-full object-cover" alt="Bukti foto">
+                                                                    <img src="{{ route('delivery.image', basename($row->image)) }}" class="w-full h-full object-cover" alt="Bukti foto">
                                                                 </button>
                                                             @else
                                                                 {{ strtoupper(substr($row->item_name ?? 'S', 0, 1)) }}
@@ -969,10 +969,10 @@
                         {{-- Current image preview --}}
                         @if($editCurrentImage && !$editPhoto)
                             <div class="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30 mb-2">
-                                <img src="{{ Storage::disk('public')->url($editCurrentImage) }}"
+                                <img src="{{ route('delivery.image', basename($editCurrentImage)) }}"
                                     class="w-14 h-14 rounded-lg object-cover border border-border shrink-0 cursor-pointer"
                                     x-data
-                                    @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($editCurrentImage) }}' })"
+                                    @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($editCurrentImage)) }}' })"
                                     title="Klik untuk lihat penuh"
                                     alt="Foto saat ini">
                                 <div class="min-w-0">

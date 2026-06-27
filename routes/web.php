@@ -140,6 +140,21 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware(['auth'])->group(function () {
 
+    // ---------- Delivery image serving (works without storage:link) ----------
+    Route::get('/delivery-image/{path}', function (string $path) {
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        $fullPath = 'images/deliveries/' . $path;
+
+        if (!$disk->exists($fullPath)) {
+            abort(404);
+        }
+
+        return response()->file(
+            $disk->path($fullPath),
+            ['Cache-Control' => 'public, max-age=86400']
+        );
+    })->where('path', '.*')->name('delivery.image');
+
     // ---------- Attachments API (Local Storage) ----------
     Route::prefix('attachments')->group(function () {
         Route::post('/temp', [AttachmentController::class, 'tempUpload'])
