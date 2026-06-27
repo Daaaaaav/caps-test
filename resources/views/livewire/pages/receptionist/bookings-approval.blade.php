@@ -1,4 +1,4 @@
-﻿<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+﻿<div class="min-h-screen bg-gray-50" wire:poll.10000ms.keep-alive>
     @php
     use Carbon\Carbon;
     use App\Models\Requirement; // ADDED: Required for the temporary bug workaround
@@ -131,7 +131,7 @@
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4A2F24] text-[#CDDEA7] border border-[#4A2F24]/30">
                                     <x-heroicon-o-building-office class="w-3.5 h-3.5"/>
                                     <span>{{ __('app.room') }}: {{ $activeRoom['label'] ?? __('app.no_data') }}</span>
-                                    <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">├ù</button>
+                                    <button type="button" class="ml-1 hover:text-white" wire:click="clearRoomFilter">&times;</button>
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
