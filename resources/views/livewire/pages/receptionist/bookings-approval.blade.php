@@ -734,8 +734,11 @@
         </div>
 
         {{-- REJECT MODAL (Alasan wajib) --}}
-        @if($showRejectModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        <div
+            x-show="$wire.showRejectModal"
+            x-cloak
+            style="display:none"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog" aria-modal="true"
             wire:key="reject-modal"
             wire:keydown.escape.window="closeReject">
@@ -752,7 +755,7 @@
                             </div>
                             <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.reject_booking_title') }}</h3>
                         </div>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeReject">Γ£ò</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeReject">&times;</button>
                     </div>
 
                     {{-- Modal Body --}}
@@ -787,11 +790,13 @@
                 </form>
             </div>
         </div>
-        @endif
 
         {{-- RESCHEDULE MODAL --}}
-        @if($showRescheduleModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+            x-show="$wire.showRescheduleModal"
+            x-cloak
+            style="display:none"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
 
             <div class="relative bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
@@ -803,7 +808,7 @@
                                 {{ __('app.reschedule_reason_required') }}
                             </p>
                         </div>
-                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeReschedule">Γ£ò</button>
+                        <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" wire:click="closeReschedule">&times;</button>
                     </div>
 
                     <div class="p-6 space-y-4">
@@ -855,11 +860,13 @@
                 </form>
             </div>
         </div>
-        @endif
 
         {{-- MOBILE FILTER MODAL --}}
-        @if($showFilterModal)
-        <div class="fixed inset-0 z-40 md:hidden flex items-end">
+        <div
+            x-show="$wire.showFilterModal"
+            x-cloak
+            style="display:none"
+            class="fixed inset-0 z-40 md:hidden flex items-end">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeFilterModal"></div>
             <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
@@ -867,7 +874,7 @@
                         <h3 class="text-sm font-semibold tracking-tight text-foreground">Filter & Recent</h3>
                         <p class="text-[11px] text-muted-foreground mt-0.5">{{ __('app.filter_by_room_recent') }}</p>
                     </div>
-                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeFilterModal">Γ£ò</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeFilterModal">&times;</button>
                 </div>
 
                 <div class="p-5 space-y-4 overflow-y-auto flex-1">
@@ -924,11 +931,13 @@
                 </div>
             </div>
         </div>
-        @endif
 
         {{-- BOOKING DETAIL MODAL --}}
         @if ($showDetailModal && $selectedBookingDetail)
         <div
+            x-show="$wire.showDetailModal"
+            x-cloak
+            style="display:none"
             class="fixed inset-0 z-[60] flex items-center justify-center p-4"
             role="dialog" aria-modal="true"
             wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}"
@@ -945,7 +954,7 @@
                         </div>
                         <h3 class="text-base font-bold text-foreground tracking-tight">{{ __('app.detail_booking') }}</h3>
                     </div>
-                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeDetailModal">Γ£ò</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition" type="button" wire:click="closeDetailModal">&times;</button>
                 </div>
 
                 {{-- Modal Body --}}
