@@ -181,8 +181,14 @@
                                         {{-- Image on the left --}}
                                         <div class="{{ $icoAvatar }} mt-0.5 border border-gray-200 shrink-0">
                                             @if($row->image)
-                                                <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
-                                                    class="w-full h-full object-cover">
+                                                <button type="button"
+                                                    x-data
+                                                    @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                    class="w-full h-full block focus:outline-none focus:ring-2 focus:ring-[#4E653D]/40 rounded-xl"
+                                                    title="Lihat foto penuh">
+                                                    <img src="{{ Storage::disk('public')->url($row->image) }}" alt="Bukti foto"
+                                                        class="w-full h-full object-cover">
+                                                </button>
                                             @else
                                                 <span class="text-white font-semibold text-sm">{{ $avatarChar }}</span>
                                             @endif
@@ -300,7 +306,23 @@
                                         @endphp
                                         <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
                                             <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
-                                            <td class="px-6 py-4 font-semibold text-gray-900">{{ $row->item_name }}</td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-[#4E653D] flex items-center justify-center text-white text-xs font-semibold">
+                                                        @if($row->image)
+                                                            <button type="button"
+                                                                x-data
+                                                                @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($row->image) }}' })"
+                                                                class="w-full h-full block focus:outline-none">
+                                                                <img src="{{ Storage::disk('public')->url($row->image) }}" class="w-full h-full object-cover" alt="Bukti foto">
+                                                            </button>
+                                                        @else
+                                                            {{ strtoupper(substr($row->item_name ?? 'D', 0, 1)) }}
+                                                        @endif
+                                                    </div>
+                                                    <div class="font-semibold text-gray-900">{{ $row->item_name }}</div>
+                                                </div>
+                                            </td>
                                             <td class="px-6 py-4">
                                                 <span class="text-[10px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 font-medium uppercase">
                                                     {{ __('app.type_' . $row->type) }}
@@ -747,6 +769,48 @@
                             @error('edit.nama_penerima') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
                     </div>
+
+                    {{-- Photo Upload --}}
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">Bukti Foto</label>
+
+                        {{-- Current image preview --}}
+                        @if($editCurrentImage && !$editPhoto)
+                            <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 mb-2">
+                                <img src="{{ Storage::disk('public')->url($editCurrentImage) }}"
+                                    class="w-14 h-14 rounded-lg object-cover border border-gray-300 shrink-0 cursor-pointer"
+                                    @click="$dispatch('open-lightbox', { src: '{{ Storage::disk('public')->url($editCurrentImage) }}' })"
+                                    title="Klik untuk lihat penuh"
+                                    alt="Foto saat ini">
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-gray-700">Foto saat ini</p>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">Upload foto baru untuk mengganti</p>
+                                </div>
+                            </div>
+                        @elseif(!$editCurrentImage && !$editPhoto)
+                            <p class="text-xs text-gray-400 italic mb-1.5">Belum ada foto</p>
+                        @endif
+
+                        {{-- New photo preview --}}
+                        @if($editPhoto)
+                            <div class="flex items-center gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 mb-2">
+                                <img src="{{ $editPhoto->temporaryUrl() }}"
+                                    class="w-14 h-14 rounded-lg object-cover border border-emerald-300 shrink-0"
+                                    alt="Foto baru">
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-emerald-700">Foto baru dipilih</p>
+                                    <p class="text-[11px] text-emerald-600 mt-0.5">Akan mengganti foto lama saat disimpan</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        <input type="file"
+                            wire:model="editPhoto"
+                            accept="image/*"
+                            class="w-full text-xs text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#4E653D]/10 file:text-[#4E653D] hover:file:bg-[#4E653D]/20 transition cursor-pointer">
+                        <div wire:loading wire:target="editPhoto" class="text-xs text-gray-500 mt-1">Mengunggah...</div>
+                        @error('editPhoto') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
+                    </div>
                 </div>
                 <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50">
                     <button type="button" wire:click="$set('showEdit', false)"
@@ -754,10 +818,10 @@
                         <x-heroicon-o-arrow-uturn-left class="w-3.5 h-3.5" />
                         <span>{{ __('app.cancel') }}</span>
                     </button>
-                    <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit"
+                    <button type="button" wire:click="saveEdit" wire:loading.attr="disabled" wire:target="saveEdit,editPhoto"
                         class="h-9 px-4 rounded-lg bg-[#4E653D] text-white text-xs font-semibold hover:bg-[#354C2B] transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
-                        <span wire:loading.remove wire:target="saveEdit">{{ __('app.save_changes') }}</span>
-                        <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
+                        <span wire:loading.remove wire:target="saveEdit,editPhoto">{{ __('app.save_changes') }}</span>
+                        <span wire:loading wire:target="saveEdit,editPhoto" class="flex items-center gap-1.5">
                             <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-white"/>
                             {{ __('app.saving') }}
                         </span>
@@ -766,4 +830,26 @@
             </div>
         </div>
     @endif
+
+    {{-- IMAGE LIGHTBOX --}}
+    <div
+        x-data="{ open: false, src: '' }"
+        @open-lightbox.window="open = true; src = $event.detail.src"
+        @keydown.escape.window="open = false"
+        x-show="open"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        @click.self="open = false"
+        style="display:none">
+        <button type="button" @click="open = false"
+            class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img :src="src" alt="Bukti foto" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain">
+    </div>
 </div>

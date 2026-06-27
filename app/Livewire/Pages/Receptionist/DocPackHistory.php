@@ -7,9 +7,11 @@ use App\Models\Department;
 use App\Models\User as UserModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 use App\Livewire\Pages\Receptionist\Traits\HasViewMode;
@@ -20,6 +22,7 @@ class DocPackHistory extends Component
 {
     use WithPagination;
     use HasViewMode;
+    use WithFileUploads;
 
     protected string $paginationTheme = 'tailwind';
 
@@ -47,11 +50,14 @@ class DocPackHistory extends Component
         'nama_pengirim' => null,
         'nama_penerima' => null,
     ];
+    public $editPhoto = null;
+    public ?string $editCurrentImage = null;
 
     protected $rules = [
         'edit.item_name' => 'nullable|string|max:255',
         'edit.nama_pengirim' => 'nullable|string|max:255',
         'edit.nama_penerima' => 'nullable|string|max:255',
+        'editPhoto' => 'nullable|image|max:2048',
     ];
 
     public function updated($name): void
@@ -187,6 +193,8 @@ class DocPackHistory extends Component
             'nama_pengirim' => $row->nama_pengirim,
             'nama_penerima' => $row->nama_penerima,
         ];
+        $this->editCurrentImage = $row->image;
+        $this->editPhoto = null;
         $this->showEdit = true;
     }
 
@@ -199,15 +207,29 @@ class DocPackHistory extends Component
         $this->validate();
 
         $row = $this->base()->findOrFail($this->editId);
-        $row->fill([
+
+        $data = [
             'item_name' => $this->edit['item_name'],
             'nama_pengirim' => $this->edit['nama_pengirim'],
             'nama_penerima' => $this->edit['nama_penerima'],
-        ]);
-        $row->save();
+        ];
+
+        if ($this->editPhoto) {
+            // Delete old image if exists
+            if ($row->image && Storage::disk('public')->exists($row->image)) {
+                Storage::disk('public')->delete($row->image);
+            }
+            $ext = strtolower($this->editPhoto->getClientOriginalExtension() ?: 'png');
+            $filename = 'delivery_' . now()->format('Ymd_His') . '_' . uniqid() . '.' . $ext;
+            $data['image'] = $this->editPhoto->storeAs('images/deliveries', $filename, 'public');
+        }
+
+        $row->fill($data)->save();
 
         $this->showEdit = false;
         $this->editId = null;
+        $this->editPhoto = null;
+        $this->editCurrentImage = null;
         $this->resetPage('donePage');
         $this->dispatch('toast', type: 'success', title: 'Saved', message: 'Information successfully saved.', duration: 3000);
     }

@@ -371,12 +371,12 @@ class Vehiclestatus extends Component
             $booking = VehicleBooking::when($this->includeDeleted, fn($q) => $q->withTrashed())
                 ->findOrFail($id);
 
-            $photos = VehicleBookingPhoto::where('vehiclebooking_id', $id)
-                ->with('user') // Pastikan relasi user ada di model VehicleBookingPhoto
-                ->orderBy('created_at')
-                ->get();
+            // $photos = VehicleBookingPhoto::where('vehiclebooking_id', $id)
+            //     ->with('user') // Pastikan relasi user ada di model VehicleBookingPhoto
+            //     ->orderBy('created_at')
+            //     ->get();
 
-            $this->selectedBooking = $booking;
+            // $this->selectedBooking = $booking;
 
             // // Sort photos
             // $before = [];

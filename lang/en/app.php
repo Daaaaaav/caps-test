@@ -464,7 +464,7 @@ return [
     'ongoing_meetings_sub'      => 'Meetings currently in progress (already approved).',
     'no_pending_requests'       => 'No pending requests.',
     'no_ongoing_meetings'       => 'No ongoing meetings.',
-    'reject_reason_ph'          => 'Rejection reason (optional)',
+    'reject_reason_ph'          => 'Rejection reason',
     'send_rejection'            => 'Send Rejection',
 
     // ── Vehicle Status ────────────────────────────────────────────────────────
