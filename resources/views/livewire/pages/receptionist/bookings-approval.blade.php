@@ -1163,30 +1163,53 @@
     </main>
 </div>
 
-
-
 <script>
 (function() {
+    var errors = [];
+    window.addEventListener('error', function(e) {
+        errors.push('JS ERROR: ' + e.message + ' @ ' + (e.filename||'').split('/').pop() + ':' + e.lineno);
+        showBanner('error');
+    });
+    function getBanner() {
+        var b = document.getElementById('__kiro_diag__');
+        if (!b) {
+            b = document.createElement('div');
+            b.id = '__kiro_diag__';
+            b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#0f172a;color:#7dd3fc;font-size:11px;font-family:monospace;padding:10px 14px;max-height:220px;overflow:auto;white-space:pre;line-height:1.7;border-top:2px solid #f87171;';
+            document.body.appendChild(b);
+        }
+        return b;
+    }
+    function showBanner(reason) {
+        var b = getBanner();
+        var lw = typeof window.Livewire !== 'undefined' ? 'YES v' + (window.Livewire.version||'?') : 'NOT FOUND';
+        var alpine = typeof window.Alpine !== 'undefined' ? 'YES v' + (window.Alpine.version||'?') : 'NOT FOUND';
+        var wireEls = document.querySelectorAll('[wire\\:id]').length;
+        b.textContent = [
+            '=== LIVEWIRE DIAGNOSTICS [' + (reason||'load') + '] ===',
+            'Livewire: ' + lw + '   Alpine: ' + alpine + '   wire:id elements: ' + wireEls,
+            errors.length ? '\nJS ERRORS:\n' + errors.join('\n') : 'No JS errors.'
+        ].join('\n');
+    }
     document.addEventListener('click', function(e) {
         var el = document.elementFromPoint(e.clientX, e.clientY);
-        var info = [];
+        var b = getBanner();
+        var lw = typeof window.Livewire !== 'undefined' ? 'YES v' + (window.Livewire.version||'?') : 'NOT FOUND';
+        var alpine = typeof window.Alpine !== 'undefined' ? 'YES v' + (window.Alpine.version||'?') : 'NOT FOUND';
+        var wireEls = document.querySelectorAll('[wire\\:id]').length;
+        var wireClick = null;
         var node = el;
-        for (var i = 0; i < 7 && node && node !== document.body; i++) {
-            var tag = node.tagName || '?';
-            var id = node.id ? '#'+node.id : '';
-            var cls = (typeof node.className === 'string') ? node.className.trim().replace(/\s+/g,'.').substring(0, 50) : '';
-            var s = window.getComputedStyle(node);
-            info.push(tag + id + (cls ? '.'+cls : '') + '  [pe:'+s.pointerEvents+' pos:'+s.position+' z:'+s.zIndex+' vis:'+s.visibility+']');
+        while (node && node !== document.body) {
+            if (node.getAttribute && node.getAttribute('wire:click')) { wireClick = node.getAttribute('wire:click'); break; }
             node = node.parentElement;
         }
-        var banner = document.getElementById('__kiro_diag__');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = '__kiro_diag__';
-            banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#0f172a;color:#7dd3fc;font-size:11px;font-family:monospace;padding:10px 14px;max-height:180px;overflow:auto;white-space:pre;line-height:1.7;border-top:2px solid #38bdf8;';
-            document.body.appendChild(banner);
-        }
-        banner.textContent = 'CLICK @ ('+Math.round(e.clientX)+','+Math.round(e.clientY)+') — target: '+el.tagName+'\n'+info.join('\n');
+        b.textContent = [
+            '=== CLICK @ (' + Math.round(e.clientX) + ',' + Math.round(e.clientY) + ') ===',
+            'Livewire: ' + lw + '   Alpine: ' + alpine + '   wire:id elements: ' + wireEls,
+            'Clicked: ' + el.tagName + '   wire:click found: ' + (wireClick || 'NONE'),
+            errors.length ? '\nJS ERRORS:\n' + errors.join('\n') : 'No JS errors.'
+        ].join('\n');
     }, true);
+    window.addEventListener('load', function() { showBanner('load'); });
 })();
 </script>
