@@ -733,17 +733,20 @@
             </aside>
         </div>
 
+    </main>
+</div>
+
+{{-- Modals teleported outside the wire:poll div so polling never morphs them --}}
+
+@teleport('body')
         {{-- REJECT MODAL (Alasan wajib) --}}
-        <div
-            x-show="$wire.showRejectModal"
-            x-cloak
-            style="display:none"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        @if($showRejectModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog" aria-modal="true"
             wire:key="reject-modal"
             wire:keydown.escape.window="closeReject">
             {{-- Backdrop --}}
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReject"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeReject"></div>
 
             <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
                 <form wire:submit.prevent="confirmReject">
@@ -790,14 +793,12 @@
                 </form>
             </div>
         </div>
+        @endif
 
         {{-- RESCHEDULE MODAL --}}
-        <div
-            x-show="$wire.showRescheduleModal"
-            x-cloak
-            style="display:none"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
+        @if($showRescheduleModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeReschedule"></div>
 
             <div class="relative bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
                 <form wire:submit.prevent="submitReschedule">
@@ -860,14 +861,12 @@
                 </form>
             </div>
         </div>
+        @endif
 
         {{-- MOBILE FILTER MODAL --}}
-        <div
-            x-show="$wire.showFilterModal"
-            x-cloak
-            style="display:none"
-            class="fixed inset-0 z-40 md:hidden flex items-end">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeFilterModal"></div>
+        @if($showFilterModal)
+        <div class="fixed inset-0 z-40 md:hidden flex items-end">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeFilterModal"></div>
             <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
@@ -931,18 +930,16 @@
                 </div>
             </div>
         </div>
+        @endif
 
         {{-- BOOKING DETAIL MODAL --}}
         @if ($showDetailModal && $selectedBookingDetail)
         <div
-            x-show="$wire.showDetailModal"
-            x-cloak
-            style="display:none"
             class="fixed inset-0 z-[60] flex items-center justify-center p-4"
             role="dialog" aria-modal="true"
             wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}"
             wire:keydown.escape.window="closeDetailModal">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeDetailModal"></div>
 
             <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100 flex flex-col max-h-[85vh]" tabindex="-1">
 
@@ -1175,7 +1172,6 @@
             </div>
         </div>
         @endif
-    </main>
-</div>
+@endteleport
 
 
