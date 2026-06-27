@@ -118,12 +118,11 @@ class OccupancyForecasting extends Component
     private function movingAverageForecast(array $history, int $days): array
     {
         // All magic numbers read from ai_settings table
-        $window      = (int)   AISettings::get('ma_window',         7);
-        $lowerMult   = (float) AISettings::get('ma_lower_bound',    0.8);
-        $upperMult   = (float) AISettings::get('ma_upper_bound',    1.2);
-        $confidence  = (float) AISettings::get('ma_confidence',     0.60);
-        $noiseFactor = (float) AISettings::get('ma_noise_factor',   0.1);
-        $floorAvg    = (float) AISettings::get('ma_floor_avg',      3.0);
+        $window     = (int)   AISettings::get('ma_window',      7);
+        $lowerMult  = (float) AISettings::get('ma_lower_bound', 0.8);
+        $upperMult  = (float) AISettings::get('ma_upper_bound', 1.2);
+        $confidence = (float) AISettings::get('ma_confidence',  0.60);
+        $floorAvg   = (float) AISettings::get('ma_floor_avg',   3.0);
 
         if (empty($history)) {
             $avg = $floorAvg;
@@ -132,19 +131,46 @@ class OccupancyForecasting extends Component
             $avg   = array_sum(array_column($slice, 'count')) / count($slice);
         }
 
+        // Build a day-of-week multiplier from historical data so the forecast
+        // reflects real patterns (e.g. busier on Fridays) instead of random noise.
+        $dowTotals = array_fill(0, 7, 0.0);   // Sun=0 … Sat=6
+        $dowCounts = array_fill(0, 7, 0);
+
+        foreach ($history as $row) {
+            $dow = (int) date('w', strtotime($row['date']));
+            $dowTotals[$dow] += (float) $row['count'];
+            $dowCounts[$dow]++;
+        }
+
+        // Per-DOW average; fall back to the global avg when a day has no data.
+        $dowAvg = [];
+        for ($d = 0; $d < 7; $d++) {
+            $dowAvg[$d] = $dowCounts[$d] > 0
+                ? $dowTotals[$d] / $dowCounts[$d]
+                : $avg;
+        }
+
+        // Express each DOW relative to the overall mean so we get a multiplier
+        // centred around 1.0.  Protect against a zero overall average.
+        $overallHistAvg = $avg > 0 ? $avg : $floorAvg;
+        $dowMultiplier  = [];
+        for ($d = 0; $d < 7; $d++) {
+            $dowMultiplier[$d] = $dowAvg[$d] / $overallHistAvg;
+        }
+
         $lastDate = !empty($history) ? end($history)['date'] : date('Y-m-d');
         $forecast = [];
 
         for ($i = 1; $i <= $days; $i++) {
-            $date       = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
-            $noise      = $avg * $noiseFactor * (mt_rand(-10, 10) / 10);
-            $predicted  = round(max(0, $avg + $noise), 1);
+            $date      = date('Y-m-d', strtotime($lastDate . " +{$i} days"));
+            $dow       = (int) date('w', strtotime($date));
+            $predicted = round(max(0, $avg * $dowMultiplier[$dow]), 1);
 
             $forecast[] = [
                 'date'        => $date,
                 'predicted'   => $predicted,
-                'lower_bound' => round(max(0, $avg * $lowerMult), 1),
-                'upper_bound' => round($avg * $upperMult, 1),
+                'lower_bound' => round(max(0, $predicted * $lowerMult), 1),
+                'upper_bound' => round($predicted * $upperMult, 1),
                 'confidence'  => $confidence,
             ];
         }

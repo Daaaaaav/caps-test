@@ -50,15 +50,21 @@ class GoogleAuthController extends Controller
         }
 
         $client->setAuthConfig($secretPath);
-        return $client;
-    }
+        return $client;    }
 
     /**
      * Redirect the user to Google's OAuth consent screen.
      */
     public function auth()
     {
-        $client = $this->getClient();
+        try {
+            $client = $this->getClient();
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('superadmin.settings')
+                ->withErrors(['google' => $e->getMessage()]);
+        }
+
         return redirect()->away($client->createAuthUrl());
     }
 
