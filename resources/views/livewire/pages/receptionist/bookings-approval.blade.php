@@ -1,4 +1,4 @@
-﻿<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
     @php
     use Carbon\Carbon;
     use App\Models\Requirement; // ADDED: Required for the temporary bug workaround
