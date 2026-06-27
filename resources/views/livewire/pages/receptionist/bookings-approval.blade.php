@@ -1,4 +1,4 @@
-﻿<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
     @php
     use Carbon\Carbon;
     use App\Models\Requirement; // ADDED: Required for the temporary bug workaround
@@ -42,7 +42,7 @@
         option:checked { background:#e5e7eb !important; color:#111827 !important; }
     </style>
 
-    <main class="px-4 sm:px-6 py-6 space-y-6" wire:poll.10000ms>
+    <main class="px-4 sm:px-6 py-6 space-y-6">
         {{-- HERO --}}
         <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl">
             <div class="pointer-events-none absolute inset-0 opacity-10">
@@ -208,18 +208,6 @@
 
                 {{-- PENDING TAB (MODIFIED FOR IMAGE DESIGN) --}}
                 @if($activeTab === 'pending')
-                    {{-- Auto-approval info banner --}}
-                    <div class="px-4 sm:px-6 pt-4">
-                        <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-800">
-                            <svg class="w-4 h-4 shrink-0 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"/>
-                            </svg>
-                            <span>
-                                <span class="font-semibold">Persetujuan otomatis aktif.</span>
-                                Semua booking akan disetujui secara otomatis ketika waktu mulai tiba dan langsung berpindah ke tab <strong>Ongoing</strong>. Setelah waktu selesai, booking akan otomatis dipindahkan ke <strong>History</strong>. Anda hanya perlu menangani penolakan jika diperlukan.
-                            </span>
-                        </div>
-                    </div>
                     @if($list->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
                             {{ __('app.no_pending_filter') }}
@@ -292,7 +280,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -339,12 +327,29 @@
 
                                             </div>
 
-                                            {{-- BOTTOM ACTIONS --}}
+                                            {{-- 6. NEW: BOTTOM ACTIONS (Horizontally aligned, matching the image) --}}
+                                            @if($needsGoogleConnect || $needsZoomConfig)
+                                                <div class="w-full text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-3">
+                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
+                                                </div>
+                                            @endif
                                             <div class="pt-3 border-t border-gray-100 flex justify-end gap-3">
+                                                                              {{-- DETAIL BUTTON (Using ghost style as in the image) --}}
                                                 <button type="button"
                                                     wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                     class="{{ $btnGhost }} px-4 py-2">
                                                     {{ __('app.detail') }}
+                                                </button>
+
+                                                {{-- APPROVE BUTTON (Green) --}}
+                                                <button type="button"
+                                                    wire:click="approve({{ $b->bookingroom_id }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="approve"
+                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
+                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm inline-flex items-center justify-center @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
+                                                    <x-heroicon-o-check class="w-3.5 h-3.5 inline-block mr-0.5"/>
+                                                    {{ __('app.approve') }}
                                                 </button>
 
                                                 {{-- REJECT BUTTON (Red) --}}
@@ -413,7 +418,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -423,11 +428,24 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
-                                                        <div class="flex items-center justify-end gap-2">
+                                                        <div class="flex flex-col items-end gap-2">
+                                                            @if($needsGoogleConnect || $needsZoomConfig)
+                                                                <div class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 max-w-sm text-right">
+                                                                    {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
+                                                                </div>
+                                                            @endif
+                                                            <div class="flex items-center justify-end gap-2">
                                                                 <button type="button"
                                                                     wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                     {{ __('app.detail') }}
+                                                                </button>
+                                                                <button type="button"
+                                                                    wire:click="approve({{ $b->bookingroom_id }})"
+                                                                    wire:loading.attr="disabled"
+                                                                    @if($needsGoogleConnect || $needsZoomConfig) disabled @endif
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition @if($needsGoogleConnect || $needsZoomConfig) opacity-60 cursor-not-allowed @endif">
+                                                                    {{ __('app.approve') }}
                                                                 </button>
                                                                 <button type="button"
                                                                     wire:click="openReject({{ $b->bookingroom_id }})"
@@ -435,6 +453,7 @@
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                                     {{ __('app.reject') }}
                                                                 </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -513,7 +532,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -564,7 +583,12 @@
 
                                                         {{-- CANCEL BUTTON (for ongoing) --}}
                                                         <button type="button"
-                                                            wire:click="openReschedule({{ $b->bookingroom_id }})"
+                                                            x-data
+                                                            @click="
+                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
+                                                                    $wire.openReschedule({{ $b->bookingroom_id }});
+                                                                }
+                                                            "
                                                             wire:loading.attr="disabled"
                                                             wire:target="openReschedule"
                                                             class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
@@ -630,7 +654,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}–{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -647,7 +671,8 @@
                                                                 {{ __('app.detail') }}
                                                             </button>
                                                             <button type="button"
-                                                                wire:click="openReschedule({{ $b->bookingroom_id }})"
+                                                                x-data
+                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                                 {{ __('app.cancel') }}
@@ -734,7 +759,7 @@
             wire:key="reject-modal"
             wire:keydown.escape.window="closeReject">
             {{-- Backdrop --}}
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeReject"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReject"></div>
 
             <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100" tabindex="-1">
                 <form wire:submit.prevent="confirmReject">
@@ -786,7 +811,7 @@
         {{-- RESCHEDULE MODAL --}}
         @if($showRescheduleModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeReschedule"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeReschedule"></div>
 
             <div class="relative bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300 scale-100">
                 <form wire:submit.prevent="submitReschedule">
@@ -854,7 +879,7 @@
         {{-- MOBILE FILTER MODAL --}}
         @if($showFilterModal)
         <div class="fixed inset-0 z-40 md:hidden flex items-end">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeFilterModal"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeFilterModal"></div>
             <div class="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-border">
                 <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/10">
                     <div>
@@ -927,7 +952,7 @@
             role="dialog" aria-modal="true"
             wire:key="detail-modal-{{ $selectedBookingDetail->bookingroom_id }}"
             wire:keydown.escape.window="closeDetailModal">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeDetailModal"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" wire:click="closeDetailModal"></div>
 
             <div class="relative w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl overflow-hidden focus:outline-none transform transition-all duration-300 scale-100 flex flex-col max-h-[85vh]" tabindex="-1">
 
@@ -1038,7 +1063,7 @@
                             <p class="text-sm font-semibold text-foreground">
                                 {{ \Illuminate\Support\Carbon::parse($detail->date)->format('d M Y') }}
                                 <span class="text-muted-foreground/40 mx-1.5">/</span>
-                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} – {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
+                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} ΓÇô {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
                             </p>
                         </div>
 
