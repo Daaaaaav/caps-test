@@ -1,23 +1,23 @@
-<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
+﻿<div class="min-h-screen bg-gray-50" wire:poll.1000ms.keep-alive>
     @php
     use Carbon\Carbon;
     use App\Models\Requirement; // ADDED: Required for the temporary bug workaround
 
     if (!function_exists('fmtDate')) {
         function fmtDate($v) {
-            try { return $v ? Carbon::parse($v)->format('d M Y') : 'ΓÇö'; }
-            catch (\Throwable) { return 'ΓÇö'; }
+            try { return $v ? Carbon::parse($v)->format('d M Y') : '—'; }
+            catch (\Throwable) { return '—'; }
         }
     }
     if (!function_exists('fmtTime')) {
         function fmtTime($v) {
-            try { return $v ? Carbon::parse($v)->format('H.i') : 'ΓÇö'; }
+            try { return $v ? Carbon::parse($v)->format('H.i') : '—'; }
             catch (\Throwable) {
                 if (is_string($v)) {
                     if (preg_match('/^\d{2}:\d{2}/', $v)) return str_replace(':','.', substr($v,0,5));
                     if (preg_match('/^\d{2}\.\d{2}/', $v)) return substr($v,0,5);
                 }
-                return 'ΓÇö';
+                return '—';
             }
         }
     }
@@ -232,7 +232,7 @@
                                         @php
                                             $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
                                             $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
-                                            $avatarChar = strtoupper(substr($b->meeting_title ?? 'ΓÇö', 0, 1));
+                                            $avatarChar = strtoupper(substr($b->meeting_title ?? '—', 0, 1));
 
                                             $platform = $b->online_meeting_platform
                                                         ?? $b->platform
@@ -461,7 +461,7 @@
                                         @php
                                             $isOnline   = in_array($b->booking_type, ['online_meeting','onlinemeeting']);
                                             $isRoomType = in_array($b->booking_type, ['bookingroom','meeting']);
-                                            $avatarChar = strtoupper(substr($b->meeting_title ?? 'ΓÇö', 0, 1));
+                                            $avatarChar = strtoupper(substr($b->meeting_title ?? '—', 0, 1));
 
                                             $platform = $b->online_meeting_platform
                                                         ?? $b->platform
@@ -520,7 +520,7 @@
                                                             <span class="{{ $chip }} text-xs px-2.5 py-0.5">
                                                                 <x-heroicon-o-building-office class="w-3.5 h-3.5 text-gray-500"/>
                                                                 <span class="font-medium text-gray-700">
-                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? 'ΓÇö' }}
+                                                                    {{ __('app.room') }}: {{ $b->room?->room_name ?? '—' }}
                                                                 </span>
                                                             </span>
                                                         @elseif($isOnline && $platform)
@@ -630,7 +630,7 @@
                                                             </span>
                                                         @else
                                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-semibold uppercase border border-blue-200">
-                                                                {{ $b->room?->room_name ?? 'ΓÇö' }}
+                                                                {{ $b->room?->room_name ?? '—' }}
                                                             </span>
                                                         @endif
                                                     </td>
@@ -829,7 +829,7 @@
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.room') }} ({{ __('app.optional') }})</label>
                             <select class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" wire:model.live="rescheduleRoomId">
-                                <option value="">{{ __('app.select_room') }}ΓÇª</option>
+                                <option value="">{{ __('app.select_room') }}...</option>
                                 @foreach($roomsOptions as $r)
                                 <option value="{{ $r['id'] }}">{{ $r['label'] }}</option>
                                 @endforeach
@@ -966,12 +966,12 @@
                         // Requester: prefer user relation, fall back to stored name fields
                         $requesterName = $detail->user?->full_name
                             ?? $detail->user?->name
-                            ?? 'ΓÇö';
+                            ?? '—';
 
                         // Department: prefer the direct department relation, fall back through user's department
                         $departmentName = $detail->department?->department_name
                             ?? $detail->user?->department?->department_name
-                            ?? 'ΓÇö';
+                            ?? '—';
 
                         // Booking type human label
                         $bookingTypeLabel = match (strtolower((string) $detail->booking_type)) {
@@ -986,7 +986,7 @@
                             ? $detail->requirements->pluck('name')->filter()->values()->toArray()
                             : [];
 
-                        // Clean special notes ΓÇö just show the raw value, no fake-bug detection
+                        // Clean special notes — just show the raw value, no fake-bug detection
                         $specialNotes = trim((string) ($detail->special_notes ?? ''));
 
                         // "Info dept request" flag
@@ -1056,7 +1056,7 @@
                                     <span>{{ __('app.attendees_count') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground">
-                                    {{ $detail->number_of_attendees > 0 ? $detail->number_of_attendees : 'ΓÇö' }}
+                                    {{ $detail->number_of_attendees > 0 ? $detail->number_of_attendees : '—' }}
                                 </p>
                             </div>
                             @if (!$isOnline)
@@ -1065,7 +1065,7 @@
                                     <x-heroicon-o-building-office-2 class="w-3.5 h-3.5 text-muted-foreground/60" />
                                     <span>{{ __('app.meeting_room_label') }}</span>
                                 </div>
-                                <p class="text-sm font-semibold text-foreground">{{ $detail->room->room_name ?? 'ΓÇö' }}</p>
+                                <p class="text-sm font-semibold text-foreground">{{ $detail->room->room_name ?? '—' }}</p>
                             </div>
                             @else
                             <div class="space-y-1">
@@ -1074,7 +1074,7 @@
                                     <span>{{ __('app.online_provider_label') }}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-foreground capitalize">
-                                    {{ str_replace('_', ' ', $detail->online_provider ?? 'ΓÇö') }}
+                                    {{ str_replace('_', ' ', $detail->online_provider ?? '—') }}
                                 </p>
                             </div>
                             @endif
@@ -1103,13 +1103,13 @@
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.meeting_code_label') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
-                                    {{ $detail->online_meeting_code ?: 'ΓÇö' }}
+                                    {{ $detail->online_meeting_code ?: '—' }}
                                 </p>
                             </div>
                             <div class="space-y-1">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{{ __('app.password') }}</div>
                                 <p class="text-xs font-semibold text-foreground font-mono bg-muted px-2 py-1 rounded border border-border/40 w-fit">
-                                    {{ $detail->online_meeting_password ?: 'ΓÇö' }}
+                                    {{ $detail->online_meeting_password ?: '—' }}
                                 </p>
                             </div>
                         </div>
@@ -1125,7 +1125,7 @@
                                 {{ $detail->online_meeting_url }}
                             </a>
                             @else
-                            <p class="text-xs text-muted-foreground">ΓÇö</p>
+                            <p class="text-xs text-muted-foreground">—</p>
                             @endif
                         </div>
                         @endif
@@ -1148,7 +1148,7 @@
                                 <span>{{ __('app.special_notes_label') }}</span>
                             </div>
                             <p class="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                                {{ $specialNotes !== '' ? $specialNotes : 'ΓÇö' }}
+                                {{ $specialNotes !== '' ? $specialNotes : '—' }}
                             </p>
                         </div>
 
@@ -1168,3 +1168,5 @@
         @endif
     </main>
 </div>
+
+
