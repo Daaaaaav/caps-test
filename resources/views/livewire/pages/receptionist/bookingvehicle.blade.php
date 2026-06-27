@@ -79,7 +79,7 @@
                 <form wire:submit.prevent="submit" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {{-- Departemen --}}
-                        <div>
+                        <div class="flex flex-col justify-end">
                             <label class="{{ $label }}">{{ __('app.department') }} <span class="text-destructive">*</span></label>
 
                             {{-- Combobox: search + select in one --}}
@@ -178,7 +178,7 @@
                         </div>
 
                         {{-- User peminjam (filtered by department) --}}
-                        <div>
+                        <div class="flex flex-col justify-end">
                             <label class="{{ $label }}">{{ __('app.user_filtered') }}</label>
 
                             {{-- Combobox: search + select in one --}}
@@ -278,7 +278,7 @@
                         </div>
 
                         {{-- Nama peminjam manual --}}
-                        <div>
+                        <div class="flex flex-col justify-end">
                             <label class="{{ $label }}">
                                 {{ __('app.borrower_name') }} <span class="text-destructive">*</span>
                             </label>
@@ -286,7 +286,7 @@
                                 type="text"
                                 wire:model.defer="borrower_name"
                                 placeholder="{{ __('app.borrower_name') }}"
-                                class="{{ $input }} md:mt-[50px]"
+                                class="{{ $input }}"
                             >
                             @error('borrower_name')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
