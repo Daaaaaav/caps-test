@@ -155,8 +155,10 @@ class BookingsApproval extends Component
     }
 
     /**
-     * Auto-approve pending offline bookings whose start time has arrived.
+     * Auto-approve pending offline and online bookings whose start time has arrived.
      * Mirrors the AutoApproveBookings command so it also works without a scheduler.
+     * Online bookings are approved directly without link creation (links are created
+     * at manual approval time, or by the scheduler if configured).
      */
     private function autoApprovePending(): void
     {
@@ -173,7 +175,6 @@ class BookingsApproval extends Component
             ->whereNull('deleted_at')
             ->where('status', 'pending')
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
-            ->whereNotIn('booking_type', ['online_meeting', 'onlinemeeting'])
             ->whereNotNull('date')
             ->whereNotNull('start_time')
             ->whereRaw("$startExpr <= ?", [$now])

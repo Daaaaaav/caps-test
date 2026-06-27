@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies so HTTPS scheme is correctly detected behind
+        // Nginx/Apache reverse proxies (fixes Livewire upload-file 401).
+        $middleware->trustProxies(at: '*');
+
         // Apply locale detection to every web request
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
