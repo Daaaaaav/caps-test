@@ -308,50 +308,66 @@ class SingleCompanySeeder extends Seeder
         echo "  ✅ Seeded Announcements, Information, and Guestbooks\n";
 
         // ===== VEHICLE BOOKINGS =====
+        // The 4 vehicles are: index 0 & 1 = "clean" (never late_return),
+        // index 2 & 3 = "overdue" (may have late_return bookings).
         if ($vehicles->isNotEmpty()) {
+            $cleanVehicleIds  = $vehicles->take(2)->pluck('vehicle_id')->toArray();
+            $overdueVehicleIds = $vehicles->slice(2)->pluck('vehicle_id')->toArray();
+
+            // Statuses allowed for clean vehicles (no late_return)
+            $cleanStatuses   = ['pending', 'approved', 'on_progress', 'returned', 'completed', 'rejected'];
+            // Statuses for overdue vehicles (late_return included)
+            $overdueStatuses = ['pending', 'approved', 'on_progress', 'returned', 'completed', 'rejected', 'late_return'];
+
             foreach (range(1, 80) as $i) {
-                $user = $users->random();
+                $user    = $users->random();
                 $vehicle = $vehicles->random();
-                $start = $now->copy()->subDays(rand(0, $daysBack))->hour(rand(8,14));
-                $end = $start->copy()->addHours(rand(2,6));
+                $start   = $now->copy()->subDays(rand(0, $daysBack))->hour(rand(8,14));
+                $end     = $start->copy()->addHours(rand(2,6));
 
                 $purposeType = Arr::random(['dinas', 'operasional', 'antar_jemput', 'lainnya']);
-                $status = Arr::random(['pending', 'approved', 'on_progress', 'returned', 'completed', 'rejected', 'cancelled']);
-                
+
+                // Pick status pool based on whether this vehicle is "clean"
+                if (in_array($vehicle->vehicle_id, $cleanVehicleIds)) {
+                    $status = Arr::random($cleanStatuses);
+                } else {
+                    $status = Arr::random($overdueStatuses);
+                }
+
                 $booking = VehicleBooking::create([
-                    'vehicle_id' => $vehicle->vehicle_id,
-                    'company_id' => $companyId,
-                    'department_id' => $user->department_id,
-                    'user_id' => $user->user_id,
-                    'borrower_name' => $user->full_name,
-                    'start_at' => $start,
-                    'end_at' => $end,
-                    'purpose' => "Keperluan " . ucfirst($purposeType) . " #{$i}",
+                    'vehicle_id'   => $vehicle->vehicle_id,
+                    'company_id'   => $companyId,
+                    'department_id'=> $user->department_id,
+                    'user_id'      => $user->user_id,
+                    'borrower_name'=> $user->full_name,
+                    'start_at'     => $start,
+                    'end_at'       => $end,
+                    'purpose'      => "Keperluan " . ucfirst($purposeType) . " #{$i}",
                     'purpose_type' => $purposeType,
-                    'destination' => Arr::random(['Bogor','Jakarta','Bali','Purwodadi']),
-                    'odd_even_area' => Arr::random(['tidak', 'ganjil', 'genap']),
-                    'status' => $status,
+                    'destination'  => Arr::random(['Bogor','Jakarta','Bali','Purwodadi']),
+                    'odd_even_area'=> Arr::random(['tidak', 'ganjil', 'genap']),
+                    'status'       => $status,
                     'terms_agreed' => 1,
-                    'created_at' => $start,
-                    'updated_at' => $start,
+                    'created_at'   => $start,
+                    'updated_at'   => $start,
                 ]);
 
-                if (in_array($status, ['on_progress', 'returned', 'completed'])) {
+                if (in_array($status, ['on_progress', 'returned', 'completed', 'late_return'])) {
                     VehicleBookingPhoto::create([
                         'vehiclebooking_id' => $booking->vehiclebooking_id,
-                        'user_id' => $user->user_id,
-                        'photo_type' => 'before',
-                        'photo_path' => 'vehicle_photos/demo_sample_before_' . $i . '.jpg',
-                        'created_at' => $start,
+                        'user_id'           => $user->user_id,
+                        'photo_type'        => 'before',
+                        'photo_path'        => 'vehicle_photos/demo_sample_before_' . $i . '.jpg',
+                        'created_at'        => $start,
                     ]);
                 }
-                if ($status == 'completed') {
+                if ($status === 'completed') {
                     VehicleBookingPhoto::create([
                         'vehiclebooking_id' => $booking->vehiclebooking_id,
-                        'user_id' => $user->user_id,
-                        'photo_type' => 'after',
-                        'photo_path' => 'vehicle_photos/demo_sample_after_' . $i . '.jpg',
-                        'created_at' => $end,
+                        'user_id'           => $user->user_id,
+                        'photo_type'        => 'after',
+                        'photo_path'        => 'vehicle_photos/demo_sample_after_' . $i . '.jpg',
+                        'created_at'        => $end,
                     ]);
                 }
             }
