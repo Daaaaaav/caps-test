@@ -551,38 +551,166 @@
                     </div>
 
                     <div class="p-4 space-y-4 bg-white">
-                        {{-- Department Filter --}}
+                        {{-- Department Combobox --}}
                         <div class="space-y-1">
                             <label class="{{ $label }}">{{ __('app.department') }}</label>
-                            <input type="text" wire:model.live="departmentQ" class="{{ $input }}"
-                                placeholder="{{ __('app.search_department_ph') }}">
-                            <div class="relative mt-2">
-                                <select wire:model.live="departmentId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.all_departments') }}</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: null,
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
+                                            !q || i.label.toLowerCase().includes(q)
+                                        );
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        $wire.set('departmentId', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = null;
+                                        $wire.set('departmentId', null);
+                                    }
+                                }"
+                                x-init="
+                                    $watch('$wire.departmentId', val => {
+                                        this.selectedId = val || null;
+                                        if (!val) { search = ''; }
+                                        else {
+                                            const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
+                                            if (found) search = found.label;
+                                        }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.all_departments') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
                             </div>
                         </div>
 
-                        {{-- User Filter --}}
+                        {{-- User / Officer Combobox --}}
                         <div class="space-y-1">
                             <label class="{{ $label }}">{{ __('app.officer') }}</label>
-                            <input type="text" wire:model.live="userQ" class="{{ $input }}" placeholder="{{ __('app.search_user_ph') }}">
-                            <div class="relative mt-2">
-                                <select wire:model.live="userId" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.all_users') }}</option>
-                                    @foreach($users as $u)
-                                        <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: null,
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).filter(i =>
+                                            !q || i.label.toLowerCase().includes(q)
+                                        );
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        $wire.set('userId', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = null;
+                                        $wire.set('userId', null);
+                                    }
+                                }"
+                                x-init="
+                                    $watch('$wire.departmentId', () => { search = ''; this.selectedId = null; });
+                                    $watch('$wire.userId', val => {
+                                        this.selectedId = val || null;
+                                        if (!val) { search = ''; }
+                                        else {
+                                            const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
+                                            if (found) search = found.label;
+                                        }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.all_users') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-gray-400 hover:text-gray-700">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-400" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -605,38 +733,166 @@
                 </div>
 
                 <div class="p-5 space-y-5 overflow-y-auto flex-1">
-                    {{-- Department Filter --}}
+                    {{-- Department Combobox (Mobile) --}}
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Department</label>
-                        <input type="text" wire:model.live="departmentQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
-                            placeholder="{{ __('app.search_department_ph') }}">
-                        <div class="relative mt-2">
-                            <select wire:model.live="departmentId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
-                                <option value="">{{ __('app.all_departments') }}</option>
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.department') }}</label>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: null,
+                                get items() {
+                                    const q = this.search.toLowerCase().trim();
+                                    return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
+                                        !q || i.label.toLowerCase().includes(q)
+                                    );
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('departmentId', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = null;
+                                    $wire.set('departmentId', null);
+                                }
+                            }"
+                            x-init="
+                                $watch('$wire.departmentId', val => {
+                                    this.selectedId = val || null;
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).find(i => i.id == val);
+                                        if (found) search = found.label;
+                                    }
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.all_departments') }}"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-foreground hover:bg-muted cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                {{ __('app.no_data') }}
+                            </p>
                         </div>
                     </div>
 
-                    {{-- User Filter --}}
+                    {{-- User / Officer Combobox (Mobile) --}}
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Receptionist / User</label>
-                        <input type="text" wire:model.live="userQ" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" placeholder="{{ __('app.search_user_ph') }}">
-                        <div class="relative mt-2">
-                            <select wire:model.live="userId" class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition appearance-none pr-8">
-                                <option value="">{{ __('app.all_users') }}</option>
-                                @foreach($users as $u)
-                                    <option value="{{ $u->user_id }}">{{ $u->full_name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{{ __('app.officer') }}</label>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: null,
+                                get items() {
+                                    const q = this.search.toLowerCase().trim();
+                                    return @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).filter(i =>
+                                        !q || i.label.toLowerCase().includes(q)
+                                    );
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('userId', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = null;
+                                    $wire.set('userId', null);
+                                }
+                            }"
+                            x-init="
+                                $watch('$wire.departmentId', () => { search = ''; this.selectedId = null; });
+                                $watch('$wire.userId', val => {
+                                    this.selectedId = val || null;
+                                    if (!val) { search = ''; }
+                                    else {
+                                        const found = @js($users->map(fn($u) => ['id' => $u->user_id, 'label' => $u->full_name])->values()->toArray()).find(i => i.id == val);
+                                        if (found) search = found.label;
+                                    }
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.all_users') }}"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="selectedId == item.id ? 'bg-[#4E653D] text-white' : 'text-foreground hover:bg-muted cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                {{ __('app.no_data') }}
+                            </p>
                         </div>
                     </div>
                 </div>
