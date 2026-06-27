@@ -564,12 +564,7 @@
 
                                                         {{-- CANCEL BUTTON (for ongoing) --}}
                                                         <button type="button"
-                                                            x-data
-                                                            @click="
-                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
-                                                                    $wire.openReschedule({{ $b->bookingroom_id }});
-                                                                }
-                                                            "
+                                                            wire:click="openReschedule({{ $b->bookingroom_id }})"
                                                             wire:loading.attr="disabled"
                                                             wire:target="openReschedule"
                                                             class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
@@ -652,8 +647,7 @@
                                                                 {{ __('app.detail') }}
                                                             </button>
                                                             <button type="button"
-                                                                x-data
-                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
+                                                                wire:click="openReschedule({{ $b->bookingroom_id }})"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                                 {{ __('app.cancel') }}
@@ -733,12 +727,6 @@
             </aside>
         </div>
 
-    </main>
-</div>
-
-{{-- Modals teleported outside the wire:poll div so polling never morphs them --}}
-
-@teleport('body')
         {{-- REJECT MODAL (Alasan wajib) --}}
         @if($showRejectModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -1172,6 +1160,7 @@
             </div>
         </div>
         @endif
-@endteleport
+    </main>
+</div>
 
 
