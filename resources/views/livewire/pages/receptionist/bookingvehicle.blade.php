@@ -261,17 +261,25 @@
                                 <p x-show="open && items.length === 0 && search && $wire.department_id" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
                                     {{ __('app.no_users_found') }}
                                 </p>
-                                <p x-show="!$wire.department_id" class="mt-1.5 text-[11px] text-muted-foreground">
-                                    {{ __('app.select_dept_first') }}
-                                </p>
 
                                 {{-- Hidden real input for Livewire --}}
                                 <input type="hidden" wire:model="borrower_user_id">
                             </div>
 
-                            <p class="text-[11px] text-muted-foreground mt-1.5">
-                                {{ __('app.borrower_name_hint') }}
-                            </p>
+                            {{-- Hover tooltip instead of always-visible hint text --}}
+                            <div class="relative inline-flex items-center gap-1 mt-1.5 group">
+                                <svg class="w-3.5 h-3.5 text-muted-foreground/50 cursor-help shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"/>
+                                </svg>
+                                <span class="text-[11px] text-muted-foreground/50 cursor-help">{{ __('app.user_hint_short') }}</span>
+                                <div class="absolute bottom-full left-0 mb-2 w-56 hidden group-hover:block z-50">
+                                    <div class="bg-gray-900 text-white text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-xl">
+                                        <p class="font-medium mb-0.5">{{ __('app.select_dept_first') }}</p>
+                                        <p class="text-white/70">{{ __('app.borrower_name_hint') }}</p>
+                                        <div class="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                            </div>
                             @error('borrower_user_id')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
                             @enderror

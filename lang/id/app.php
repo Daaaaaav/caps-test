@@ -200,6 +200,7 @@ return [
     'no_users_found'            => '— Tidak ada pengguna —',
     'borrower_name'             => 'Nama Peminjam (manual)',
     'borrower_name_hint'        => 'Jika tidak memilih pengguna, isi nama peminjam manual di kolom di bawah.',
+    'user_hint_short'           => 'Opsional — pilih user atau isi nama manual',
     'vehicle'                   => 'Kendaraan',
     'no_vehicle_data'           => 'Data kendaraan belum tersedia',
     'select_vehicle'            => 'Pilih kendaraan',

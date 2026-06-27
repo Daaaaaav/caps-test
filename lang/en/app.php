@@ -212,6 +212,7 @@ return [
     'no_users_found'            => '— No users found —',
     'borrower_name'             => 'Borrower Name (manual)',
     'borrower_name_hint'        => 'If no user is selected, fill in the borrower name manually below.',
+    'user_hint_short'           => 'Optional — select a user or type name manually',
     'vehicle'                   => 'Vehicle',
     'no_vehicle_data'           => 'No vehicle data available',
     'select_vehicle'            => 'Select vehicle',
