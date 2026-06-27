@@ -195,11 +195,14 @@ class Bookingvehicle extends Component
                 $overdueLabel = max(1, $diffMins) . ' minute' . ($diffMins !== 1 ? 's' : '');
             }
 
-            $this->addError(
-                'vehicle_id',
-                'This vehicle cannot be booked — it has an unresolved late return '
-                . '(Booking #' . $blocker->vehiclebooking_id . ', overdue by ' . $overdueLabel . '). '
-                . 'Please mark it as returned first.'
+            $this->dispatch(
+                'toast',
+                type: 'error',
+                title: 'Vehicle Unavailable',
+                message: 'This vehicle cannot be booked — it has an unresolved late return '
+                    . '(Booking #' . $blocker->vehiclebooking_id . ', overdue by ' . $overdueLabel . '). '
+                    . 'Please mark it as returned first.',
+                duration: 7000,
             );
             return;
         }

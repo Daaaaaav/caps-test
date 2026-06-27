@@ -211,7 +211,7 @@
                                         'returned'     => ['bg'=>'bg-indigo-100','text'=>'text-indigo-800','label'=>__('app.returned')],
                                         'rejected'     => ['bg'=>'bg-rose-100','text'=>'text-rose-800','label'=>__('app.rejected')],
                                         'completed'    => ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')],
-                                        'late_return'  => ['bg'=>'bg-orange-100','text'=>'text-orange-800','label'=>__('app.late_return')],
+                                        'late_return'  => ['bg'=>'bg-orange-600','text'=>'text-white','label'=>__('app.late_return')],
                                     ];
                                     $statusStyle = $statusColors[$b->status] ?? ['bg'=>'bg-gray-100','text'=>'text-gray-800','label'=>ucfirst($b->status)];
                                     $overdue = $b->status === 'late_return' ? $this->overdueDuration($b) : null;
