@@ -11,13 +11,44 @@
     }
     if (!function_exists('fmtTime')) {
         function fmtTime($v) {
-            try { return $v ? Carbon::parse($v)->format('H.i') : '—'; }
+            try { return $v ? Carbon::parse($v)->format('H:i') : '—'; }
             catch (\Throwable) {
                 if (is_string($v)) {
-                    if (preg_match('/^\d{2}:\d{2}/', $v)) return str_replace(':','.', substr($v,0,5));
-                    if (preg_match('/^\d{2}\.\d{2}/', $v)) return substr($v,0,5);
+                    if (preg_match('/^\d{2}:\d{2}/', $v)) return substr($v,0,5);
+                    if (preg_match('/^\d{2}\.\d{2}/', $v)) return str_replace('.',':', substr($v,0,5));
                 }
                 return '—';
+            }
+        }
+    }
+    if (!function_exists('canRejectBooking')) {
+        /**
+         * Check if a booking can still be rejected.
+         * Returns false if less than 30 minutes remain before meeting start.
+         */
+        function canRejectBooking($booking) {
+            try {
+                $tz = 'Asia/Jakarta';
+                $now = Carbon::now($tz);
+                $dateVal = $booking->date;
+                $timeVal = $booking->start_time;
+
+                // Build start datetime
+                if (is_string($timeVal) && preg_match('/^\d{4}-\d{2}-\d{2}/', $timeVal)) {
+                    $start = Carbon::parse($timeVal, $tz);
+                } elseif (is_string($dateVal) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:/', $dateVal)) {
+                    $start = Carbon::parse($dateVal, $tz);
+                    if (is_string($timeVal) && preg_match('/^\d{2}:\d{2}/', $timeVal)) {
+                        $start = $start->setTimeFromTimeString($timeVal);
+                    }
+                } else {
+                    $start = Carbon::parse(trim($dateVal . ' ' . ($timeVal ?: '00:00:00')), $tz);
+                }
+
+                // If less than 30 minutes remain before start, cannot reject
+                return $now->diffInMinutes($start, false) >= 30;
+            } catch (\Throwable) {
+                return true; // Allow rejection if we can't parse the time
             }
         }
     }
@@ -280,7 +311,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -341,15 +372,24 @@
                                                     {{ __('app.detail') }}
                                                 </button>
 
-                                                {{-- REJECT BUTTON (Red) --}}
+                                                {{-- REJECT BUTTON (Red) - disabled if < 30min before meeting --}}
+                                                @php $canReject = canRejectBooking($b); @endphp
                                                 <button type="button"
                                                     wire:click="openReject({{ $b->bookingroom_id }})"
                                                     wire:loading.attr="disabled"
                                                     wire:target="openReject"
-                                                    class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
+                                                    @if(!$canReject) disabled @endif
+                                                    class="px-4 py-2 text-xs font-medium rounded-lg border inline-flex items-center justify-center transition
+                                                        {{ $canReject
+                                                            ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
+                                                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' }}"
+                                                    @if(!$canReject) title="Cannot reject: less than 30 minutes before meeting starts" @endif>
                                                     <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                     {{ __('app.reject') }}
                                                 </button>
+                                                @if(!$canReject)
+                                                    <span class="text-[10px] text-gray-400 italic">Less than 30 min before start</span>
+                                                @endif
                                             </div>
                                         </div>
                                         {{-- END: MODIFIED CARD DESIGN TO MATCH IMAGE --}}
@@ -407,7 +447,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -429,10 +469,16 @@
                                                                     class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                     {{ __('app.detail') }}
                                                                 </button>
+                                                                @php $canRejectTbl = canRejectBooking($b); @endphp
                                                                 <button type="button"
                                                                     wire:click="openReject({{ $b->bookingroom_id }})"
                                                                     wire:loading.attr="disabled"
-                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
+                                                                    @if(!$canRejectTbl) disabled @endif
+                                                                    class="px-2.5 py-1.5 text-xs font-medium rounded-lg border transition
+                                                                        {{ $canRejectTbl
+                                                                            ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 focus:outline-none'
+                                                                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' }}"
+                                                                    @if(!$canRejectTbl) title="Cannot reject: less than 30 minutes before meeting starts" @endif>
                                                                     {{ __('app.reject') }}
                                                                 </button>
                                                             </div>
@@ -514,7 +560,7 @@
                                                             </span>
                                                             <span class="flex items-center gap-1.5 font-medium text-gray-800">
                                                                 <x-heroicon-o-clock class="w-4 h-4 text-gray-500"/>
-                                                                {{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}
+                                                                {{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}
                                                             </span>
                                                         </div>
                                                         @if($isRoomType)
@@ -561,21 +607,6 @@
                                                             class="{{ $btnGhost }}">
                                                             <x-heroicon-o-eye class="w-3.5 h-3.5 inline-block mr-0.5"/>
                                                             {{ __('app.detail') }}
-                                                        </button>
-
-                                                        {{-- CANCEL BUTTON (for ongoing) --}}
-                                                        <button type="button"
-                                                            x-data
-                                                            @click="
-                                                                if (confirm('{{ __('app.cancel_request_confirm') }}')) {
-                                                                    $wire.openReschedule({{ $b->bookingroom_id }});
-                                                                }
-                                                            "
-                                                            wire:loading.attr="disabled"
-                                                            wire:target="openReschedule"
-                                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:opacity-60 transition inline-flex items-center justify-center">
-                                                            <x-heroicon-o-x-mark class="w-3.5 h-3.5 inline-block mr-0.5"/>
-                                                            {{ __('app.cancel') }}
                                                         </button>
                                                     </div>
 
@@ -636,7 +667,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }}ΓÇô{{ fmtTime($b->end_time) }}</td>
+                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
                                                     <td class="px-6 py-4">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
@@ -651,13 +682,6 @@
                                                                 wire:click="openDetailModal({{ $b->bookingroom_id }})"
                                                                 class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition">
                                                                 {{ __('app.detail') }}
-                                                            </button>
-                                                            <button type="button"
-                                                                x-data
-                                                                @click="if (confirm('{{ __('app.cancel_request_confirm') }}')) { $wire.openReschedule({{ $b->bookingroom_id }}); }"
-                                                                wire:loading.attr="disabled"
-                                                                class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
-                                                                {{ __('app.cancel') }}
                                                             </button>
                                                         </div>
                                                     </td>
@@ -1045,7 +1069,7 @@
                             <p class="text-sm font-semibold text-foreground">
                                 {{ \Illuminate\Support\Carbon::parse($detail->date)->format('d M Y') }}
                                 <span class="text-muted-foreground/40 mx-1.5">/</span>
-                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} ΓÇô {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
+                                {{ \Illuminate\Support\Carbon::parse($detail->start_time)->format('H:i') }} &ndash; {{ \Illuminate\Support\Carbon::parse($detail->end_time)->format('H:i') }}
                             </p>
                         </div>
 

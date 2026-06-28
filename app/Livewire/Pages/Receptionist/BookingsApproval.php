@@ -389,6 +389,15 @@ class BookingsApproval extends Component
                 /** @var BookingRoom $b */
                 $b = BookingRoom::lockForUpdate()->findOrFail($this->rejectId);
 
+                // Enforce 30-minute rejection threshold
+                $now = Carbon::now($this->tz);
+                $start = $this->buildDt($b->date, $b->start_time);
+                $minutesLeft = $now->diffInMinutes($start, false);
+
+                if ($minutesLeft < 30) {
+                    throw new \RuntimeException('Cannot reject: less than 30 minutes before meeting starts.');
+                }
+
                 $b->status      = 'rejected';
                 $b->is_approve  = 0;
                 $b->approved_by = Auth::id();
