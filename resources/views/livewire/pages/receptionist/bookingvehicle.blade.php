@@ -404,7 +404,7 @@
                                     <option value="">{{ __('app.select_purpose') }}</option>
                                     <option value="dinas">{{ __('app.official') }}</option>
                                     <option value="operasional">{{ __('app.operational') }}</option>
-                                    <option value="antar jemput">{{ __('app.pickup_dropoff') }}</option>
+                                    <option value="antar_jemput">{{ __('app.pickup_dropoff') }}</option>
                                     <option value="lainnya">{{ __('app.other') }}</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">

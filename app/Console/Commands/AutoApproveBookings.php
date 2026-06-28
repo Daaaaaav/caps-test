@@ -85,8 +85,45 @@ class AutoApproveBookings extends Command
         }
 
         // ──────────────────────────────────────────────────────────────────
-        // 2. VEHICLE BOOKINGS — late return detection
-        //    approved → late_return  when end_at < NOW()
+        // 2. VEHICLE BOOKINGS — approved → on_progress
+        //    When an approved vehicle booking's start_at <= NOW()
+        //    (and end_at has NOT yet passed), mark it as on_progress.
+        // ──────────────────────────────────────────────────────────────────
+        $progressQuery = DB::table('vehicle_bookings')
+            ->whereNull('deleted_at')
+            ->where('status', 'approved')
+            ->whereNotNull('start_at')
+            ->whereNotNull('end_at')
+            ->where('start_at', '<=', $nowStr)
+            ->where('end_at', '>=', $nowStr);
+
+        $progressCount = $progressQuery->count();
+
+        if ($progressCount > 0) {
+            if ($isDry) {
+                $this->line("  [DRY-RUN] Would mark {$progressCount} vehicle booking(s) as on_progress.");
+            } else {
+                $affected = DB::table('vehicle_bookings')
+                    ->whereNull('deleted_at')
+                    ->where('status', 'approved')
+                    ->whereNotNull('start_at')
+                    ->whereNotNull('end_at')
+                    ->where('start_at', '<=', $nowStr)
+                    ->where('end_at', '>=', $nowStr)
+                    ->update([
+                        'status'     => 'on_progress',
+                        'updated_at' => $nowStr,
+                    ]);
+
+                $this->info("  ✓ Vehicle bookings marked as on_progress: {$affected}");
+            }
+        } else {
+            $this->line('  Vehicle bookings: none to mark as on_progress.');
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        // 3. VEHICLE BOOKINGS — late return detection
+        //    approved/on_progress → late_return  when end_at < NOW()
         // ──────────────────────────────────────────────────────────────────
         $lateQuery = DB::table('vehicle_bookings')
             ->whereNull('deleted_at')
