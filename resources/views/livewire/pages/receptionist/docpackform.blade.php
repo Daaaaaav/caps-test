@@ -52,30 +52,188 @@
             <form wire:submit.prevent="save" class="p-6 space-y-6">
                 {{-- Row: Direction & Type & Storage --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">{{ __('app.type') }}</label>
-                        <div class="relative">
-                            <select class="{{ $input }} appearance-none pr-8" wire:model.live="direction" wire:key="direction-select">
-                                <option value="taken">{{ __('app.incoming') }} ({{ __('app.taken') }})</option>
-                                <option value="deliver">{{ __('app.outgoing') }} ({{ __('app.deliver') }})</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.direction,
+                                options: [
+                                    { id: 'taken', label: @js(__('app.incoming') . ' (' . __('app.taken') . ')') },
+                                    { id: 'deliver', label: @js(__('app.outgoing') . ' (' . __('app.deliver') . ')') }
+                                ],
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                    return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const found = this.options.find(i => i.id === $wire.direction);
+                                    return found ? found.label : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('direction', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = 'taken';
+                                    $wire.set('direction', 'taken');
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('$wire.direction', val => {
+                                    this.selectedId = val || 'taken';
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.type') }}"
+                                    class="{{ $input }} pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button
+                                        x-show="search && selectedId !== 'taken'"
+                                        type="button"
+                                        @click.stop="clear()"
+                                        class="text-muted-foreground hover:text-foreground"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="selectedId == item.id
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'text-foreground hover:bg-muted cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                {{ __('app.no_data') }}
+                            </p>
+                            <input type="hidden" wire:model="direction">
                         </div>
                         @error('direction') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
 
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">{{ __('app.type') }}</label>
-                        <div class="relative">
-                            <select class="{{ $input }} appearance-none pr-8" wire:model.live="itemType" wire:key="type-select">
-                                <option value="package">{{ __('app.type_package') }}</option>
-                                <option value="document">{{ __('app.type_document') }}</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.itemType,
+                                options: [
+                                    { id: 'package', label: @js(__('app.type_package')) },
+                                    { id: 'document', label: @js(__('app.type_document')) }
+                                ],
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                    return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const found = this.options.find(i => i.id === $wire.itemType);
+                                    return found ? found.label : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('itemType', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = 'package';
+                                    $wire.set('itemType', 'package');
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('$wire.itemType', val => {
+                                    this.selectedId = val || 'package';
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.type') }}"
+                                    class="{{ $input }} pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button
+                                        x-show="search && selectedId !== 'package'"
+                                        type="button"
+                                        @click.stop="clear()"
+                                        class="text-muted-foreground hover:text-foreground"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.label)"
+                                        :class="selectedId == item.id
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'text-foreground hover:bg-muted cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.label"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                {{ __('app.no_data') }}
+                            </p>
+                            <input type="hidden" wire:model="itemType">
                         </div>
                         @error('itemType') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
@@ -88,10 +246,15 @@
                                 search: '',
                                 selectedId: null,
                                 get items() {
-                                    const q = this.search.toLowerCase().trim();
-                                    return @js(collect($storages)->map(fn($s) => ['id' => $s['id'], 'label' => $s['name']])->values()->toArray()).filter(i =>
-                                        !q || i.label.toLowerCase().includes(q)
-                                    );
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    const list = @js(collect($storages)->map(fn($s) => ['id' => $s['id'], 'label' => $s['name']])->values()->toArray());
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                    return list.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const list = @js(collect($storages)->map(fn($s) => ['id' => $s['id'], 'label' => $s['name']])->values()->toArray());
+                                    const found = list.find(i => i.id == $wire.storageId);
+                                    return found ? found.label : '';
                                 },
                                 select(id, label) {
                                     this.search = label;
@@ -106,13 +269,10 @@
                                 }
                             }"
                             x-init="
+                                search = selectedLabel;
                                 $watch('$wire.storageId', val => {
                                     this.selectedId = val || null;
-                                    if (!val) { search = ''; }
-                                    else {
-                                        const found = @js(collect($storages)->map(fn($s) => ['id' => $s['id'], 'label' => $s['name']])->values()->toArray()).find(i => i.id == val);
-                                        if (found) search = found.label;
-                                    }
+                                    search = selectedLabel;
                                 });
                             "
                             class="relative"
@@ -189,10 +349,15 @@
                                     search: '',
                                     selectedId: null,
                                     get items() {
-                                        const q = this.search.toLowerCase().trim();
-                                        return @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).filter(i =>
-                                            !q || i.label.toLowerCase().includes(q)
-                                        );
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        const list = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray());
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                        return list.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const list = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray());
+                                        const found = list.find(i => i.id == $wire.departmentId);
+                                        return found ? found.label : '';
                                     },
                                     select(id, label) {
                                         this.search = label;
@@ -207,13 +372,10 @@
                                     }
                                 }"
                                 x-init="
+                                    search = selectedLabel;
                                     $watch('$wire.departmentId', val => {
                                         this.selectedId = val || null;
-                                        if (!val) { search = ''; }
-                                        else {
-                                            const found = @js(collect($departments)->map(fn($d) => ['id' => $d['id'], 'label' => $d['name']])->values()->toArray()).find(i => i.id == val);
-                                            if (found) search = found.label;
-                                        }
+                                        search = selectedLabel;
                                     });
                                 "
                                 class="relative"
@@ -280,9 +442,14 @@
                                     search: '',
                                     selectedId: null,
                                     get items() {
-                                        const q = this.search.toLowerCase().trim();
+                                        const q = (this.search || '').toLowerCase().trim();
                                         const list = Object.entries($wire.users || {}).map(([id, name]) => ({ id: parseInt(id), label: name }));
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
                                         return q ? list.filter(i => i.label.toLowerCase().includes(q)) : list;
+                                    },
+                                    get selectedLabel() {
+                                        const found = Object.entries($wire.users || {}).find(([id]) => id == $wire.userId);
+                                        return found ? found[1] : '';
                                     },
                                     select(id, label) {
                                         this.search = label;
@@ -297,14 +464,11 @@
                                     }
                                 }"
                                 x-init="
+                                    search = selectedLabel;
                                     $watch('$wire.departmentId', () => { search = ''; this.selectedId = null; });
                                     $watch('$wire.userId', val => {
                                         this.selectedId = val || null;
-                                        if (!val) { search = ''; }
-                                        else {
-                                            const found = Object.entries($wire.users || {}).find(([id]) => id == val);
-                                            if (found) search = found[1];
-                                        }
+                                        search = selectedLabel;
                                     });
                                 "
                                 class="relative"
@@ -440,13 +604,15 @@
     <div id="camera-modal"
          wire:ignore   {{-- penting: Livewire jangan utak-atik modal ini --}}
          class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 items-center justify-center p-4 hidden">
-        <div class="bg-card rounded-2xl shadow-2xl border border-border max-w-lg w-full overflow-hidden flex flex-col">
-            <div class="px-6 py-5 border-b border-border bg-muted/10 flex items-center justify-between">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-hidden flex flex-col">
+            <div class="px-6 py-5 border-b border-gray-200 bg-[#4A2F24] text-[#CDDEA7] flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-sm font-semibold text-foreground">{{ __('app.camera_active') }}</span>
+                    <div class="w-8 h-8 rounded-lg bg-[#CDDEA7]/10 flex items-center justify-center border border-[#CDDEA7]/20">
+                        <x-heroicon-o-camera class="w-4 h-4 text-[#CDDEA7]" />
+                    </div>
+                    <span class="text-base font-bold tracking-tight">{{ __('app.camera_active') }}</span>
                 </div>
-                <button id="close-camera-btn" class="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition">
+                <button id="close-camera-btn" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition">
                     <x-heroicon-o-x-mark class="w-4.5 h-4.5" />
                 </button>
             </div>

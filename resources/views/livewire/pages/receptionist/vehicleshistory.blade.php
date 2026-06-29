@@ -27,7 +27,7 @@
     $icoAvatar = 'w-10 h-10 bg-[#4E653D] rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0 overflow-hidden relative';
 @endphp
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50" x-data="{ showFilterModal: false }">
     <main class="px-4 sm:px-6 py-6 space-y-6">
 
         {{-- Flash Messages --}}
@@ -71,12 +71,23 @@
                         </div>
                     </div>
 
-                    {{-- Include Deleted --}}
-                    <label class="inline-flex items-center gap-2 text-sm text-[#CDDEA7]/90 cursor-pointer">
-                        <input type="checkbox" wire:model.live="includeDeleted"
-                            class="w-4 h-4 rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 text-[#CDDEA7] focus:ring-2 focus:ring-[#CDDEA7]/20 cursor-pointer">
-                        <span>{{ __('app.include_deleted') }}</span>
-                    </label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" wire:click="$toggle('withTrashed')" class="flex items-center gap-2 group focus:outline-none">
+                            <div class="relative flex items-center">
+                                <div class="w-9 h-5 rounded-full transition-colors {{ $withTrashed ? 'bg-[#CDDEA7] border-[#CDDEA7]' : 'bg-[#4A2F24]/50 border border-[#CDDEA7]/30' }}"></div>
+                                <div class="absolute left-[3px] w-3.5 h-3.5 rounded-full transition-transform {{ $withTrashed ? 'translate-x-4 bg-[#4A2F24]' : 'bg-[#CDDEA7]' }}"></div>
+                            </div>
+                            <span class="text-sm font-medium text-[#CDDEA7]/90 group-hover:text-[#CDDEA7] transition-colors">{{ __('app.show_deleted') }}</span>
+                        </button>
+
+                        {{-- MOBILE FILTER BUTTON --}}
+                        <button type="button"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden"
+                                @click="showFilterModal = true">
+                            <x-heroicon-o-funnel class="w-4 h-4"/>
+                            <span>{{ __('app.filter') }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,10 +153,6 @@
                                 Vehicle: {{ $activeVehicle }}
                                 <button type="button" class="ml-1 hover:text-white" wire:click="$set('vehicleFilter', null)">×</button>
                             </span>
-                        @else
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
-                                {{ __('app.no_vehicle_filter') }}
-                            </span>
                         @endif
                     </div>
                 </div>
@@ -173,11 +180,71 @@
 
                         <div>
                             <label class="{{ $label }}">{{ __('app.sort') }}</label>
-                            <select wire:model.live="sortFilter" class="{{ $input }}">
-                                <option value="recent">{{ __('app.sort_default') }}</option>
-                                <option value="oldest">{{ __('app.sort_oldest_first') }}</option>
-                                <option value="nearest">{{ __('app.sort_nearest') }}</option>
-                            </select>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: @entangle('sortFilter').live,
+                                    options: [
+                                        { id: 'recent', label: '{{ __('app.sort_default') }}' },
+                                        { id: 'oldest', label: '{{ __('app.sort_oldest_first') }}' },
+                                        { id: 'nearest', label: '{{ __('app.sort_nearest') }}' }
+                                    ],
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id === this.selectedId);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id) {
+                                        this.selectedId = id;
+                                        this.open = false;
+                                    }
+                                }"
+                                x-init="
+                                    if (!selectedId) selectedId = 'recent';
+                                    $watch('selectedId', () => { search = ''; });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id)"
+                                        autocomplete="off"
+                                        :placeholder="selectedLabel || '{{ __('app.sort_default') }}'"
+                                        class="{{ $input }} pr-8 cursor-pointer"
+                                        :class="{ 'placeholder-gray-900': selectedId, 'placeholder-gray-400': !selectedId }"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id)"
+                                            :class="selectedId === item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -226,10 +293,6 @@
                                                             {{ __('app.deleted') }}
                                                         </span>
                                                     @endif
-                                                    {{-- ID Chip --}}
-                                                    <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0">
-                                                        #{{ $b->vehiclebooking_id }}
-                                                    </span>
                                                 </div>
                                             </div>
 
@@ -288,6 +351,7 @@
 
                                     {{-- 5. BOTTOM ACTIONS (Horizontally aligned and right justified) --}}
                                     <div class="pt-3 border-t border-gray-100 flex justify-end gap-3 items-center">
+                                        <span class="text-[11px] text-gray-500 mr-auto">No. {{ ($bookings->firstItem() ?? 1) + $loop->index }}</span>
                                         
                                         {{-- Actions based on Trashed Status --}}
                                         @if(!$isTrashed)
@@ -391,7 +455,7 @@
                 {{-- Pagination --}}
                 @if(method_exists($bookings, 'links'))
                     <div class="px-4 sm:px-6 py-5 bg-gray-50 border-t border-gray-200 rounded-b-2xl">
-                        <div class="flex justify-center">
+                        <div class="w-full">
                             {{ $bookings->links() }}
                         </div>
                     </div>
@@ -401,66 +465,106 @@
             {{-- SIDEBAR --}}
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
-                    <div class="px-4 py-4 border-b border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">{{ __('app.click_to_filter') }}</p>
+                    <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">{{ __('app.advanced_filters') }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.filter_by_vehicle') }}</p>
                     </div>
 
-                    <div class="px-4 py-3 max-h-64 overflow-y-auto">
-                        <button type="button" wire:click="$set('vehicleFilter', null)"
-                            class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
-                            <span class="flex items-center gap-2">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">{{ __('app.all') }}</span>
-                                <span>{{ __('app.all_vehicles') }}</span>
-                            </span>
-                            @if(is_null($vehicleFilter))
-                                <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
-                            @endif
-                        </button>
-
-                        <div class="mt-2 space-y-1.5">
-                            @forelse($vehicles as $v)
-                                @php
-                                    $vLabel = $v->name ?? $v->plate_number ?? '#'.$v->vehicle_id;
-                                    $active = !is_null($vehicleFilter) && (int)$vehicleFilter === (int)$v->vehicle_id;
-                                @endphp
-
+                    <div class="p-4 space-y-4 bg-white">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{{ __('app.vehicle') }}</label>
+                            <div class="px-1 py-1 max-h-80 overflow-y-auto">
                                 <button type="button"
-                                    wire:click="$set('vehicleFilter', {{ $v->vehicle_id }})"
-                                    class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-800 hover:bg-gray-100' }}">
+                                        wire:click="$set('vehicleFilter', null)"
+                                        class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors mb-1.5
+                                            {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
                                     <span class="flex items-center gap-2">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">
-                                            {{ substr($vLabel,0,2) }}
-                                        </span>
-                                        <span class="truncate">{{ $vLabel }}</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">All</span>
+                                        <span>{{ __('app.all_vehicles') }}</span>
                                     </span>
-                                    @if($active)
-                                        <span class="text-[10px] uppercase tracking-wide opacity-80">{{ __('app.active') }}</span>
-                                    @endif
                                 </button>
-                            @empty
-                                <p class="text-xs text-gray-500">{{ __('app.no_vehicle_data_filter') }}</p>
-                            @endforelse
-                        </div>
-                    </div>
 
-                    <div class="px-4 pt-3 pb-4 border-t border-gray-200 bg-gray-50">
-                        <h4 class="text-xs font-semibold text-gray-900 mb-2">{{ __('app.analytics') }}</h4>
-                        <div class="space-y-2 text-xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-600">{{ __('app.total_vehicles') }}</span>
-                                <span class="font-semibold text-gray-900">{{ count($vehicles) }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-600">
-                                    {{ $statusTab === 'rejected' ? __('app.rejected_records') : __('app.completed_records') }}
-                                </span>
-                                <span class="font-semibold text-gray-900">{{ $bookings->total() }}</span>
+                                <div class="mt-2 space-y-1.5">
+                                    @forelse($vehicles as $v)
+                                        @php
+                                            $vLabel = $v->name ?? $v->plate_number ?? '#'.$v->vehicle_id;
+                                            $active = !is_null($vehicleFilter) && (int)$vehicleFilter === (int)$v->vehicle_id;
+                                        @endphp
+                                        <button type="button"
+                                                wire:click="$set('vehicleFilter', {{ $v->vehicle_id }})"
+                                                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs border transition-colors
+                                                    {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                                            <span class="flex items-center gap-2">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">
+                                                    {{ substr($vLabel, 0, 2) }}
+                                                </span>
+                                                <span class="truncate font-medium">{{ $vLabel }}</span>
+                                            </span>
+                                        </button>
+                                    @empty
+                                        <p class="text-xs text-gray-500">{{ __('app.no_vehicle_data_filter') }}</p>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
             </aside>
+        </div>
+
+        {{-- MOBILE FILTER MODAL --}}
+        <div x-show="showFilterModal" class="fixed inset-0 z-50 md:hidden flex items-end" x-cloak style="display: none;">
+            <div x-show="showFilterModal" x-transition.opacity class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="showFilterModal = false"></div>
+            <div x-show="showFilterModal" 
+                 x-transition:enter="transform transition ease-out duration-300"
+                 x-transition:enter-start="translate-y-full"
+                 x-transition:enter-end="translate-y-0"
+                 x-transition:leave="transform transition ease-in duration-200"
+                 x-transition:leave-start="translate-y-0"
+                 x-transition:leave-end="translate-y-full"
+                 class="relative w-full bg-white rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-gray-200">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+                    <div>
+                        <h3 class="text-sm font-semibold tracking-tight text-gray-900">{{ __('app.filter_by_vehicle') }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.click_to_filter') }}</p>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition" @click="showFilterModal = false">✕</button>
+                </div>
+
+                <div class="p-5 space-y-5 overflow-y-auto flex-1 bg-white">
+                    <button type="button" wire:click="$set('vehicleFilter', null)" @click="showFilterModal = false"
+                        class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors {{ is_null($vehicleFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                        <span class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">{{ __('app.all') }}</span>
+                            <span>{{ __('app.all_vehicles') }}</span>
+                        </span>
+                    </button>
+
+                    <div class="space-y-1.5">
+                        @forelse($vehicles as $v)
+                            @php
+                                $vLabel = $v->name ?? $v->plate_number ?? '#'.$v->vehicle_id;
+                                $active = !is_null($vehicleFilter) && (int)$vehicleFilter === (int)$v->vehicle_id;
+                            @endphp
+
+                            <button type="button"
+                                wire:click="$set('vehicleFilter', {{ $v->vehicle_id }})"
+                                @click="showFilterModal = false"
+                                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs border transition-colors {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                                <span class="flex items-center gap-2">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-300 text-[11px]">
+                                        {{ substr($vLabel,0,2) }}
+                                    </span>
+                                    <span class="truncate">{{ $vLabel }}</span>
+                                </span>
+                            </button>
+                        @empty
+                            <p class="text-xs text-gray-500">{{ __('app.no_vehicle_data_filter') }}</p>
+                        @endforelse
+                    </div>
+
+                </div>
+            </div>
         </div>
     </main>
 </div>

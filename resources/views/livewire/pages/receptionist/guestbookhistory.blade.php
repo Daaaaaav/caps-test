@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50" wire:poll.15s>
+<div class="min-h-screen bg-gray-50" x-data="{ showFilterModal: false }" wire:poll.15s>
     @php
         use Carbon\Carbon;
 
@@ -73,12 +73,21 @@
 
                     <div class="flex items-center gap-3">
                         {{-- Show deleted toggle --}}
-                        <label class="inline-flex items-center gap-2 text-sm text-[#CDDEA7]/90 cursor-pointer">
-                            <input type="checkbox"
-                                   wire:model.live="withTrashed"
-                                   class="rounded border-[#CDDEA7]/30 bg-[#CDDEA7]/10 focus:ring-[#CDDEA7]/40 text-[#CDDEA7]">
-                            <span>{{ __('app.show_deleted') }}</span>
-                        </label>
+                        <button type="button" wire:click="$toggle('withTrashed')" class="flex items-center gap-2 group focus:outline-none">
+                            <div class="relative flex items-center">
+                                <div class="w-9 h-5 rounded-full transition-colors {{ $withTrashed ? 'bg-[#CDDEA7] border-[#CDDEA7]' : 'bg-[#4A2F24]/50 border border-[#CDDEA7]/30' }}"></div>
+                                <div class="absolute left-[3px] w-3.5 h-3.5 rounded-full transition-transform {{ $withTrashed ? 'translate-x-4 bg-[#4A2F24]' : 'bg-[#CDDEA7]' }}"></div>
+                            </div>
+                            <span class="text-sm font-medium text-[#CDDEA7]/90 group-hover:text-[#CDDEA7] transition-colors">{{ __('app.show_deleted') }}</span>
+                        </button>
+
+                        {{-- MOBILE FILTER BUTTON --}}
+                        <button type="button"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#CDDEA7]/10 text-xs font-medium border border-[#CDDEA7]/30 hover:bg-[#CDDEA7]/20 md:hidden transition"
+                                @click="showFilterModal = true">
+                            <x-heroicon-o-funnel class="w-4 h-4"/>
+                            <span>{{ __('app.filter') ?? 'Filter' }}</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -151,11 +160,6 @@
                                     <span>{{ __('app.officer') }}: {{ $petugasFilter }}</span>
                                     <button type="button" class="ml-1 hover:text-white font-bold" wire:click="clearPetugasFilter">×</button>
                                 </span>
-                            @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-dashed border-gray-300">
-                                    <x-heroicon-o-funnel class="w-3.5 h-3.5 text-gray-400"/>
-                                    <span>{{ __('app.all_officers') }}</span>
-                                </span>
                             @endif
                         </div>
                     </div>
@@ -187,11 +191,71 @@
 
                         <div>
                             <label class="{{ $label }}">{{ __('app.sort') }}</label>
-                            <select wire:model.live="dateMode" class="{{ $input }}">
-                                <option value="semua">{{ __('app.sort_default') }}</option>
-                                <option value="terbaru">{{ __('app.sort_newest') }}</option>
-                                <option value="terlama">{{ __('app.sort_oldest') }}</option>
-                            </select>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: @entangle('dateMode').live,
+                                    options: [
+                                        { id: 'semua', label: '{{ __('app.sort_default') }}' },
+                                        { id: 'terbaru', label: '{{ __('app.sort_newest') }}' },
+                                        { id: 'terlama', label: '{{ __('app.sort_oldest') }}' }
+                                    ],
+                                    get items() {
+                                        const q = this.search.toLowerCase().trim();
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id === this.selectedId);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id) {
+                                        this.selectedId = id;
+                                        this.open = false;
+                                    }
+                                }"
+                                x-init="
+                                    if (!selectedId) selectedId = 'semua';
+                                    $watch('selectedId', () => { search = ''; });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id)"
+                                        autocomplete="off"
+                                        :placeholder="selectedLabel || '{{ __('app.sort_default') }}'"
+                                        class="{{ $input }} pr-8 cursor-pointer"
+                                        :class="{ 'placeholder-gray-900': selectedId, 'placeholder-gray-400': !selectedId }"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id)"
+                                            :class="selectedId === item.id ? 'bg-[#4E653D] text-white' : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                            class="px-3.5 py-2.5 transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,10 +279,9 @@
                                             $avatarChar = strtoupper(substr($e->name ?? 'G', 0, 1));
                                         @endphp
                                         <div wire:key="entry-card-{{ $e->guestbook_id }}-{{ $stateKey }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between {{ $e->deleted_at ? 'opacity-60 bg-gray-50/50' : '' }}">
-
-                                            <div class="space-y-3">
-                                                <div class="flex items-start gap-4">
+                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition {{ $e->deleted_at ? 'opacity-60 bg-gray-50/50' : '' }}">
+                                             
+                                            <div class="flex items-start gap-4">
                                                     {{-- Avatar/Initial --}}
                                                     <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
 
@@ -227,18 +290,24 @@
                                                             <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
                                                                 {{ $e->name }}
                                                             </h4>
-                                                            <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 text-gray-500 bg-gray-50 flex-shrink-0 font-mono">
-                                                                #{{ $rowNo }}
-                                                            </span>
+                                                            <div class="flex-shrink-0 flex items-center gap-2">
+                                                                @if($e->deleted_at)
+                                                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 flex-shrink-0">
+                                                                        {{ strtoupper(__('app.deleted')) }}
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex-shrink-0">
+                                                                        {{ strtoupper(__('app.active')) }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
                                                         </div>
                                                         @if($e->phone_number)
                                                             <p class="text-xs text-gray-500 font-mono">{{ $e->phone_number }}</p>
                                                         @endif
-                                                    </div>
-                                                </div>
 
                                                 {{-- Middle: Details --}}
-                                                <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
+                                                <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2 mt-3">
                                                     @if($e->instansi)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-building-office class="w-4 h-4 text-gray-500 shrink-0"/>
@@ -253,35 +322,32 @@
                                                     @endif
                                                 </div>
 
-                                                {{-- Time and Officer --}}
-                                                <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2">
-                                                    <div class="flex items-center gap-1.5 min-w-0">
-                                                        <x-heroicon-o-calendar class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span class="truncate font-medium text-gray-700">{{ fmtDate($e->date) }}</span>
-                                                    </div>
-                                                    <div class="flex items-center gap-1.5 min-w-0">
-                                                        <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span class="truncate font-medium text-emerald-600">{{ fmtTime($e->jam_in) }}</span>
-                                                        <span class="text-gray-400 font-medium">-</span>
-                                                        <span class="truncate font-medium text-rose-600">{{ fmtTime($e->jam_out) }}</span>
-                                                    </div>
-                                                    @if($e->petugas_penjaga)
-                                                        <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
-                                                            <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $e->petugas_penjaga }}</span></span>
+                                                {{-- BOTTOM LEFT: Time and Officer --}}
+                                                <div class="text-[12px] text-gray-600 space-y-2 mt-2">
+                                                    <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2">
+                                                        <div class="flex items-center gap-1.5 min-w-0">
+                                                            <x-heroicon-o-calendar class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                            <span class="truncate font-medium text-gray-700">{{ fmtDate($e->date) }}</span>
                                                         </div>
-                                                    @endif
+                                                        <div class="flex items-center gap-1.5 min-w-0">
+                                                            <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                            <span class="truncate font-medium text-emerald-600">{{ fmtTime($e->jam_in) }}</span>
+                                                            <span class="text-gray-400 font-medium">-</span>
+                                                            <span class="truncate font-medium text-rose-600">{{ fmtTime($e->jam_out) }}</span>
+                                                        </div>
+                                                        @if($e->petugas_penjaga)
+                                                            <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
+                                                                <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                                <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $e->petugas_penjaga }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
+                                            </div>
 
-                                            <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
-                                                <span>
-                                                    @if($e->deleted_at)
-                                                        <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
-                                                    @else
-                                                        <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
-                                                    @endif
-                                                </span>
+                                            <div class="pt-3 border-t border-gray-100 flex justify-end gap-3 items-center">
+                                                <span class="text-[11px] text-gray-500 mr-auto">No. {{ $rowNo }}</span>
                                                 <div class="flex gap-1.5 font-medium">
                                                     <button wire:click="openEdit({{ $e->guestbook_id }})"
                                                             wire:loading.attr="disabled"
@@ -427,10 +493,9 @@
                                             $avatarChar = strtoupper(substr($r->name ?? 'G', 0, 1));
                                         @endphp
                                         <div wire:key="latest-card-{{ $r->guestbook_id }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition flex flex-col justify-between">
+                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
 
-                                            <div class="space-y-3">
-                                                <div class="flex items-start gap-4">
+                                            <div class="flex items-start gap-4">
                                                     <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
 
                                                     <div class="flex-1 min-w-0">
@@ -438,17 +503,17 @@
                                                             <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
                                                                 {{ $r->name }}
                                                             </h4>
-                                                            <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 text-gray-500 bg-gray-50 flex-shrink-0 font-mono">
-                                                                #{{ $rowNoLatest }}
-                                                            </span>
+                                                            <div class="flex-shrink-0 flex items-center gap-2">
+                                                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex-shrink-0">
+                                                                    {{ strtoupper(__('app.active')) }}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                         @if($r->phone_number)
                                                             <p class="text-xs text-gray-500 font-mono">{{ $r->phone_number }}</p>
                                                         @endif
-                                                    </div>
-                                                </div>
 
-                                                <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2">
+                                                <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2 mt-3">
                                                     @if($r->instansi)
                                                         <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-building-office class="w-4 h-4 text-gray-500 shrink-0"/>
@@ -456,32 +521,38 @@
                                                         </div>
                                                     @endif
                                                     @if($r->keperluan)
-                                                        <div class="flex items-center gap-1.5 font-medium text-gray-800">
+                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
                                                             <x-heroicon-o-information-circle class="w-4 h-4 text-gray-500 shrink-0"/>
                                                             <span class="truncate">{{ __('app.visit_purpose') }}: <span class="font-semibold text-gray-900">{{ $r->keperluan }}</span></span>
                                                         </div>
                                                     @endif
                                                 </div>
 
-                                                <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2">
-                                                    <div class="flex items-center gap-1.5 min-w-0">
-                                                        <x-heroicon-o-calendar class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span class="truncate font-medium text-gray-700">{{ fmtDate($r->date) }}</span>
-                                                    </div>
-                                                    <div class="flex items-center gap-1.5 min-w-0">
-                                                        <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                        <span class="truncate font-semibold text-emerald-600">{{ __('app.check_in') }}: {{ fmtTime($r->jam_in) }}</span>
-                                                    </div>
-                                                    @if($r->petugas_penjaga)
-                                                        <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
-                                                            <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $r->petugas_penjaga }}</span></span>
+                                                {{-- BOTTOM LEFT: Time and Officer --}}
+                                                <div class="text-[12px] text-gray-600 space-y-2 mt-2">
+                                                    <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2">
+                                                        <div class="flex items-center gap-1.5 min-w-0">
+                                                            <x-heroicon-o-calendar class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                            <span class="truncate font-medium text-gray-700">{{ fmtDate($r->date) }}</span>
                                                         </div>
-                                                    @endif
+                                                        <div class="flex items-center gap-1.5 min-w-0">
+                                                            <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                            <span class="truncate font-medium text-emerald-600">{{ fmtTime($r->jam_in) }}</span>
+                                                        </div>
+                                                        @if($r->petugas_penjaga)
+                                                            <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
+                                                                <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                                                <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $r->petugas_penjaga }}</span></span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-end gap-1.5 font-medium">
+                                        <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
+                                            <span class="text-[11px] text-gray-500 mr-auto">No. {{ $rowNoLatest }}</span>
+                                            <div class="flex items-center justify-end gap-1.5 font-medium">
                                                 <button wire:click="openEdit({{ $r->guestbook_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
@@ -568,21 +639,12 @@
 
                 {{-- PAGINATION --}}
                 <div class="px-4 sm:px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <p class="text-xs text-gray-500 font-medium">
-                            @if($activeTab === 'entries')
-                                Showing {{ $entries->firstItem() ?? 0 }}–{{ $entries->lastItem() ?? 0 }} of {{ $entries->total() }} entries
-                            @else
-                                Showing {{ $latest->firstItem() ?? 0 }}–{{ $latest->lastItem() ?? 0 }} of {{ $latest->total() }} entries
-                            @endif
-                        </p>
-                        <div class="text-sm">
-                            @if($activeTab === 'entries')
-                                {{ $entries->onEachSide(1)->links() }}
-                            @else
-                                {{ $latest->onEachSide(1)->links() }}
-                            @endif
-                        </div>
+                    <div class="w-full">
+                        @if($activeTab === 'entries')
+                            {{ $entries->onEachSide(1)->links() }}
+                        @else
+                            {{ $latest->onEachSide(1)->links() }}
+                        @endif
                     </div>
                 </div>
             </section>
@@ -590,48 +652,47 @@
             {{-- RIGHT: SIDEBAR (OFFICER FILTER) (1 Column) --}}
             <aside class="hidden md:flex md:flex-col md:col-span-1 gap-4">
                 <section class="{{ $card }}">
-                    <div class="px-4 py-4 border-b border-gray-200 bg-gray-50/50">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ __('app.all_officers') }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">Klik salah satu petugas untuk mem-filter daftar history.</p>
+                    <div class="px-4 py-3.5 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900">{{ __('app.advanced_filters') }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.filter_by_officer') ?? 'Filter by Officer' }}</p>
                     </div>
 
-                    <div class="px-4 py-3 max-h-80 overflow-y-auto space-y-1.5">
-                        {{-- All Officers --}}
-                        <button type="button"
-                                wire:click="clearPetugasFilter"
-                                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition
-                                    {{ is_null($petugasFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                            <span class="flex items-center gap-2">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200 text-[10px] bg-white font-mono text-gray-500">
-                                    ALL
-                                </span>
-                                <span>{{ __('app.all_officers') }}</span>
-                            </span>
-                            @if(is_null($petugasFilter))
-                                <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">{{ __('app.active') }}</span>
-                            @endif
-                        </button>
+                    <div class="p-4 space-y-4 bg-white">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{{ __('app.officer') ?? 'Officer' }}</label>
+                            <div class="px-1 py-1 max-h-80 overflow-y-auto">
+                                {{-- All Officers --}}
+                                <button type="button"
+                                        wire:click="clearPetugasFilter"
+                                        class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors mb-1.5
+                                            {{ is_null($petugasFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                                    <span class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">All</span>
+                                        <span>{{ __('app.all_officers') }}</span>
+                                    </span>
+                                </button>
 
-                        {{-- Each Officer option --}}
-                        @forelse($petugasOptions as $p)
-                            @php $active = !is_null($petugasFilter) && $petugasFilter === $p; @endphp
-                            <button type="button"
-                                    wire:click="selectPetugas('{{ $p }}')"
-                                    class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition text-left
-                                        {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                                <span class="flex items-center gap-2 min-w-0">
-                                    <div class="w-6 h-6 rounded-md bg-[#4E653D]/10 text-[#4E653D] flex items-center justify-center font-bold text-[10px] shrink-0">
-                                        {{ strtoupper(substr($p, 0, 1)) }}
-                                    </div>
-                                    <span class="truncate pr-1">{{ $p }}</span>
-                                </span>
-                                @if($active)
-                                    <span class="text-[9px] uppercase font-bold tracking-wider opacity-85">{{ __('app.active') }}</span>
-                                @endif
-                            </button>
-                        @empty
-                            <p class="text-[11px] text-gray-400 text-center py-4">Belum ada data petugas.</p>
-                        @endforelse
+                                {{-- Each Officer option --}}
+                                <div class="mt-2 space-y-1.5">
+                                    @forelse($petugasOptions as $p)
+                                        @php $active = !is_null($petugasFilter) && $petugasFilter === $p; @endphp
+                                        <button type="button"
+                                                wire:click="selectPetugas('{{ $p }}')"
+                                                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs border transition-colors
+                                                    {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                                            <span class="flex items-center gap-2">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">
+                                                    {{ substr($p, 0, 2) }}
+                                                </span>
+                                                <span class="truncate font-medium">{{ $p }}</span>
+                                            </span>
+                                        </button>
+                                    @empty
+                                        <p class="text-[11px] text-gray-400 text-center py-4">{{ __('app.no_data') }}</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </aside>
@@ -639,7 +700,7 @@
 
         {{-- EDIT MODAL (Matching premium modal style from booking history) --}}
         @if ($showEdit)
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4"
                  x-data x-on:keydown.escape.window="$wire.closeEdit()">
                 {{-- Backdrop with blur --}}
                 <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300" wire:click="closeEdit"></div>
@@ -742,5 +803,73 @@
                 </div>
             </div>
         @endif
+
+        {{-- MOBILE FILTER MODAL --}}
+        <div x-show="showFilterModal" class="fixed inset-0 z-50 md:hidden flex items-end" x-cloak style="display: none;">
+            <div x-show="showFilterModal" x-transition.opacity class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="showFilterModal = false"></div>
+            <div x-show="showFilterModal" 
+                 x-transition:enter="transform transition ease-out duration-300"
+                 x-transition:enter-start="translate-y-full"
+                 x-transition:enter-end="translate-y-0"
+                 x-transition:leave="transform transition ease-in duration-200"
+                 x-transition:leave-start="translate-y-0"
+                 x-transition:leave-end="translate-y-full"
+                 class="relative w-full bg-white rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col border-t border-gray-200">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+                    <div>
+                        <h3 class="text-sm font-semibold tracking-tight text-gray-900">{{ __('app.advanced_filters') }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">{{ __('app.filter_by_officer') ?? 'Filter by Officer' }}</p>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition" @click="showFilterModal = false">✕</button>
+                </div>
+
+                <div class="p-5 space-y-4 overflow-y-auto flex-1 bg-white">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 mb-3 flex items-center gap-1.5">{{ __('app.officer') ?? 'Officer' }}</h4>
+
+                        <button type="button"
+                                wire:click="clearPetugasFilter"
+                                @click="showFilterModal = false"
+                                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors mb-2
+                                    {{ is_null($petugasFilter) ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                            <span class="flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">
+                                    {{ __('app.all') ?? 'All' }}
+                                </span>
+                                <span>{{ __('app.all_officers') }}</span>
+                            </span>
+                        </button>
+
+                        <div class="mt-2 space-y-1.5">
+                            @forelse($petugasOptions as $p)
+                                @php $active = !is_null($petugasFilter) && $petugasFilter === $p; @endphp
+                                <button type="button"
+                                        wire:click="selectPetugas('{{ $p }}')"
+                                        @click="showFilterModal = false"
+                                        class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs border transition-colors
+                                            {{ $active ? 'bg-[#4A2F24] text-[#CDDEA7] border-[#4A2F24] shadow-sm' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50' }}">
+                                    <span class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md border border-gray-200/60 text-[10px] font-bold">
+                                            {{ substr($p, 0, 2) }}
+                                        </span>
+                                        <span class="truncate font-medium">{{ $p }}</span>
+                                    </span>
+                                </button>
+                            @empty
+                                <p class="text-[11px] text-gray-400 text-center py-4">{{ __('app.no_data') }}</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-5 py-4 border-t border-gray-200 bg-gray-50">
+                    <button type="button"
+                            class="w-full h-10 rounded-lg bg-[#4E653D] text-white text-xs font-semibold hover:bg-[#354C2B] transition-colors shadow-sm"
+                            @click="showFilterModal = false">
+                        {{ __('app.apply_close') ?? 'Apply & Close' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
