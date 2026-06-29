@@ -155,7 +155,7 @@ class Guestbook extends Component
             try {
                 Mail::to($validatedData['email'])->send(new GuestbookQrMail($entry));
             } catch (\Throwable $e) {
-                Log::error('GuestbookQrMail failed: ' . $e->getMessage());
+                Log::error('GuestbookQrMail failed: ' . $e->getMessage(), ['exception' => $e]);
                 // Non-fatal — entry is already saved, just warn the receptionist
                 $this->dispatch(
                     'toast',

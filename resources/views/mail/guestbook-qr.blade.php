@@ -86,13 +86,20 @@
             color: #6b7280;
             margin: 0 0 16px 0;
         }
-        .qr-section img {
+        .qr-section .qr-svg-wrap {
+            display: inline-block;
             width: 220px;
             height: 220px;
             border: 4px solid #4A2F24;
             border-radius: 12px;
             padding: 8px;
             background: #fff;
+            box-sizing: content-box;
+        }
+        .qr-section .qr-svg-wrap svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
         .qr-section .scan-count-note {
             font-size: 12px;
@@ -188,7 +195,7 @@
         {{-- QR Code --}}
         <div class="qr-section">
             <p>Scan QR code ini untuk mencatat kehadiran Anda:</p>
-            <img src="data:image/png;base64,{{ $qrCodeBase64 }}" alt="QR Code Kunjungan">
+            <div class="qr-svg-wrap">{!! $qrCodeSvg !!}</div>
             <br>
             <span class="scan-count-note">
                 &#10003; Dapat di-scan lebih dari satu kali untuk rombongan

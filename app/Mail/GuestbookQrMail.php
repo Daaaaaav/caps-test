@@ -14,20 +14,18 @@ class GuestbookQrMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $qrCodeBase64;
+    public string $qrCodeSvg;
     public string $scanUrl;
 
     public function __construct(public Guestbook $entry)
     {
         $this->scanUrl = route('guestbook.scan', ['token' => $entry->qr_token]);
 
-        // Generate a PNG QR code and encode it as base64 for inline embedding
-        $png = QrCode::format('png')
+        // SVG requires no Imagick or GD — works on any server
+        $this->qrCodeSvg = (string) QrCode::format('svg')
             ->size(300)
             ->errorCorrection('H')
             ->generate($this->scanUrl);
-
-        $this->qrCodeBase64 = base64_encode($png);
     }
 
     public function envelope(): Envelope

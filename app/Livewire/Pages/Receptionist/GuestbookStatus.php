@@ -251,7 +251,10 @@ class GuestbookStatus extends Component
 
             $this->dispatch('toast', type: 'success', title: 'QR Dikirim Ulang', message: 'QR code berhasil dikirim ulang ke ' . $row->email . '.', duration: 4000);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('GuestbookQrMail resend failed: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('GuestbookQrMail resend failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'guestbook_id' => $id,
+            ]);
             $this->dispatch('toast', type: 'error', title: 'Gagal Kirim', message: 'Gagal mengirim ulang QR code. Periksa konfigurasi mail.', duration: 5000);
         }
     }
