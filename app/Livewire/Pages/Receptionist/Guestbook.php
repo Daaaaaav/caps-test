@@ -71,6 +71,8 @@ class Guestbook extends Component
         // Reset user yang dipilih sebelumnya
         $this->user_id = null; 
         $this->loadUsers($value);
+        // Push updated list to Alpine (needed because the dropdown uses wire:ignore)
+        $this->dispatch('users-list-updated', users: $this->users_list);
     }
     
     // Helper function to load users
@@ -171,6 +173,8 @@ class Guestbook extends Component
         $this->users_list = [];
 
         $this->dispatch('$refresh');
+        // Tell Alpine dropdowns to clear (needed because they use wire:ignore)
+        $this->dispatch('guestbook-form-reset');
 
         $toastMessage = !empty($validatedData['email'])
             ? 'Guest ditambah. QR code dikirim ke ' . $validatedData['email'] . '.'

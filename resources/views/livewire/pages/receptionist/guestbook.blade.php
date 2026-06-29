@@ -122,6 +122,7 @@
                             {{ __('app.target_department_opt') }}
                         </label>
                         <div
+                            wire:ignore
                             x-data="{
                                 open: false,
                                 search: '',
@@ -156,6 +157,7 @@
                                     search = selectedLabel;
                                 });
                             "
+                            @guestbook-form-reset.window="clear()"
                             class="relative"
                             @click.outside="open = false"
                         >
@@ -218,19 +220,20 @@
                             {{ __('app.meet_with_opt') }}
                         </label>
                         <div
+                            wire:ignore
                             x-data="{
                                 open: false,
                                 search: '',
                                 selectedId: $wire.user_id,
+                                usersList: [],
                                 get items() {
                                     const q = (this.search || '').toLowerCase().trim();
-                                    const list = ($wire.users_list || []);
+                                    const list = this.usersList;
                                     if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
                                     return list.filter(i => !q || i.full_name.toLowerCase().includes(q));
                                 },
                                 get selectedLabel() {
-                                    const list = ($wire.users_list || []);
-                                    const found = list.find(i => i.id == $wire.user_id);
+                                    const found = this.usersList.find(i => i.id == $wire.user_id);
                                     return found ? found.full_name : '';
                                 },
                                 select(id, label) {
@@ -247,12 +250,14 @@
                             }"
                             x-init="
                                 search = selectedLabel;
-                                $watch('$wire.department_id', () => { search = ''; this.selectedId = null; });
+                                $watch('$wire.department_id', () => { search = ''; selectedId = null; usersList = []; });
                                 $watch('$wire.user_id', val => {
-                                    this.selectedId = val || null;
+                                    selectedId = val || null;
                                     search = selectedLabel;
                                 });
                             "
+                            @users-list-updated.window="usersList = $event.detail.users; search = ''; selectedId = null;"
+                            @guestbook-form-reset.window="usersList = []; search = ''; selectedId = null; open = false;"
                             class="relative"
                             @click.outside="open = false"
                         >
