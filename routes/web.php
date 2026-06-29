@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 // ========== Controllers ==========
+use App\Http\Controllers\GuestbookScanController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\VehicleAttachmentController;
 
@@ -46,6 +47,7 @@ use App\Livewire\Pages\Receptionist\BookingsApproval;
 use App\Livewire\Pages\Receptionist\RoomApproval;
 use App\Livewire\Pages\Receptionist\BookingHistory;
 use App\Livewire\Pages\Receptionist\GuestbookHistory;
+use App\Livewire\Pages\Receptionist\GuestbookStatus;
 use App\Livewire\Pages\Receptionist\DocPackHistory;
 use App\Livewire\Pages\Receptionist\DocPackStatus;
 use App\Livewire\Pages\Receptionist\DocPackForm;
@@ -76,6 +78,19 @@ Route::get('/lang/{locale}', function (string $locale) {
     session(['locale' => $locale]);
     return redirect()->back();
 })->name('lang.switch');
+
+/*
+|--------------------------------------------------------------------------
+| Guestbook QR scan (public – no auth required, token is the gate)
+|--------------------------------------------------------------------------
+*/
+Route::get('/guestbook/scan/{token}', [GuestbookScanController::class, 'show'])
+    ->name('guestbook.scan')
+    ->where('token', '[a-f0-9]{64}');
+
+Route::post('/guestbook/scan/{token}', [GuestbookScanController::class, 'submit'])
+    ->name('guestbook.scan.submit')
+    ->where('token', '[a-f0-9]{64}');
 
 /*
 |--------------------------------------------------------------------------
@@ -177,6 +192,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/ai-security', AISecurityReports::class)->name('superadmin.ai-security');
         // Route::get('/weather', \App\Livewire\Pages\Superadmin\WeatherDashboard::class)->name('superadmin.weather');
         Route::get('/occupancy-forecasting', \App\Livewire\Pages\Superadmin\OccupancyForecasting::class)->name('superadmin.occupancy');
+        // Resource Management
+        Route::get('/manage-rooms', Manageroom::class)->name('superadmin.manageroom');
+        Route::get('/manage-vehicles', VehiclePage::class)->name('superadmin.managevehicle');
+        Route::get('/manage-storages', StoragePage::class)->name('superadmin.managestorage');
         Route::get('/superadmin-settings', SuperadminSettings::class)->name('superadmin.settings');
         Route::get('/superadmin-help', SuperadminHelp::class)->name('superadmin.help');
     });
@@ -192,6 +211,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/receptionist-roomapproval', RoomApproval::class)->name('receptionist.roomapproval');
         Route::get('/receptionist-bookinghistory', BookingHistory::class)->name('receptionist.bookinghistory');
         Route::get('/receptionist-guestbookhistory', GuestbookHistory::class)->name('receptionist.guestbookhistory');
+        Route::get('/receptionist-guestbookstatus', GuestbookStatus::class)->name('receptionist.guestbookstatus');
         Route::get('/receptionist-docpackhistory', DocPackHistory::class)->name('receptionist.docpackhistory');
         Route::get('/receptionist-docpackstatus', DocPackStatus::class)->name('receptionist.docpackstatus');
         Route::get('/receptionist-docpackform', DocPackForm::class)->name('receptionist.docpackform');

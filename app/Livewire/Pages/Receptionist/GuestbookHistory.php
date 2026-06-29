@@ -317,7 +317,8 @@ class GuestbookHistory extends Component
         $row = $this->findOwnedOrFail($id);
 
         $row->update([
-            'jam_out' => Carbon::now()->format('H:i'),
+            'jam_out'    => Carbon::now()->format('H:i'),
+            'qr_status'  => 'completed',
         ]);
 
         $this->dispatch(

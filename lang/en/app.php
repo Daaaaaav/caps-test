@@ -131,6 +131,7 @@ return [
     'guest_management'      => 'Guest Management',
     'guestbook'             => 'GuestBook',
     'guestbook_history'     => 'GuestBook History',
+    'guestbook_status'      => 'GuestBook Status',
     'docpac_management'     => 'DocPac Management',
     'docpac_form'           => 'DocPac Form',
     'docpac_status'         => 'DocPac Status',
@@ -265,6 +266,9 @@ return [
     'data_saved'                => 'Data Saved!',
     'save_data'                 => 'Save Data',
     'saving_data'               => 'Saving...',
+    'guest_email'               => 'Guest Email',
+    'guest_email_placeholder'   => 'guest@email.com',
+    'guest_email_hint'          => 'Optional. A QR code will be emailed to this address.',
 
     // ── Guestbook History ─────────────────────────────────────────────────────
     'guestbook_history_title'   => 'Guestbook History',

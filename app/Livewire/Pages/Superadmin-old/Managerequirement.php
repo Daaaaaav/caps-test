@@ -1,7 +1,7 @@
 <?php
 // app/Livewire/Pages/Superadmin/Managerequirement.php
 
-namespace App\Livewire\Pages\Superadmin;
+namespace App\Livewire\Pages\SuperadminOld;
 
 use Livewire\Component;
 use Livewire\WithPagination;

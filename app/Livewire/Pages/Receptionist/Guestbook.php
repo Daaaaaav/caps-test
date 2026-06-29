@@ -6,10 +6,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Guestbook as GuestbookModel;
-use App\Models\Department; 
+use App\Models\Department;
 use App\Models\User;
+use App\Mail\GuestbookQrMail;
 use App\Services\SecurityMonitoringService;
 
 #[Layout('layouts.receptionist')]
@@ -18,6 +21,7 @@ class Guestbook extends Component
 {
     // Form fields yang diisi user
     public $name;
+    public $email;
     public $phone_number;
     public $instansi;
     public $keperluan;
@@ -91,6 +95,7 @@ class Guestbook extends Component
     {
         return [
             'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['nullable', 'email', 'max:255'],
             'phone_number'  => ['nullable', 'string', 'max:50'],
             'instansi'      => ['nullable', 'string', 'max:255'],
             'keperluan'     => ['nullable', 'string', 'max:255'],
@@ -125,25 +130,53 @@ class Guestbook extends Component
 
         SecurityMonitoringService::logFormSubmit('guestbook', $validatedData);
 
+        // Generate QR token; entry starts as 'pending' until the first scan
+        $qrToken = GuestbookModel::generateQrToken();
+
         // Prepare data including auto-filled fields
         $entryData = array_merge($validatedData, [
             'date'              => $this->date,
             'jam_in'            => $this->jam_in,
             'petugas_penjaga'   => $this->petugas_penjaga,
-            'company_id'        => $companyId, 
-            'jam_out'           => null, 
+            'company_id'        => $companyId,
+            'jam_out'           => null,
+            'qr_token'          => $qrToken,
+            'qr_status'         => 'pending',
+            'visitor_count'     => 0,
         ]);
 
         // Saves data to the database
-        GuestbookModel::create($entryData); 
+        $entry = GuestbookModel::create($entryData);
+
+        // Send QR code email if an email address was provided
+        if (!empty($validatedData['email'])) {
+            try {
+                Mail::to($validatedData['email'])->send(new GuestbookQrMail($entry));
+            } catch (\Throwable $e) {
+                Log::error('GuestbookQrMail failed: ' . $e->getMessage());
+                // Non-fatal — entry is already saved, just warn the receptionist
+                $this->dispatch(
+                    'toast',
+                    type: 'warning',
+                    title: 'Email Gagal Terkirim',
+                    message: 'Data tamu disimpan, namun QR code gagal dikirim ke email. Periksa konfigurasi mail.',
+                    duration: 6000
+                );
+            }
+        }
 
         // Reset form
-        $this->reset(['name', 'phone_number', 'instansi', 'keperluan', 'department_id', 'user_id']);
+        $this->reset(['name', 'email', 'phone_number', 'instansi', 'keperluan', 'department_id', 'user_id']);
         // Reset user list 
-        $this->users_list = []; 
+        $this->users_list = [];
 
         $this->dispatch('$refresh');
-        $this->dispatch('toast', type: 'success', title: 'Ditambah', message: 'Guest ditambah.', duration: 3000);
+
+        $toastMessage = !empty($validatedData['email'])
+            ? 'Guest ditambah. QR code dikirim ke ' . $validatedData['email'] . '.'
+            : 'Guest ditambah. (Tidak ada email – QR tidak dikirim)';
+
+        $this->dispatch('toast', type: 'success', title: 'Ditambah', message: $toastMessage, duration: 4000);
         session()->flash('saved', true);
     }
 

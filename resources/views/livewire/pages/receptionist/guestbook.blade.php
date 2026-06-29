@@ -37,6 +37,11 @@
                     </div>
 
                     <div class="inline-flex rounded-lg overflow-hidden bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 backdrop-blur-sm shadow-sm">
+                        <a href="{{ route('receptionist.guestbookstatus') }}"
+                           class="px-4 py-2 text-xs font-bold text-[#CDDEA7] hover:bg-[#CDDEA7]/10 inline-flex items-center gap-1.5 transition">
+                            <x-heroicon-o-qr-code class="w-4 h-4"/>
+                            <span>Status Tamu</span>
+                        </a>
                         <a href="{{ route('receptionist.guestbookhistory') }}"
                            class="px-4 py-2 text-xs font-bold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
                             <x-heroicon-o-calendar class="w-4 h-4"/>
@@ -82,6 +87,15 @@
                         <label class="{{ $label }}">{{ __('app.full_name') }} <span class="text-rose-500">*</span></label>
                         <input type="text" wire:model.defer="name" placeholder="{{ __('app.full_name_placeholder') }}" class="{{ $input }}">
                         @error('name') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="{{ $label }}">{{ __('app.guest_email') }}</label>
+                        <input type="email" wire:model.defer="email" placeholder="{{ __('app.guest_email_placeholder') }}" class="{{ $input }}">
+                        @error('email') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-[10px] text-gray-400 font-medium leading-tight">
+                            {{ __('app.guest_email_hint') }}
+                        </p>
                     </div>
 
                     <div>

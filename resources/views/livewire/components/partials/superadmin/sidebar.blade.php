@@ -101,6 +101,42 @@
 
             <div class="sidebar-collapsed-divider"></div>
 
+            {{-- ===== RESOURCE MANAGEMENT ===== --}}
+            @php $manageRoomActive = request()->routeIs('superadmin.manageroom'); @endphp
+            <a href="{{ route('superadmin.manageroom') }}" class="sidebar-collapsed-item group {{ $manageRoomActive ? 'active' : '' }}">
+                @if($manageRoomActive)<div class="active-dot-indicator"></div>@endif
+                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" fill-opacity="0.15"/>
+                    <path d="M10 21V11.5a1.5 1.5 0 0 1 3 0V21"/>
+                </svg>
+                <div class="sidebar-tooltip">Manage Rooms</div>
+            </a>
+
+            @php $manageVehActive = request()->routeIs('superadmin.managevehicle'); @endphp
+            <a href="{{ route('superadmin.managevehicle') }}" class="sidebar-collapsed-item group {{ $manageVehActive ? 'active' : '' }}">
+                @if($manageVehActive)<div class="active-dot-indicator"></div>@endif
+                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                    <circle cx="7" cy="17" r="2" fill="currentColor" fill-opacity="0.15"/>
+                    <circle cx="17" cy="17" r="2" fill="currentColor" fill-opacity="0.15"/>
+                </svg>
+                <div class="sidebar-tooltip">Manage Vehicles</div>
+            </a>
+
+            @php $manageStorActive = request()->routeIs('superadmin.managestorage'); @endphp
+            <a href="{{ route('superadmin.managestorage') }}" class="sidebar-collapsed-item group {{ $manageStorActive ? 'active' : '' }}">
+                @if($manageStorActive)<div class="active-dot-indicator"></div>@endif
+                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z" fill="currentColor" fill-opacity="0.15"/>
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    <line x1="12" y1="12" x2="12" y2="16"/>
+                    <line x1="10" y1="14" x2="14" y2="14"/>
+                </svg>
+                <div class="sidebar-tooltip">Manage Storages</div>
+            </a>
+
+            <div class="sidebar-collapsed-divider"></div>
+
             {{-- ===== AI & SECURITY SYSTEM ===== --}}
             @php $lstmActive = request()->routeIs('superadmin.lstm-predictions'); @endphp
             <a href="{{ route('superadmin.lstm-predictions') }}" class="sidebar-collapsed-item group {{ $lstmActive ? 'active' : '' }}">
@@ -294,6 +330,28 @@
                         :current="request()->routeIs('superadmin.guestbook')"
                         x-show="!search || 'guestbook'.includes(search.toLowerCase())">
                         {{ __('app.guestbook') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                {{-- ===== RESOURCE MANAGEMENT ===== --}}
+                <flux:sidebar.group expandable heading="Resource Management"
+                    x-show="!search || ['resource management','rooms','vehicles','storages'].some(s => s.includes(search.toLowerCase()))">
+                    <flux:sidebar.item icon="building-office-2" href="{{ route('superadmin.manageroom') }}"
+                        :current="request()->routeIs('superadmin.manageroom')"
+                        x-show="!search || 'rooms'.includes(search.toLowerCase())">
+                        Manage Rooms
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="truck" href="{{ route('superadmin.managevehicle') }}"
+                        :current="request()->routeIs('superadmin.managevehicle')"
+                        x-show="!search || 'vehicles'.includes(search.toLowerCase())">
+                        Manage Vehicles
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="archive-box" href="{{ route('superadmin.managestorage') }}"
+                        :current="request()->routeIs('superadmin.managestorage')"
+                        x-show="!search || 'storages'.includes(search.toLowerCase())">
+                        Manage Storages
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 

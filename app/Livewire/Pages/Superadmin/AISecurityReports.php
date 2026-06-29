@@ -29,11 +29,18 @@ class AISecurityReports extends Component
     {
         try {
 
-            // Request alerts already filtered by severity from the service
+            // Fetch all alerts unfiltered so stats always reflect the true totals
             $report = app(WazuhAlertService::class)
-                ->getRecentAlerts(25, $this->selectedSeverity);
+                ->getRecentAlerts(25, 'all');
 
+            // Apply severity filter for the displayed list only
             $alerts = collect($report['alerts']);
+
+            if ($this->selectedSeverity !== 'all') {
+                $alerts = $alerts->filter(
+                    fn (array $alert) => $alert['severity'] === $this->selectedSeverity
+                );
+            }
 
             return view(
                 'livewire.pages.superadmin.a-i-security-reports',

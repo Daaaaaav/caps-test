@@ -128,6 +128,18 @@
                 <div class="sidebar-tooltip">GuestBook History</div>
             </a>
 
+            @php $gstatActive = request()->routeIs('receptionist.guestbookstatus'); @endphp
+            <a href="{{ route('receptionist.guestbookstatus') }}" class="sidebar-collapsed-item group {{ $gstatActive ? 'active' : '' }}">
+                @if($gstatActive)<div class="active-dot-indicator"></div>@endif
+                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor" fill-opacity="0.15"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <path d="M14 14h3v3m0 4v-4h4" stroke-linecap="round"/>
+                </svg>
+                <div class="sidebar-tooltip">GuestBook Status</div>
+            </a>
+
             <div class="sidebar-collapsed-divider"></div>
 
             {{-- ------- DocPac Management ------- --}}
@@ -338,20 +350,29 @@
 
                 {{-- ------- Guest Management ------- --}}
                 <flux:sidebar.group expandable heading="{{ __('app.guest_management') }}" class="grid"
-                    x-show="!search || ['guest management','guestbook','guestbook history'].some(s => s.includes(search.toLowerCase()))">
+                    x-show="!search || ['guest management','guestbook','guestbook status','guestbook history'].some(s => s.includes(search.toLowerCase()))">
                     <flux:sidebar.item
                         icon="inbox"
                         href="{{ route('receptionist.guestbook') }}"
-                        :current="request()->routeIs('receptionist.guestbook*')"
+                        :current="request()->routeIs('receptionist.guestbook')"
                         x-show="!search || 'guestbook'.includes(search.toLowerCase())"
                     >
                         {{ __('app.guestbook') }}
                     </flux:sidebar.item>
 
                     <flux:sidebar.item
+                        icon="qr-code"
+                        href="{{ route('receptionist.guestbookstatus') }}"
+                        :current="request()->routeIs('receptionist.guestbookstatus')"
+                        x-show="!search || 'guestbook status'.includes(search.toLowerCase())"
+                    >
+                        {{ __('app.guestbook_status') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item
                         icon="clock"
                         href="{{ route('receptionist.guestbookhistory') }}"
-                        :current="request()->routeIs('receptionist.guestbookhistory*')"
+                        :current="request()->routeIs('receptionist.guestbookhistory')"
                         x-show="!search || 'guestbook history'.includes(search.toLowerCase())"
                     >
                         {{ __('app.guestbook_history') }}

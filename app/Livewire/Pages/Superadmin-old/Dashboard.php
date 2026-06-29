@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\Superadmin;
+namespace App\Livewire\Pages\SuperadminOld;
 
 use App\Models\Announcement;
 use App\Models\BookingRoom;

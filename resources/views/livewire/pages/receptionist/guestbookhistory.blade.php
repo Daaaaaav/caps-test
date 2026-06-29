@@ -72,6 +72,12 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+                        {{-- Link to Status page --}}
+                        <a href="{{ route('receptionist.guestbookstatus') }}"
+                           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 text-xs font-semibold text-[#CDDEA7] hover:bg-[#CDDEA7]/20 transition">
+                            <x-heroicon-o-qr-code class="w-3.5 h-3.5"/>
+                            <span>Status Tamu Aktif</span>
+                        </a>
                         {{-- Show deleted toggle --}}
                         <label class="inline-flex items-center gap-2 text-sm text-[#CDDEA7]/90 cursor-pointer">
                             <input type="checkbox"
@@ -275,11 +281,26 @@
                                             </div>
 
                                             <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
-                                                <span>
+                                                <span class="flex flex-col gap-1">
                                                     @if($e->deleted_at)
                                                         <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
                                                     @else
                                                         <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
+                                                    @endif
+                                                    {{-- QR status badge --}}
+                                                    @if($e->qr_token)
+                                                        @php
+                                                            $qrBadge = match($e->qr_status ?? 'pending') {
+                                                                'ongoing'   => ['bg-blue-50 text-blue-700 border-blue-100',   '&#128203; Sedang Berkunjung'],
+                                                                'completed' => ['bg-gray-100 text-gray-600 border-gray-200', '&#10003; Selesai'],
+                                                                default     => ['bg-amber-50 text-amber-700 border-amber-100','&#9201; Menunggu Scan'],
+                                                            };
+                                                        @endphp
+                                                        <span class="inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadge[0] }}">{!! $qrBadge[1] !!}</span>
+                                                        <span class="inline-flex items-center gap-1 text-[10px] text-gray-500">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                            {{ $e->visitor_count ?? 0 }} pengunjung
+                                                        </span>
                                                     @endif
                                                 </span>
                                                 <div class="flex gap-1.5 font-medium">
@@ -362,6 +383,23 @@
                                                             <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
                                                         @else
                                                             <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
+                                                        @endif
+                                                        {{-- QR status --}}
+                                                        @if($e->qr_token)
+                                                            @php
+                                                                $qrBadgeT = match($e->qr_status ?? 'pending') {
+                                                                    'ongoing'   => 'bg-blue-50 text-blue-700 border-blue-100',
+                                                                    'completed' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                                                    default     => 'bg-amber-50 text-amber-700 border-amber-100',
+                                                                };
+                                                                $qrLabelT = match($e->qr_status ?? 'pending') {
+                                                                    'ongoing'   => 'Berkunjung',
+                                                                    'completed' => 'Selesai',
+                                                                    default     => 'QR: Pending',
+                                                                };
+                                                            @endphp
+                                                            <span class="mt-1 inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadgeT }}">{{ $qrLabelT }}</span>
+                                                            <span class="block text-[10px] text-gray-400 mt-0.5">{{ $e->visitor_count ?? 0 }} org</span>
                                                         @endif
                                                     </td>
                                                     <td class="h-12 px-4 text-right">
@@ -482,6 +520,17 @@
                                             </div>
 
                                             <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-end gap-1.5 font-medium">
+                                                {{-- QR status pill --}}
+                                                @if($r->qr_token)
+                                                    @php
+                                                        $rQrBadge = match($r->qr_status ?? 'pending') {
+                                                            'ongoing'   => ['bg-blue-50 text-blue-700 border-blue-100',   '&#128203; Sedang Berkunjung'],
+                                                            'completed' => ['bg-gray-100 text-gray-600 border-gray-200', '&#10003; Selesai'],
+                                                            default     => ['bg-amber-50 text-amber-700 border-amber-100','&#9201; Menunggu Scan'],
+                                                        };
+                                                    @endphp
+                                                    <span class="mr-auto inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $rQrBadge[0] }}">{!! $rQrBadge[1] !!} ({{ $r->visitor_count ?? 0 }} org)</span>
+                                                @endif
                                                 <button wire:click="openEdit({{ $r->guestbook_id }})"
                                                         wire:loading.attr="disabled"
                                                         class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">

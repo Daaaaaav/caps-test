@@ -118,6 +118,7 @@ return [
     'guest_management'      => 'Manajemen Tamu',
     'guestbook'             => 'Buku Tamu',
     'guestbook_history'     => 'Riwayat Buku Tamu',
+    'guestbook_status'      => 'Status Buku Tamu',
     'docpac_management'     => 'Manajemen DocPac',
     'docpac_form'           => 'Formulir DocPac',
     'docpac_status'         => 'Status DocPac',
@@ -253,6 +254,9 @@ return [
     'data_saved'                => 'Data Tersimpan!',
     'save_data'                 => 'Simpan Data',
     'saving_data'               => 'Menyimpan...',
+    'guest_email'               => 'Email Tamu',
+    'guest_email_placeholder'   => 'email@tamu.com',
+    'guest_email_hint'          => 'Opsional. QR code akan dikirim ke email ini.',
 
     // ── Superadmin Dashboard ──────────────────────────────────────────────────
     'superadmin_analytics'      => 'Analitik Superadmin',
