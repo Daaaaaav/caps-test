@@ -3,14 +3,7 @@
     collapsible="mobile"
     @mouseenter="sidebarCollapsed = false"
     @mouseleave="sidebarCollapsed = true"
-    class="
-        fixed top-0 left-0 h-screen
-        bg-sidebar
-        border-r border-sidebar-border
-        lg:w-[var(--sbw)] w-[85vw] max-w-sm
-        z-40
-        overflow-y-auto overflow-x-hidden
-    "
+    class="bg-sidebar border-r border-sidebar-border max-lg:!w-64 lg:w-[var(--sbw)] overflow-y-auto overflow-x-hidden box-border shadow-2xl shadow-black/30 z-50"
 >
     <!-- COLLAPSED STATE DOCK (shown when sidebarCollapsed is true) -->
     <div x-show="sidebarCollapsed" class="sidebar-collapsed-container flex flex-col h-full justify-between items-center py-2 px-1 w-full select-none">
@@ -178,7 +171,7 @@
     </div>
 
     <!-- EXPANDED STATE SIDEBAR (shown when sidebarCollapsed is false, or always on mobile) -->
-    <div x-show="!sidebarCollapsed || window.innerWidth < 1024" class="flex flex-col h-full justify-between w-full">
+    <div class="flex flex-col h-full justify-between w-full" :class="sidebarCollapsed ? 'lg:hidden' : ''">
         {{-- Logo + Brand + Collapse (mobile) --}}
         <flux:sidebar.header>
             <flux:sidebar.brand

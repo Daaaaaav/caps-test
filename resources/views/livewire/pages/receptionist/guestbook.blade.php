@@ -117,45 +117,196 @@
                     </div>
 
                     {{-- Departemen yang Dituju --}}
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">
                             {{ __('app.target_department_opt') }}
                         </label>
-                        <div class="relative">
-                            <select wire:model.live="department_id" class="{{ $input }} appearance-none pr-8">
-                                <option value="">{{ __('app.select_department_opt') }}</option>
-                                @foreach($departments_list as $dept)
-                                    <option value="{{ $dept['id'] }}">{{ $dept['name'] }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-500">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.department_id,
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    const list = @js($departments_list);
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                    return list.filter(i => !q || i.name.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const list = @js($departments_list);
+                                    const found = list.find(i => i.id == $wire.department_id);
+                                    return found ? found.name : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('department_id', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = null;
+                                    $wire.set('department_id', null);
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('$wire.department_id', val => {
+                                    this.selectedId = val || null;
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].name)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.select_department_opt') }}"
+                                    class="{{ $input }} pr-8"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button
+                                        x-show="search"
+                                        type="button"
+                                        @click.stop="clear()"
+                                        class="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.name)"
+                                        :class="selectedId == item.id
+                                            ? 'bg-[#4E653D] text-white'
+                                            : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.name"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-500" style="display:none">
+                                {{ __('app.no_data') }}
+                            </p>
+
+                            <input type="hidden" wire:model="department_id">
                         </div>
                         @error('department_id') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Bertemu dengan --}}
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">
                             {{ __('app.meet_with_opt') }}
                         </label>
-                        <div class="relative">
-                            <select wire:model.defer="user_id"
-                                    class="{{ $input }} appearance-none pr-8 disabled:bg-gray-100 disabled:text-gray-400"
-                                    @if(empty($users_list) && $department_id) disabled @endif>
-                                <option value="">{{ __('app.select_employee') }}</option>
-                                @foreach($users_list as $user)
-                                    <option value="{{ $user['id'] }}">{{ $user['full_name'] }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-500">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.user_id,
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    const list = ($wire.users_list || []);
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                    return list.filter(i => !q || i.full_name.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const list = ($wire.users_list || []);
+                                    const found = list.find(i => i.id == $wire.user_id);
+                                    return found ? found.full_name : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    $wire.set('user_id', id);
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = null;
+                                    $wire.set('user_id', null);
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('$wire.department_id', () => { search = ''; this.selectedId = null; });
+                                $watch('$wire.user_id', val => {
+                                    this.selectedId = val || null;
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="if ($wire.department_id) open = true"
+                                    @input="if ($wire.department_id) open = true"
+                                    @keydown.escape="open = false"
+                                    @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].full_name)"
+                                    autocomplete="off"
+                                    placeholder="{{ __('app.select_employee') }}"
+                                    :disabled="!$wire.department_id"
+                                    class="{{ $input }} pr-8 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                >
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button
+                                        x-show="search"
+                                        type="button"
+                                        @click.stop="clear()"
+                                        class="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+
+                            <ul
+                                x-show="open && items.length > 0"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm"
+                                style="display:none"
+                            >
+                                <template x-for="item in items" :key="item.id">
+                                    <li
+                                        @click="select(item.id, item.full_name)"
+                                        :class="selectedId == item.id
+                                            ? 'bg-[#4E653D] text-white'
+                                            : 'text-gray-800 hover:bg-gray-100 cursor-pointer'"
+                                        class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                        x-text="item.full_name"
+                                    ></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search && $wire.department_id" class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg text-sm px-3.5 py-2.5 text-gray-500" style="display:none">
+                                {{ __('app.no_users_dept') }}
+                            </p>
+
+                            <input type="hidden" wire:model="user_id">
                         </div>
-                        @if(empty($users_list) && $department_id)
-                            <p class="mt-1.5 text-xs text-amber-600 font-semibold">{{ __('app.no_users_dept') }}</p>
-                        @endif
                         @error('user_id') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
                 </div>

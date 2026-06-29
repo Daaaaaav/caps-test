@@ -41,6 +41,7 @@ class DocPackHistory extends Component
 
     // Mobile filter modal
     public bool $showFilterModal = false;
+    public bool $withTrashed = false;
 
     // Edit & Delete (soft)
     public bool $showEdit = false;
@@ -66,7 +67,7 @@ class DocPackHistory extends Component
             $this->userId = null;
         }
 
-        if (in_array($name, ['q', 'selectedDate', 'dateMode', 'type', 'departmentId', 'userId', 'departmentQ', 'userQ'], true)) {
+        if (in_array($name, ['q', 'selectedDate', 'dateMode', 'type', 'departmentId', 'userId', 'departmentQ', 'userQ', 'withTrashed'], true)) {
             $this->resetPage('donePage');
         }
     }
@@ -84,7 +85,9 @@ class DocPackHistory extends Component
 
     private function base()
     {
-        return Delivery::query()->byCompany(Auth::user()->company_id ?? null);
+        return Delivery::query()
+            ->byCompany(Auth::user()->company_id ?? null)
+            ->when($this->withTrashed, fn($q) => $q->withTrashed());
     }
 
     private function applySharedFilters($q)
@@ -240,6 +243,14 @@ class DocPackHistory extends Component
         $row->delete();
         $this->resetPage('donePage');
         $this->dispatch('toast', type: 'success', title: 'Deleted', message: 'Information successfully deleted.', duration: 3000);
+    }
+
+    public function restore(int $id): void
+    {
+        $row = Delivery::withTrashed()->byCompany(Auth::user()->company_id ?? null)->findOrFail($id);
+        $row->restore();
+        $this->resetPage('donePage');
+        $this->dispatch('toast', type: 'success', title: 'Restored', message: 'Information successfully restored.', duration: 3000);
     }
 
     public function render()

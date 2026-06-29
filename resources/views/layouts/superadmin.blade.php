@@ -106,7 +106,7 @@ $invertStyle = 'filter: brightness(0) invert(1);';
         {{-- Sidebar (always full height) --}}
         @include('livewire.components.partials.superadmin.sidebar')
 
-        <main class="bg-background flex-1 min-w-0 overflow-y-auto animate-fade-in-up sidebar-main">
+        <main class="bg-background flex-1 min-w-0 animate-fade-in-up sidebar-main">
             <div class="w-full max-w-screen-xl mx-auto px-3 sm:px-5 lg:px-8
                         [&_.container]:max-w-none [&_.container]:mx-0 [&_.container]:px-0">
 
@@ -163,6 +163,31 @@ $invertStyle = 'filter: brightness(0) invert(1);';
     @fluxScripts
     @vite('resources/js/app.js')
     @stack('scripts')
+
+    {{-- Scroll lock: prevent background scrolling when any modal overlay is visible --}}
+    <script>
+        (function(){
+            var raf;
+            function checkScrollLock() {
+                cancelAnimationFrame(raf);
+                raf = requestAnimationFrame(function() {
+                    var modals = document.querySelectorAll('.fixed.inset-0');
+                    var shouldLock = false;
+                    for (var i = 0; i < modals.length; i++) {
+                        if (window.getComputedStyle(modals[i]).display !== 'none') {
+                            shouldLock = true;
+                            break;
+                        }
+                    }
+                    document.body.style.overflow = shouldLock ? 'hidden' : '';
+                });
+            }
+            new MutationObserver(checkScrollLock).observe(document.body, {
+                childList: true, subtree: true, attributes: true, attributeFilter: ['style']
+            });
+            checkScrollLock();
+        })();
+    </script>
 </body>
 
 </html>

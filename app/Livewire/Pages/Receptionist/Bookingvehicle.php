@@ -43,10 +43,12 @@ class Bookingvehicle extends Component
 
     /** Plain array for the Alpine combobox — updated whenever department changes */
     public array $usersForCombobox = [];
+    public array $vehiclesForCombobox = [];
 
     // search box seperti di MeetingSchedule
     public string $departmentSearch = '';
     public string $userSearch = '';
+    public string $vehicleSearch = '';
 
     protected string $tz = 'Asia/Jakarta';
 
@@ -84,18 +86,50 @@ class Bookingvehicle extends Component
         // user awal kosong, baru diisi ketika departemen dipilih
         $this->users = collect();
 
-        // kendaraan aktif, urut nama A-Z
-        $this->vehicles = Vehicle::where('company_id', $companyId)
-            ->where('is_active', 1)
-            ->orderBy('name', 'asc')
-            ->get(['vehicle_id', 'name', 'plate_number']);
+        $this->loadVehicles();
 
-        $this->hasVehicles = $this->vehicles->count() > 0;
+        $this->hasVehicles = !empty($this->vehiclesForCombobox);
 
         // default tanggal = hari ini
         $today = now($this->tz)->toDateString();
         $this->date_from = $today;
         $this->date_to   = $today;
+    }
+
+    protected function loadVehicles(): void
+    {
+        $user = Auth::user();
+        $companyId = (int) ($user?->company_id ?? 0);
+
+        $query = Vehicle::where('company_id', $companyId)
+            ->where('is_active', 1)
+            ->orderBy('name', 'asc')
+            ->get(['vehicle_id', 'name', 'plate_number']);
+
+        if ($this->odd_even_area === 'ganjil' || $this->odd_even_area === 'genap') {
+            $query = $query->filter(function ($v) {
+                if (!$v->plate_number) return true; // keep if no plate number
+                $number = preg_replace('/[^0-9]/', '', $v->plate_number);
+                if ($number === '') return true;
+
+                $lastDigit = (int) substr($number, -1);
+                $isEven = ($lastDigit % 2 === 0);
+
+                if ($this->odd_even_area === 'ganjil') {
+                    return !$isEven;
+                }
+                return $isEven;
+            });
+        }
+
+        $this->vehiclesForCombobox = $query->map(function ($v) {
+            $vehicleLabel = $v->name ?? __('app.vehicle');
+            $plate = $v->plate_number ? ' — ' . $v->plate_number : '';
+            return [
+                'id' => $v->vehicle_id,
+                'label' => $vehicleLabel . $plate,
+            ];
+        })->values()->toArray();
     }
 
     /**
@@ -133,6 +167,17 @@ class Bookingvehicle extends Component
             ->values()
             ->all();
     }
+
+    /**
+     * Auto-called saat filter ganjil/genap diganti.
+     */
+    public function updatedOddEvenArea($value): void
+    {
+        $this->vehicle_id = null;
+        $this->vehicleSearch = '';
+        $this->loadVehicles();
+    }
+
 
     public function submit()
     {
@@ -246,6 +291,7 @@ class Bookingvehicle extends Component
             'purpose_type_other',
             'departmentSearch',
             'userSearch',
+            'vehicleSearch',
         ]);
 
         // list user dikosongkan lagi
@@ -301,7 +347,6 @@ class Bookingvehicle extends Component
         return view('livewire.pages.receptionist.bookingvehicle', [
             'departments' => $departments,
             'users'       => $users,
-            'vehicles'    => $this->vehicles,
             'hasVehicles' => $this->hasVehicles,
         ]);
     }

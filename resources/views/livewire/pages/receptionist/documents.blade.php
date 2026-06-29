@@ -73,17 +73,61 @@
                         <input type="text" wire:model.defer="document_name" class="{{ $input }}" placeholder="{{ __('app.document_name_ph') }}">
                         @error('document_name') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">Type</label>
-                        <div class="relative">
-                            <select wire:model.defer="type" class="{{ $input }} appearance-none pr-8">
-                                <option value="document">Document</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="etc">Etc</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.entangle('type'),
+                                options: [
+                                    { id: 'document', label: 'Document' },
+                                    { id: 'invoice', label: 'Invoice' },
+                                    { id: 'etc', label: 'Etc' }
+                                ],
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                    return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const found = this.options.find(i => i.id == this.selectedId);
+                                    return found ? found.label : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = '';
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('selectedId', val => {
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input type="text" x-model="search" @focus="open = true" @input="open = true" @keydown.escape="open = false" @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)" autocomplete="off" placeholder="Type" class="{{ $input }} pr-8">
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul x-show="open && items.length > 0" class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm" style="display:none">
+                                <template x-for="item in items" :key="item.id">
+                                    <li @click="select(item.id, item.label)" :class="selectedId == item.id ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted cursor-pointer'" class="px-3.5 py-2.5 cursor-pointer transition-colors" x-text="item.label"></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">{{ __('app.no_data') }}</p>
                         </div>
                         @error('type') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                     </div>
@@ -101,18 +145,61 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">{{ __('app.storage') }}</label>
-                        <div class="relative">
-                            <select wire:model.defer="penyimpanan" class="{{ $input }} appearance-none pr-8">
-                                <option value="">-</option>
-                                <option value="rak1">Rak 1</option>
-                                <option value="rak2">Rak 2</option>
-                                <option value="rak3">Rak 3</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.entangle('penyimpanan'),
+                                options: [
+                                    { id: 'rak1', label: 'Rak 1' },
+                                    { id: 'rak2', label: 'Rak 2' },
+                                    { id: 'rak3', label: 'Rak 3' }
+                                ],
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                    return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const found = this.options.find(i => i.id == this.selectedId);
+                                    return found ? found.label : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = '';
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('selectedId', val => {
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input type="text" x-model="search" @focus="open = true" @input="open = true" @keydown.escape="open = false" @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)" autocomplete="off" placeholder="-" class="{{ $input }} pr-8">
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul x-show="open && items.length > 0" class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm" style="display:none">
+                                <template x-for="item in items" :key="item.id">
+                                    <li @click="select(item.id, item.label)" :class="selectedId == item.id ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted cursor-pointer'" class="px-3.5 py-2.5 cursor-pointer transition-colors" x-text="item.label"></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">{{ __('app.no_data') }}</p>
                         </div>
                     </div>
 
@@ -128,17 +215,61 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
+                    <div class="flex flex-col justify-end">
                         <label class="{{ $label }}">Status</label>
-                        <div class="relative">
-                            <select wire:model.defer="status" class="{{ $input }} appearance-none pr-8">
-                                <option value="pending">Pending</option>
-                                <option value="taken">Taken</option>
-                                <option value="delivered">Delivered</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selectedId: $wire.entangle('status'),
+                                options: [
+                                    { id: 'pending', label: 'Pending' },
+                                    { id: 'taken', label: 'Taken' },
+                                    { id: 'delivered', label: 'Delivered' }
+                                ],
+                                get items() {
+                                    const q = (this.search || '').toLowerCase().trim();
+                                    if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                    return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                },
+                                get selectedLabel() {
+                                    const found = this.options.find(i => i.id == this.selectedId);
+                                    return found ? found.label : '';
+                                },
+                                select(id, label) {
+                                    this.search = label;
+                                    this.selectedId = id;
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.search = '';
+                                    this.selectedId = '';
+                                }
+                            }"
+                            x-init="
+                                search = selectedLabel;
+                                $watch('selectedId', val => {
+                                    search = selectedLabel;
+                                });
+                            "
+                            class="relative"
+                            @click.outside="open = false"
+                        >
+                            <div class="relative">
+                                <input type="text" x-model="search" @focus="open = true" @input="open = true" @keydown.escape="open = false" @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)" autocomplete="off" placeholder="Status" class="{{ $input }} pr-8">
+                                <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                    <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
                             </div>
+                            <ul x-show="open && items.length > 0" class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm" style="display:none">
+                                <template x-for="item in items" :key="item.id">
+                                    <li @click="select(item.id, item.label)" :class="selectedId == item.id ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted cursor-pointer'" class="px-3.5 py-2.5 cursor-pointer transition-colors" x-text="item.label"></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">{{ __('app.no_data') }}</p>
                         </div>
                         @error('status') <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p> @enderror
                         <p class="text-[11px] text-muted-foreground mt-1.5 font-semibold">
@@ -339,14 +470,14 @@
                 @endforelse
             </div>
 
-            <div class="px-6 py-4 bg-muted/10 border-t border-border flex justify-end">
+            <div class="px-6 py-4 bg-muted/10 border-t border-border w-full">
                 {{ $entries->onEachSide(1)->links() }}
             </div>
         </div>
     </div>
 
     @if ($showEdit)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" wire:poll.1000ms>
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" wire:poll.1000ms>
             <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300" wire:click="closeEdit"></div>
             
             <div class="relative w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden transform transition-all duration-300 scale-100 max-h-[90vh] flex flex-col">
@@ -380,15 +511,59 @@
                     <div class="grid grid-cols-2 gap-3.5">
                         <div class="space-y-1.5">
                             <label class="{{ $label }}">Type</label>
-                            <div class="relative">
-                                <select wire:model="edit.type" class="{{ $editIn }} appearance-none pr-8">
-                                    <option value="document">Document</option>
-                                    <option value="invoice">Invoice</option>
-                                    <option value="etc">Etc</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: $wire.entangle('edit.type'),
+                                    options: [
+                                        { id: 'document', label: 'Document' },
+                                        { id: 'invoice', label: 'Invoice' },
+                                        { id: 'etc', label: 'Etc' }
+                                    ],
+                                    get items() {
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id == this.selectedId);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = '';
+                                    }
+                                }"
+                                x-init="
+                                    search = selectedLabel;
+                                    $watch('selectedId', val => {
+                                        search = selectedLabel;
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input type="text" x-model="search" @focus="open = true" @input="open = true" @keydown.escape="open = false" @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)" autocomplete="off" placeholder="Type" class="{{ $editIn }} pr-8">
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul x-show="open && items.length > 0" class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm" style="display:none">
+                                    <template x-for="item in items" :key="item.id">
+                                        <li @click="select(item.id, item.label)" :class="selectedId == item.id ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted cursor-pointer'" class="px-3.5 py-2.5 cursor-pointer transition-colors" x-text="item.label"></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">{{ __('app.no_data') }}</p>
                             </div>
                             @error('edit.type') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -432,15 +607,59 @@
                         </div>
                         <div class="space-y-1.5">
                             <label class="{{ $label }}">Status</label>
-                            <div class="relative">
-                                <select wire:model="edit.status" class="{{ $editIn }} appearance-none pr-8">
-                                    <option value="pending">Pending</option>
-                                    <option value="taken">Taken</option>
-                                    <option value="delivered">Delivered</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: $wire.entangle('edit.status'),
+                                    options: [
+                                        { id: 'pending', label: 'Pending' },
+                                        { id: 'taken', label: 'Taken' },
+                                        { id: 'delivered', label: 'Delivered' }
+                                    ],
+                                    get items() {
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id == this.selectedId);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = '';
+                                    }
+                                }"
+                                x-init="
+                                    search = selectedLabel;
+                                    $watch('selectedId', val => {
+                                        search = selectedLabel;
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input type="text" x-model="search" @focus="open = true" @input="open = true" @keydown.escape="open = false" @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)" autocomplete="off" placeholder="Status" class="{{ $editIn }} pr-8">
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button x-show="search" type="button" @click.stop="clear()" class="text-muted-foreground hover:text-foreground">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+                                <ul x-show="open && items.length > 0" class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm" style="display:none">
+                                    <template x-for="item in items" :key="item.id">
+                                        <li @click="select(item.id, item.label)" :class="selectedId == item.id ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted cursor-pointer'" class="px-3.5 py-2.5 cursor-pointer transition-colors" x-text="item.label"></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">{{ __('app.no_data') }}</p>
                             </div>
                             @error('edit.status') <p class="text-[11px] text-destructive font-medium">{{ $message }}</p> @enderror
                             <p class="text-[11px] text-muted-foreground mt-1.5 font-semibold">

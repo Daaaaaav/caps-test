@@ -30,7 +30,6 @@ class Vehiclestatus extends Component
     public string $statusTab = 'pending';  // pending | approved | on_progress
     public string $sortFilter = 'recent';  // recent | oldest | nearest
     public int $perPage = 10;
-    public bool $includeDeleted = false;
 
     /** cache */
     public $vehicles;
@@ -89,10 +88,6 @@ class Vehiclestatus extends Component
     {
         $this->resetPage();
     }
-    public function updatedIncludeDeleted()
-    {
-        $this->resetPage();
-    }
 
     public function mount(): void
     {
@@ -109,8 +104,6 @@ class Vehiclestatus extends Component
     public function render()
     {
         $bookings = VehicleBooking::query()
-            ->when(!$this->includeDeleted, fn(Builder $q) => $q->whereNull('deleted_at'))
-            ->when($this->includeDeleted, fn(Builder $q) => $q->withTrashed())
             ->when($this->vehicleFilter, fn(Builder $q) => $q->where('vehicle_id', $this->vehicleFilter))
             ->when($this->q !== '', function (Builder $q) {
                 $like = '%' . $this->q . '%';
@@ -150,7 +143,6 @@ class Vehiclestatus extends Component
             DB::transaction(function () use ($id) {
                 /** @var VehicleBooking $b */
                 $b = VehicleBooking::lockForUpdate()
-                    ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
 
                 if ($b->status !== 'pending') {
@@ -206,7 +198,6 @@ class Vehiclestatus extends Component
             $affected = DB::table('vehicle_bookings')
                 ->where('vehiclebooking_id', $bookingId)
                 ->where('status', 'pending')
-                ->when(!$this->includeDeleted, fn($q) => $q->whereNull('deleted_at'))
                 ->update([
                     'status' => 'rejected',
                     'notes'  => DB::raw(
@@ -264,7 +255,6 @@ class Vehiclestatus extends Component
         try {
             DB::transaction(function () use ($id) {
                 $b = VehicleBooking::lockForUpdate()
-                    ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
                 if (!in_array($b->status, ['approved', 'on_progress', 'late_return'], true)) {
                     throw new \RuntimeException("Booking #{$b->vehiclebooking_id} cannot be completed from status '{$b->status}'.");
@@ -323,7 +313,6 @@ class Vehiclestatus extends Component
         try {
             DB::transaction(function () use ($id) {
                 $b = VehicleBooking::lockForUpdate()
-                    ->when($this->includeDeleted, fn($q) => $q->withTrashed())
                     ->findOrFail($id);
                 if ($b->status !== 'returned') {
                     throw new \RuntimeException("Booking #{$b->vehiclebooking_id} has not been returned yet.");
@@ -346,8 +335,7 @@ class Vehiclestatus extends Component
     public function showDetails(int $id): void
     {
         try {
-            $booking = VehicleBooking::when($this->includeDeleted, fn($q) => $q->withTrashed())
-                ->findOrFail($id);
+            $booking = VehicleBooking::findOrFail($id);
 
             // $photos = VehicleBookingPhoto::where('vehiclebooking_id', $id)
             //     ->with('user') // Pastikan relasi user ada di model VehicleBookingPhoto

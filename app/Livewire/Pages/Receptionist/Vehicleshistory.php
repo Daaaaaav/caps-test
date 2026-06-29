@@ -34,7 +34,7 @@ class Vehicleshistory extends Component
     public string $statusTab = 'done';
 
     // Include deleted checkbox
-    public bool $includeDeleted = false;
+    public bool $withTrashed = false;
 
     // Date filter (single date)
     public ?string $selectedDate = null;   // 'YYYY-MM-DD' atau null
@@ -49,7 +49,7 @@ class Vehicleshistory extends Component
         'q'              => ['except' => ''],
         'vehicleFilter'  => ['except' => null],
         'statusTab'      => ['except' => 'done'],
-        'includeDeleted' => ['except' => false],
+        'withTrashed' => ['except' => false],
         'selectedDate'   => ['except' => null],
         'sortFilter'     => ['except' => 'recent'],
         'page'           => ['except' => 1],
@@ -58,7 +58,7 @@ class Vehicleshistory extends Component
     public function updatingQ(): void                { $this->resetPage(); }
     public function updatingVehicleFilter(): void    { $this->resetPage(); }
     public function updatingStatusTab(): void        { $this->resetPage(); }
-    public function updatingIncludeDeleted(): void   { $this->resetPage(); }
+    public function updatingWithTrashed(): void   { $this->resetPage(); }
     public function updatingSelectedDate(): void     { $this->resetPage(); }
     public function updatingSortFilter(): void       { $this->resetPage(); }
 
@@ -140,7 +140,7 @@ class Vehicleshistory extends Component
         $query = VehicleBooking::where('company_id', $companyId);
 
         // Include / exclude soft-deleted
-        if ($this->includeDeleted) {
+        if ($this->withTrashed) {
             $query->withTrashed();
         }
 

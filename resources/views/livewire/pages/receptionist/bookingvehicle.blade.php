@@ -38,18 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="inline-flex rounded-lg overflow-hidden bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 backdrop-blur-sm">
-                        <a href="{{ route('receptionist.roomapproval') }}"
-                           class="px-3.5 py-2 text-xs font-semibold text-[#CDDEA7]/80 hover:text-[#CDDEA7] hover:bg-[#CDDEA7]/5 border-r border-[#CDDEA7]/20 inline-flex items-center gap-1.5 transition">
-                            <x-heroicon-o-calendar-days class="w-4 h-4"/>
-                            <span>{{ __('app.booking_room') }}</span>
-                        </a>
-                        <a href="{{ route('receptionist.vehiclestatus') }}"
-                           class="px-3.5 py-2 text-xs font-semibold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
-                            <x-heroicon-o-truck class="w-4 h-4"/>
-                            <span>{{ __('app.vehicle_status_menu') }}</span>
-                        </a>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -89,10 +78,10 @@
                                     search: $wire.departmentSearch,
                                     selectedId: null,
                                     get items() {
-                                        const q = this.search.toLowerCase().trim();
-                                        return @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray()).filter(i =>
-                                            !q || i.label.toLowerCase().includes(q)
-                                        );
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        const list = @js($departments->map(fn($d) => ['id' => $d->department_id, 'label' => $d->department_name])->values()->toArray());
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                        return list.filter(i => !q || i.label.toLowerCase().includes(q));
                                     },
                                     get selectedLabel() {
                                         const id = $wire.department_id;
@@ -192,9 +181,15 @@
                                     search: '',
                                     selectedId: null,
                                     get items() {
-                                        const q = this.search.toLowerCase().trim();
+                                        const q = (this.search || '').toLowerCase().trim();
                                         const list = ($wire.usersForCombobox || []);
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
                                         return q ? list.filter(i => i.label.toLowerCase().includes(q) || (i.email && i.email.toLowerCase().includes(q))) : list;
+                                    },
+                                    get selectedLabel() {
+                                        const list = ($wire.usersForCombobox || []);
+                                        const found = list.find(i => i.id == this.selectedId);
+                                        return found ? found.label : '';
                                     },
                                     select(id, label) {
                                         this.search = label;
@@ -309,33 +304,199 @@
                             @enderror
                         </div>
 
-                        {{-- Kendaraan --}}
-                        <div>
-                            <label class="{{ $label }}">{{ __('app.vehicle') }} <span class="text-destructive">*</span></label>
-                            <div class="relative">
-                                <select
-                                    wire:model.defer="vehicle_id"
-                                    @if(!$hasVehicles) disabled @endif
-                                    class="{{ $input }} appearance-none pr-8 disabled:bg-muted disabled:text-muted-foreground"
-                                >
-                                    @if(!$hasVehicles)
-                                        <option value="">{{ __('app.no_vehicle_data') }}</option>
-                                    @else
-                                        <option value="">{{ __('app.select_vehicle') }}</option>
-                                        @foreach($vehicles as $v)
-                                            @php
-                                                $vehicleLabel = $v->name ?? __('app.vehicle');
-                                                $plate = $v->plate_number ? ' — '.$v->plate_number : '';
-                                            @endphp
-                                            <option value="{{ $v->vehicle_id }}">
-                                                {{ $vehicleLabel }}{{ $plate }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        {{-- Odd/even --}}
+                        <div class="flex flex-col justify-end">
+                            <label class="{{ $label }}">{{ __('app.odd_even_area') }}</label>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: $wire.odd_even_area,
+                                    options: [
+                                        { id: 'tidak', label: @js(__('app.not_enter')) },
+                                        { id: 'ganjil', label: @js(__('app.odd')) },
+                                        { id: 'genap', label: @js(__('app.even')) }
+                                    ],
+                                    get items() {
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id === $wire.odd_even_area);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        $wire.set('odd_even_area', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = 'tidak';
+                                        $wire.set('odd_even_area', 'tidak');
+                                    }
+                                }"
+                                x-init="
+                                    search = selectedLabel;
+                                    $watch('$wire.odd_even_area', val => {
+                                        this.selectedId = val || 'tidak';
+                                        search = selectedLabel;
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.odd_even_area') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button
+                                            x-show="search && selectedId !== 'tidak'"
+                                            type="button"
+                                            @click.stop="clear()"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="selectedId == item.id
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'text-foreground hover:bg-muted cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
+
+                                <input type="hidden" wire:model="odd_even_area">
+                            </div>
+                            @error('odd_even_area')
+                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Kendaraan --}}
+                        <div class="flex flex-col justify-end">
+                            <label class="{{ $label }}">{{ __('app.vehicle') }} <span class="text-destructive">*</span></label>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: $wire.vehicleSearch,
+                                    selectedId: null,
+                                    get items() {
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        const list = ($wire.vehiclesForCombobox || []);
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return list;
+                                        return list.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const id = $wire.vehicle_id;
+                                        const list = ($wire.vehiclesForCombobox || []);
+                                        const found = list.find(i => i.id == id);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        $wire.set('vehicle_id', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = null;
+                                        $wire.set('vehicle_id', null);
+                                        $wire.set('vehicleSearch', '');
+                                    }
+                                }"
+                                x-init="
+                                    $watch('search', val => $wire.set('vehicleSearch', val));
+                                    $watch('$wire.vehicle_id', val => {
+                                        this.selectedId = val || null;
+                                        if (!val) { search = ''; }
+                                        else { search = selectedLabel; }
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.select_vehicle') }}"
+                                        @if(!$hasVehicles) disabled @endif
+                                        class="{{ $input }} pr-8 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button
+                                            x-show="search"
+                                            type="button"
+                                            @click.stop="clear()"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
+                                </div>
+
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="selectedId == item.id
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'text-foreground hover:bg-muted cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
+
+                                <input type="hidden" wire:model="vehicle_id">
                             </div>
                             @error('vehicle_id')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
@@ -378,38 +539,102 @@
                             @enderror
                         </div>
 
-                        {{-- Odd/even --}}
-                        <div>
-                            <label class="{{ $label }}">{{ __('app.odd_even_area') }}</label>
-                            <div class="relative">
-                                <select wire:model.defer="odd_even_area" class="{{ $input }} appearance-none pr-8">
-                                    <option value="tidak">{{ __('app.not_enter') }}</option>
-                                    <option value="ganjil">{{ __('app.odd') }}</option>
-                                    <option value="genap">{{ __('app.even') }}</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                </div>
-                            </div>
-                            @error('odd_even_area')
-                                <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
+
 
                         {{-- Jenis keperluan --}}
-                        <div>
+                        <div class="flex flex-col justify-end">
                             <label class="{{ $label }}">{{ __('app.purpose_type') }}</label>
-                            <div class="relative">
-                                <select wire:model.live="purpose_type" class="{{ $input }} appearance-none pr-8">
-                                    <option value="">{{ __('app.select_purpose') }}</option>
-                                    <option value="dinas">{{ __('app.official') }}</option>
-                                    <option value="operasional">{{ __('app.operational') }}</option>
-                                    <option value="antar_jemput">{{ __('app.pickup_dropoff') }}</option>
-                                    <option value="lainnya">{{ __('app.other') }}</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground/60">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <div
+                                x-data="{
+                                    open: false,
+                                    search: '',
+                                    selectedId: $wire.purpose_type,
+                                    options: [
+                                        { id: 'dinas', label: @js(__('app.official')) },
+                                        { id: 'operasional', label: @js(__('app.operational')) },
+                                        { id: 'antar_jemput', label: @js(__('app.pickup_dropoff')) },
+                                        { id: 'lainnya', label: @js(__('app.other')) }
+                                    ],
+                                    get items() {
+                                        const q = (this.search || '').toLowerCase().trim();
+                                        if (q === (this.selectedLabel || '').toLowerCase().trim()) return this.options;
+                                        return this.options.filter(i => !q || i.label.toLowerCase().includes(q));
+                                    },
+                                    get selectedLabel() {
+                                        const found = this.options.find(i => i.id === $wire.purpose_type);
+                                        return found ? found.label : '';
+                                    },
+                                    select(id, label) {
+                                        this.search = label;
+                                        this.selectedId = id;
+                                        $wire.set('purpose_type', id);
+                                        this.open = false;
+                                    },
+                                    clear() {
+                                        this.search = '';
+                                        this.selectedId = null;
+                                        $wire.set('purpose_type', null);
+                                    }
+                                }"
+                                x-init="
+                                    search = selectedLabel;
+                                    $watch('$wire.purpose_type', val => {
+                                        this.selectedId = val || null;
+                                        search = selectedLabel;
+                                    });
+                                "
+                                class="relative"
+                                @click.outside="open = false"
+                            >
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @input="open = true"
+                                        @keydown.escape="open = false"
+                                        @keydown.enter.prevent="items.length === 1 && select(items[0].id, items[0].label)"
+                                        autocomplete="off"
+                                        placeholder="{{ __('app.select_purpose') }}"
+                                        class="{{ $input }} pr-8"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center gap-1 pr-2.5">
+                                        <button
+                                            x-show="search"
+                                            type="button"
+                                            @click.stop="clear()"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <svg class="fill-current h-4 w-4 text-muted-foreground/60 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
+
+                                <ul
+                                    x-show="open && items.length > 0"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="absolute z-30 mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg text-sm"
+                                    style="display:none"
+                                >
+                                    <template x-for="item in items" :key="item.id">
+                                        <li
+                                            @click="select(item.id, item.label)"
+                                            :class="selectedId == item.id
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'text-foreground hover:bg-muted cursor-pointer'"
+                                            class="px-3.5 py-2.5 cursor-pointer transition-colors"
+                                            x-text="item.label"
+                                        ></li>
+                                    </template>
+                                </ul>
+                                <p x-show="open && items.length === 0 && search" class="absolute z-30 mt-1 w-full rounded-lg border border-border bg-card shadow-lg text-sm px-3.5 py-2.5 text-muted-foreground" style="display:none">
+                                    {{ __('app.no_data') }}
+                                </p>
+
+                                <input type="hidden" wire:model="purpose_type">
                             </div>
                             @error('purpose_type')
                                 <p class="mt-1.5 text-xs text-destructive font-medium">{{ $message }}</p>
