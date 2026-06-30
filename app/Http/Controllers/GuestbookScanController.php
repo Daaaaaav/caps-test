@@ -50,6 +50,9 @@ class GuestbookScanController extends Controller
             'Cache-Control' => 'public, max-age=86400',
         ]);
     }
+
+    /**
+     * Record one visitor scan.
      * Can be called repeatedly to accumulate group members.
      */
     public function submit(Request $request, string $token)
