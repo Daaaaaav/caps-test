@@ -28,7 +28,28 @@ class GuestbookScanController extends Controller
     }
 
     /**
-     * Record one visitor scan.
+     * Serve the QR code as a PNG image directly.
+     * Used as the <img src> in the confirmation email — avoids data: URI blocking.
+     */
+    public function qrImage(string $token)
+    {
+        $entry = Guestbook::where('qr_token', $token)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
+        $scanUrl = route('guestbook.scan', ['token' => $token]);
+
+        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+        );
+        $svg = (new \BaconQrCode\Writer($renderer))->writeString($scanUrl);
+
+        return response($svg, 200, [
+            'Content-Type'  => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
      * Can be called repeatedly to accumulate group members.
      */
     public function submit(Request $request, string $token)

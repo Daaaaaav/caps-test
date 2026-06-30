@@ -92,6 +92,10 @@ Route::post('/guestbook/scan/{token}', [GuestbookScanController::class, 'submit'
     ->name('guestbook.scan.submit')
     ->where('token', '[a-f0-9]{64}');
 
+Route::get('/guestbook/qr/{token}', [GuestbookScanController::class, 'qrImage'])
+    ->name('guestbook.qr.image')
+    ->where('token', '[a-f0-9]{64}');
+
 /*
 |--------------------------------------------------------------------------
 | Root: redirect to login
