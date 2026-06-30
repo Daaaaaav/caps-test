@@ -255,7 +255,7 @@ class GuestbookStatus extends Component
                 'exception' => $e,
                 'guestbook_id' => $id,
             ]);
-            $this->dispatch('toast', type: 'error', title: 'Gagal Kirim', message: 'Gagal mengirim ulang QR code. Periksa konfigurasi mail.', duration: 5000);
+            $this->dispatch('toast', type: 'error', title: 'Gagal Kirim [DEBUG]', message: get_class($e) . ': ' . $e->getMessage(), duration: 15000);
         }
     }
 

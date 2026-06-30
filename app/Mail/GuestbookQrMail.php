@@ -6,7 +6,10 @@ use App\Models\Guestbook;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class GuestbookQrMail extends Mailable
 {
@@ -19,30 +22,24 @@ class GuestbookQrMail extends Mailable
     {
         $this->scanUrl = route('guestbook.scan', ['token' => $entry->qr_token]);
 
-        // Generate PNG via GD (no Imagick needed)
-        $png = QrCode::format('png')
-            ->size(300)
-            ->margin(1)
-            ->errorCorrection('H')
-            ->generate($this->scanUrl);
+        // Use SVG backend — pure PHP, zero image extension dependencies (no GD, no Imagick).
+        // We then embed it as a base64 data URI which works in all modern email clients
+        // that support HTML (Gmail, Outlook web, Apple Mail, Yahoo Mail).
+        $renderer = new ImageRenderer(
+            new RendererStyle(300),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $svg = $writer->writeString($this->scanUrl);
 
-        // Write to a temp file — $message->embed() in the view needs a file path
-        $this->qrTempPath = tempnam(sys_get_temp_dir(), 'qr_') . '.png';
-        file_put_contents($this->qrTempPath, $png);
+        // Encode SVG as base64 — unlike inline <svg> tags, a base64 image/svg+xml src
+        // is treated as a regular image by email clients and is not stripped.
+        $this->qrTempPath = 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     public function build(): static
     {
-        $mail = $this->subject('Konfirmasi Kunjungan – QR Code Tamu')
-                     ->view('mail.guestbook-qr');
-
-        // Clean up temp file after build
-        if (file_exists($this->qrTempPath)) {
-            register_shutdown_function(function () {
-                @unlink($this->qrTempPath);
-            });
-        }
-
-        return $mail;
+        return $this->subject('Konfirmasi Kunjungan – QR Code Tamu')
+                    ->view('mail.guestbook-qr');
     }
 }
