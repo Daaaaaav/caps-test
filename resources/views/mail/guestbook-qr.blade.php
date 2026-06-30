@@ -190,7 +190,7 @@
         {{-- QR Code --}}
         <div class="qr-section">
             <p>Scan QR code ini untuk mencatat kehadiran Anda:</p>
-            <img src="{{ $qrImageUrl }}" alt="QR Code Kunjungan" width="220" height="220">
+            <img src="{{ $message->embedData($qrSvgData, 'qrcode.svg', 'image/svg+xml') }}" alt="QR Code Kunjungan" width="220" height="220">
             <br>
             <span class="scan-count-note">
                 &#10003; Dapat di-scan lebih dari satu kali untuk rombongan
