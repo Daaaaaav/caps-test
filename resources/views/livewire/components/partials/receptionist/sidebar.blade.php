@@ -117,17 +117,6 @@
                 <div class="sidebar-tooltip">GuestBook</div>
             </a>
 
-            @php $ghistActive = request()->routeIs('receptionist.guestbookhistory'); @endphp
-            <a href="{{ route('receptionist.guestbookhistory') }}" class="sidebar-collapsed-item group {{ $ghistActive ? 'active' : '' }}">
-                @if($ghistActive)<div class="active-dot-indicator"></div>@endif
-                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="currentColor" fill-opacity="0.15"/>
-                    <path d="M12 6v4l2.5 2.5"/>
-                </svg>
-                <div class="sidebar-tooltip">GuestBook History</div>
-            </a>
-
             @php $gstatActive = request()->routeIs('receptionist.guestbookstatus'); @endphp
             <a href="{{ route('receptionist.guestbookstatus') }}" class="sidebar-collapsed-item group {{ $gstatActive ? 'active' : '' }}">
                 @if($gstatActive)<div class="active-dot-indicator"></div>@endif
@@ -138,6 +127,17 @@
                     <path d="M14 14h3v3m0 4v-4h4" stroke-linecap="round"/>
                 </svg>
                 <div class="sidebar-tooltip">GuestBook Status</div>
+            </a>
+
+            @php $ghistActive = request()->routeIs('receptionist.guestbookhistory'); @endphp
+            <a href="{{ route('receptionist.guestbookhistory') }}" class="sidebar-collapsed-item group {{ $ghistActive ? 'active' : '' }}">
+                @if($ghistActive)<div class="active-dot-indicator"></div>@endif
+                <svg class="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="currentColor" fill-opacity="0.15"/>
+                    <path d="M12 6v4l2.5 2.5"/>
+                </svg>
+                <div class="sidebar-tooltip">GuestBook History</div>
             </a>
 
             <div class="sidebar-collapsed-divider"></div>
