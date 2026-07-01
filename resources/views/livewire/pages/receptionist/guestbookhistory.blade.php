@@ -72,12 +72,7 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        {{-- Link to Status page --}}
-                        <a href="{{ route('receptionist.guestbookstatus') }}"
-                           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 text-xs font-semibold text-[#CDDEA7] hover:bg-[#CDDEA7]/20 transition">
-                            <x-heroicon-o-qr-code class="w-3.5 h-3.5"/>
-                            <span>Status Tamu Aktif</span>
-                        </a>
+
                         {{-- Show deleted toggle --}}
                         <button type="button" wire:click="$toggle('withTrashed')" class="flex items-center gap-2 group focus:outline-none">
                             <div class="relative flex items-center">
@@ -115,25 +110,7 @@
 
                         {{-- Tabs + View Mode Toggle --}}
                         <div class="flex items-center gap-3 self-start sm:self-auto">
-                            {{-- Segmented Tabs --}}
-                            <div class="inline-flex items-center bg-gray-100 rounded-full p-1 text-xs font-medium">
-                                <button type="button"
-                                        wire:click="setTab('entries')"
-                                        class="px-3.5 py-1.5 rounded-full transition
-                                            {{ $activeTab === 'entries'
-                                                ? 'bg-[#4E653D] text-white shadow-sm'
-                                                : 'text-gray-700 hover:bg-gray-200' }}">
-                                    {{ __('app.visit_list') }}
-                                </button>
-                                <button type="button"
-                                        wire:click="setTab('latest')"
-                                        class="px-3.5 py-1.5 rounded-full transition
-                                            {{ $activeTab === 'latest'
-                                                ? 'bg-[#4E653D] text-white shadow-sm'
-                                                : 'text-gray-700 hover:bg-gray-200' }}">
-                                    {{ __('app.recent_visits') }}
-                                </button>
-                            </div>
+
 
                             {{-- Layout Toggler --}}
                             <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200/50">
@@ -267,7 +244,7 @@
                 </div>
 
                 {{-- LIST AREA --}}
-                @if($activeTab === 'entries')
+
                     {{-- TAB: RIWAYAT KUNJUNGAN (DONE) --}}
                     @if($entries->isEmpty())
                         <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
@@ -285,7 +262,7 @@
                                             $avatarChar = strtoupper(substr($e->name ?? 'G', 0, 1));
                                         @endphp
                                         <div wire:key="entry-card-{{ $e->guestbook_id }}-{{ $stateKey }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition {{ $e->deleted_at ? 'opacity-60 bg-gray-50/50' : '' }}">
+                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition {{ $e->deleted_at ? 'opacity-60 bg-gray-50/50' : '' }}">
                                              
                                             <div class="flex items-start gap-4">
                                                     {{-- Avatar/Initial --}}
@@ -301,9 +278,20 @@
                                                                     <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 flex-shrink-0">
                                                                         {{ strtoupper(__('app.deleted')) }}
                                                                     </span>
-                                                                @else
-                                                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex-shrink-0">
-                                                                        {{ strtoupper(__('app.active')) }}
+                                                                @endif
+                                                                {{-- QR status badge --}}
+                                                                @if($e->qr_token)
+                                                                    @php
+                                                                        $qrBadge = match($e->qr_status ?? 'pending') {
+                                                                            'ongoing'   => ['bg-blue-50 text-blue-700 border-blue-100',   '&#128203; Sedang Berkunjung'],
+                                                                            'completed' => ['bg-gray-100 text-gray-600 border-gray-200', '&#10003; Selesai'],
+                                                                            default     => ['bg-amber-50 text-amber-700 border-amber-100','&#9201; Menunggu Scan'],
+                                                                        };
+                                                                    @endphp
+                                                                    <span class="inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadge[0] }}">{!! $qrBadge[1] !!}</span>
+                                                                    <span class="inline-flex items-center gap-1 text-[10px] text-gray-500 font-medium">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                                        {{ $e->visitor_count ?? 0 }} org
                                                                     </span>
                                                                 @endif
                                                             </div>
@@ -352,33 +340,19 @@
                                             </div>
                                             </div>
 
-                                            <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-between">
-                                                <span class="flex flex-col gap-1">
-                                                    @if($e->deleted_at)
-                                                        <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
-                                                    @else
-                                                        <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
-                                                    @endif
-                                                    {{-- QR status badge --}}
-                                                    @if($e->qr_token)
-                                                        @php
-                                                            $qrBadge = match($e->qr_status ?? 'pending') {
-                                                                'ongoing'   => ['bg-blue-50 text-blue-700 border-blue-100',   '&#128203; Sedang Berkunjung'],
-                                                                'completed' => ['bg-gray-100 text-gray-600 border-gray-200', '&#10003; Selesai'],
-                                                                default     => ['bg-amber-50 text-amber-700 border-amber-100','&#9201; Menunggu Scan'],
-                                                            };
-                                                        @endphp
-                                                        <span class="inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadge[0] }}">{!! $qrBadge[1] !!}</span>
-                                                        <span class="inline-flex items-center gap-1 text-[10px] text-gray-500">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                                            {{ $e->visitor_count ?? 0 }} pengunjung
-                                                        </span>
-                                                    @endif
-                                                </span>
-                                                <div class="flex gap-1.5 font-medium">
+                                            <div class="pt-3 border-t border-gray-100 mt-4 flex items-end justify-between">
+                                                <div class="flex flex-col gap-1.5 mr-auto">
+                                                    <span class="text-[11px] text-gray-500">No. {{ $rowNo }}</span>
+                                                    <div class="flex flex-wrap items-center gap-1.5">
+                                                        @if($e->deleted_at)
+                                                            <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-1.5 font-medium shrink-0">
                                                     <button wire:click="openEdit({{ $e->guestbook_id }})"
                                                             wire:loading.attr="disabled"
-                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
+                                                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm">
                                                         {{ __('app.edit') }}
                                                     </button>
                                                     @if(!$e->deleted_at)
@@ -453,8 +427,6 @@
                                                     <td class="h-12 px-4">
                                                         @if($e->deleted_at)
                                                             <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
-                                                        @else
-                                                            <span class="inline-flex items-center text-[10px] text-[#4E653D] bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.active')) }}</span>
                                                         @endif
                                                         {{-- QR status --}}
                                                         @if($e->qr_token)
@@ -520,184 +492,11 @@
                         </div>
                     @endif
 
-                {{-- TAB: KUNJUNGAN TERBARU (BELUM KELUAR) --}}
-                @else
-                    @if($latest->isEmpty())
-                        <div class="px-4 sm:px-6 py-14 text-center text-gray-500 text-sm">
-                            <x-heroicon-o-user-group class="w-8 h-8 mx-auto text-gray-300 mb-2"/>
-                            {{ __('app.no_active_visits') }}
-                        </div>
-                    @else
-                        <div class="px-4 sm:px-6 py-5 bg-gray-50/30">
-                            @if($viewMode === 'card')
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    @foreach ($latest as $r)
-                                        @php
-                                            $rowNoLatest = ($latest->firstItem() ?? 1) + $loop->index;
-                                            $avatarChar = strtoupper(substr($r->name ?? 'G', 0, 1));
-                                        @endphp
-                                        <div wire:key="latest-card-{{ $r->guestbook_id }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
-
-                                            <div class="flex items-start gap-4">
-                                                    <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
-
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center justify-between gap-3 min-w-0 mb-1">
-                                                            <h4 class="font-semibold text-gray-900 text-base truncate pr-2">
-                                                                {{ $r->name }}
-                                                            </h4>
-                                                            <div class="flex-shrink-0 flex items-center gap-2">
-                                                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex-shrink-0">
-                                                                    {{ strtoupper(__('app.active')) }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        @if($r->phone_number)
-                                                            <p class="text-xs text-gray-500 font-mono">{{ $r->phone_number }}</p>
-                                                        @endif
-
-                                                <div class="space-y-2 text-[13px] text-gray-600 mb-3 border-y border-gray-100 py-2 mt-3">
-                                                    @if($r->instansi)
-                                                        <div class="flex items-center gap-1.5 font-medium text-gray-800">
-                                                            <x-heroicon-o-building-office class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">{{ __('app.institution') }}: <span class="font-semibold text-gray-900">{{ $r->instansi }}</span></span>
-                                                        </div>
-                                                    @endif
-                                                    @if($r->keperluan)
-                                                            <div class="flex items-center gap-1.5 font-medium text-gray-800">
-                                                            <x-heroicon-o-information-circle class="w-4 h-4 text-gray-500 shrink-0"/>
-                                                            <span class="truncate">{{ __('app.visit_purpose') }}: <span class="font-semibold text-gray-900">{{ $r->keperluan }}</span></span>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                {{-- BOTTOM LEFT: Time and Officer --}}
-                                                <div class="text-[12px] text-gray-600 space-y-2 mt-2">
-                                                    <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2">
-                                                        <div class="flex items-center gap-1.5 min-w-0">
-                                                            <x-heroicon-o-calendar class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-gray-700">{{ fmtDate($r->date) }}</span>
-                                                        </div>
-                                                        <div class="flex items-center gap-1.5 min-w-0">
-                                                            <x-heroicon-o-clock class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                            <span class="truncate font-medium text-emerald-600">{{ fmtTime($r->jam_in) }}</span>
-                                                        </div>
-                                                        @if($r->petugas_penjaga)
-                                                            <div class="col-span-2 flex items-center gap-1.5 min-w-0 pt-1 border-t border-gray-200/50 mt-1">
-                                                                <x-heroicon-o-user class="w-3.5 h-3.5 text-gray-400 shrink-0"/>
-                                                                <span class="truncate font-medium text-gray-600">{{ __('app.officer') }}: <span class="text-gray-900 font-semibold">{{ $r->petugas_penjaga }}</span></span>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                            <div class="pt-3 border-t border-gray-100 mt-4 flex items-center justify-end gap-1.5 font-medium">
-                                                {{-- QR status pill --}}
-                                                @if($r->qr_token)
-                                                    @php
-                                                        $rQrBadge = match($r->qr_status ?? 'pending') {
-                                                            'ongoing'   => ['bg-blue-50 text-blue-700 border-blue-100',   '&#128203; Sedang Berkunjung'],
-                                                            'completed' => ['bg-gray-100 text-gray-600 border-gray-200', '&#10003; Selesai'],
-                                                            default     => ['bg-amber-50 text-amber-700 border-amber-100','&#9201; Menunggu Scan'],
-                                                        };
-                                                    @endphp
-                                                    <span class="mr-auto inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $rQrBadge[0] }}">{!! $rQrBadge[1] !!} ({{ $r->visitor_count ?? 0 }} org)</span>
-                                                @endif
-                                                <button wire:click="openEdit({{ $r->guestbook_id }})"
-                                                        wire:loading.attr="disabled"
-                                                        class="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none transition shadow-sm">
-                                                    {{ __('app.edit') }}
-                                                </button>
-                                                <button wire:click="setJamKeluarNow({{ $r->guestbook_id }})"
-                                                        wire:loading.attr="disabled"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm">
-                                                    <x-heroicon-o-arrow-right-start-on-rectangle class="w-3.5 h-3.5" />
-                                                    <span>{{ __('app.check_out_btn') }}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                {{-- Table View --}}
-                                <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-                                    <table class="w-full text-sm">
-                                        <thead>
-                                            <tr class="border-b border-gray-200 bg-gray-50/50">
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.name_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ __(`app.institution_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.purpose_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.check_in_time') }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
-                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            @foreach ($latest as $r)
-                                                @php $rowNoLatest = ($latest->firstItem() ?? 1) + $loop->index; @endphp
-                                                <tr wire:key="latest-{{ $r->guestbook_id }}" class="hover:bg-gray-50/50 transition-colors">
-                                                    <td class="h-12 px-4 text-gray-400 text-xs font-mono">{{ $rowNoLatest }}</td>
-                                                    <td class="h-12 px-4">
-                                                        <div class="flex items-center gap-2.5">
-                                                            <div class="w-7 h-7 rounded-full bg-[#4E653D] text-white flex items-center justify-center text-xs font-semibold shrink-0">
-                                                                {{ strtoupper(substr($r->name ?? '�', 0, 1)) }}
-                                                            </div>
-                                                            <div class="min-w-0">
-                                                                <p class="font-semibold text-gray-900 truncate">{{ $r->name }}</p>
-                                                                @if($r->phone_number)
-                                                                    <p class="text-xs text-gray-400 font-mono">{{ $r->phone_number }}</p>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $r->instansi ?? '�' }}</td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $r->keperluan ?? '�' }}</td>
-                                                    <td class="h-12 px-4 text-gray-900 font-medium whitespace-nowrap">{{ fmtDate($r->date) }}</td>
-                                                    <td class="h-12 px-4 text-emerald-600 font-semibold whitespace-nowrap">{{ fmtTime($r->jam_in) }}</td>
-                                                    <td class="h-12 px-4 text-gray-900 hidden lg:table-cell font-semibold">{{ $r->petugas_penjaga }}</td>
-                                                    <td class="h-12 px-4 text-right">
-                                                        <div class="flex items-center justify-end gap-1.5">
-                                                            <button wire:click="openEdit({{ $r->guestbook_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    wire:target="openEdit({{ $r->guestbook_id }})"
-                                                                    class="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-[#4E653D] transition-colors"
-                                                                    title="{{ __('app.edit') }}">
-                                                                <x-heroicon-o-pencil-square class="w-4 h-4" />
-                                                            </button>
-                                                            <button wire:click="setJamKeluarNow({{ $r->guestbook_id }})"
-                                                                    wire:loading.attr="disabled"
-                                                                    wire:target="setJamKeluarNow({{ $r->guestbook_id }})"
-                                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm"
-                                                                    title="{{ __('app.check_out_btn') }}">
-                                                                <x-heroicon-o-arrow-right-start-on-rectangle class="w-3.5 h-3.5" />
-                                                                <span wire:loading.remove wire:target="setJamKeluarNow({{ $r->guestbook_id }})">{{ __('app.check_out_btn') }}</span>
-                                                                <span wire:loading wire:target="setJamKeluarNow({{ $r->guestbook_id }})">...</span>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                @endif
 
                 {{-- PAGINATION --}}
                 <div class="px-4 sm:px-6 py-4 bg-gray-50 border-t border-gray-200">
                     <div class="w-full">
-                        @if($activeTab === 'entries')
                             {{ $entries->onEachSide(1)->links() }}
-                        @else
-                            {{ $latest->onEachSide(1)->links() }}
-                        @endif
                     </div>
                 </div>
             </section>
@@ -779,35 +578,35 @@
                             {{-- Nama --}}
                             <div>
                                 <label for="edit_name" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.guest_name_label') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" id="edit_name" class="{{ $input }}" wire:model.defer="edit.name">
+                                <input type="text" id="edit_name" class="{{ $input }}" wire:model="edit.name">
                                 @error('edit.name') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- No HP --}}
                             <div>
                                 <label for="edit_phone_number" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.no_hp_label`) }}</label>
-                                <input type="text" id="edit_phone_number" class="{{ $input }}" wire:model.defer="edit.phone_number">
+                                <input type="text" id="edit_phone_number" class="{{ $input }}" wire:model="edit.phone_number">
                                 @error('edit.phone_number') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Instansi --}}
                             <div>
                                 <label for="edit_instansi" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.institution_col`) }}</label>
-                                <input type="text" id="edit_instansi" class="{{ $input }}" wire:model.defer="edit.instansi">
+                                <input type="text" id="edit_instansi" class="{{ $input }}" wire:model="edit.instansi">
                                 @error('edit.instansi') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Keperluan --}}
                             <div>
                                 <label for="edit_keperluan" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.purpose_col`) }} <span class="text-rose-500">*</span></label>
-                                <textarea id="edit_keperluan" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all resize-none" wire:model.defer="edit.keperluan"></textarea>
+                                <textarea id="edit_keperluan" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all resize-none" wire:model="edit.keperluan"></textarea>
                                 @error('edit.keperluan') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Petugas Penjaga --}}
                             <div>
                                 <label for="edit_petugas_penjaga" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.petugas_label`) }} <span class="text-rose-500">*</span></label>
-                                <input type="text" id="edit_petugas_penjaga" class="{{ $input }}" wire:model.defer="edit.petugas_penjaga">
+                                <input type="text" id="edit_petugas_penjaga" class="{{ $input }}" wire:model="edit.petugas_penjaga">
                                 @error('edit.petugas_penjaga') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
@@ -815,17 +614,17 @@
                             <div class="grid grid-cols-3 gap-3">
                                 <div>
                                     <label for="edit_date" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.date_col`) }} <span class="text-rose-500">*</span></label>
-                                    <input type="date" id="edit_date" class="{{ $input }}" wire:model.defer="edit.date">
+                                    <input type="date" id="edit_date" class="{{ $input }}" wire:model="edit.date">
                                     @error('edit.date') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                     <label for="edit_jam_in" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_masuk_label`) }} <span class="text-rose-500">*</span></label>
-                                    <input type="time" id="edit_jam_in" class="{{ $input }}" wire:model.defer="edit.jam_in">
+                                    <input type="time" id="edit_jam_in" class="{{ $input }}" wire:model="edit.jam_in">
                                     @error('edit.jam_in') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                     <label for="edit_jam_out" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_keluar_label`) }}</label>
-                                    <input type="time" id="edit_jam_out" class="{{ $input }}" wire:model.defer="edit.jam_out">
+                                    <input type="time" id="edit_jam_out" class="{{ $input }}" wire:model="edit.jam_out">
                                     @error('edit.jam_out') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                             </div>

@@ -256,7 +256,7 @@ return [
     'saving_data'               => 'Menyimpan...',
     'guest_email'               => 'Email Tamu',
     'guest_email_placeholder'   => 'email@tamu.com',
-    'guest_email_hint'          => 'Opsional. QR code akan dikirim ke email ini.',
+    'guest_email_hint'          => 'QR code akan dikirim ke email ini.',
 
     // ── Superadmin Dashboard ──────────────────────────────────────────────────
     'superadmin_analytics'      => 'Analitik Superadmin',

@@ -238,7 +238,7 @@
                             @endphp
 
                             <div wire:key="done-{{ $row->delivery_id }}"
-                                class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                 
                                 <div class="flex items-start gap-4">
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
@@ -561,7 +561,8 @@
         </div>
     </div>
 
-    {{-- EDIT MODAL --}}
+    </div>
+{{-- EDIT MODAL --}}
     @if($showEdit)
         <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="$set('showEdit', false)"></div>
@@ -578,18 +579,18 @@
                 <div class="p-6 space-y-4 bg-white">
                     <div class="space-y-1.5">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">{{ __('app.item_name') }}</label>
-                        <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model.defer="edit.item_name">
+                        <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model="edit.item_name">
                         @error('edit.item_name') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">{{ __('app.sender_name') }}</label>
-                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model.defer="edit.nama_pengirim">
+                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model="edit.nama_pengirim">
                             @error('edit.nama_pengirim') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">{{ __('app.receiver_name') }}</label>
-                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model.defer="edit.nama_penerima">
+                            <input type="text" class="w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 focus:border-[#4E653D] transition" wire:model="edit.nama_penerima">
                             @error('edit.nama_penerima') <p class="text-xs text-rose-600 mt-1.5 font-medium">{{ $message }}</p> @enderror
                         </div>
                     </div>

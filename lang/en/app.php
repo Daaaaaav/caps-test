@@ -268,7 +268,7 @@ return [
     'saving_data'               => 'Saving...',
     'guest_email'               => 'Guest Email',
     'guest_email_placeholder'   => 'guest@email.com',
-    'guest_email_hint'          => 'Optional. A QR code will be emailed to this address.',
+    'guest_email_hint'          => 'A QR code will be emailed to this address.',
 
     // ── Guestbook History ─────────────────────────────────────────────────────
     'guestbook_history_title'   => 'Guestbook History',

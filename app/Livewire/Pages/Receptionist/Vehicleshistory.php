@@ -45,6 +45,16 @@ class Vehicleshistory extends Component
     // Pagination
     public int $perPage = 5;
 
+    // Edit Modal State
+    public bool $showEdit = false;
+    public ?int $editId = null;
+    public array $edit = [
+        'borrower_name' => '',
+        'purpose'       => '',
+        'destination'   => '',
+        'notes'         => '',
+    ];
+
     protected $queryString = [
         'q'              => ['except' => ''],
         'vehicleFilter'  => ['except' => null],
@@ -130,6 +140,61 @@ class Vehicleshistory extends Component
         }
 
         $this->resetPage();
+    }
+
+    public function openEdit(int $id): void
+    {
+        $user = Auth::user();
+        $companyId = (int) ($user?->company_id ?? 0);
+        
+        $query = VehicleBooking::where('company_id', $companyId);
+        if ($this->withTrashed) {
+            $query->withTrashed();
+        }
+        $booking = $query->find($id);
+        
+        if (!$booking) return;
+
+        $this->editId = $id;
+        $this->edit = [
+            'borrower_name' => (string) $booking->borrower_name,
+            'purpose'       => (string) $booking->purpose,
+            'destination'   => (string) $booking->destination,
+            'notes'         => (string) $booking->notes,
+        ];
+        $this->showEdit = true;
+    }
+
+    public function saveEdit(): void
+    {
+        $this->validate([
+            'edit.borrower_name' => 'required|string|max:255',
+            'edit.purpose'       => 'nullable|string|max:255',
+            'edit.destination'   => 'nullable|string|max:255',
+            'edit.notes'         => 'nullable|string',
+        ]);
+
+        $user = Auth::user();
+        $companyId = (int) ($user?->company_id ?? 0);
+        
+        $query = VehicleBooking::where('company_id', $companyId);
+        if ($this->withTrashed) {
+            $query->withTrashed();
+        }
+        $booking = $query->find($this->editId);
+
+        if ($booking) {
+            $booking->update([
+                'borrower_name' => $this->edit['borrower_name'],
+                'purpose'       => $this->edit['purpose'],
+                'destination'   => $this->edit['destination'],
+                'notes'         => $this->edit['notes'],
+            ]);
+            session()->flash('success', "Data #{$this->editId} berhasil diperbarui.");
+        }
+
+        $this->showEdit = false;
+        $this->reset('editId', 'edit');
     }
 
     public function render()

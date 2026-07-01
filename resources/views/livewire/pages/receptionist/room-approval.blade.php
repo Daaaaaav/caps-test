@@ -63,7 +63,7 @@
                         @forelse ($pending as $m)
                             @php $id = $m['id']; @endphp
                             <div wire:key="p-{{ $id }}"
-                                 class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                 class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                 
                                 <div class="flex items-start gap-4">
                                     {{-- 1. Avatar/Initial --}}
@@ -205,7 +205,7 @@
                         @forelse ($ongoing as $m)
                             @php $id = $m['id']; @endphp
                             <div wire:key="o-{{ $id }}"
-                                 class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                 class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                 
                                 <div class="flex items-start gap-4">
                                     {{-- 1. Avatar/Initial --}}

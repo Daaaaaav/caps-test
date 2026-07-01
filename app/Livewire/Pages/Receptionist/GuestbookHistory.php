@@ -23,7 +23,6 @@ class GuestbookHistory extends Component
 
     // --- Pagination Controls ---
     // Set default data per page to 12
-    public int $perLatest = 6; // for "Kunjungan Terbaru"
     public int $perEntries = 6; // for "Riwayat Kunjungan"
 
     // Shared property for the dropdown control in Blade
@@ -47,8 +46,7 @@ class GuestbookHistory extends Component
     public bool $showEdit = false;
     public ?int $editId = null;
 
-    // Active tab: entries | latest
-    public string $activeTab = 'entries';
+
 
     public array $edit = [
         'date' => null,
@@ -160,27 +158,11 @@ class GuestbookHistory extends Component
     // Bind shared property to the list-specific pagination properties
     public function updatedSelectedPerPage($value): void
     {
-        $this->perLatest = (int) $value;
         $this->perEntries = (int) $value;
-        $this->resetPage(); // Reset both paginations when size changes
+        $this->resetPage('entriesPage');
     }
 
-    /** Tabs switcher (Riwayat / Terbaru) */
-    public function setTab(string $tab): void
-    {
-        if (!in_array($tab, ['entries', 'latest'], true)) {
-            return;
-        }
 
-        $this->activeTab = $tab;
-
-        // Reset the page of the tab you are switching TO
-        if ($tab === 'entries') {
-            $this->resetPage('entriesPage');
-        } else {
-            $this->resetPage('latestPage');
-        }
-    }
 
     /** Sorting helper like BookingsApproval */
     private function sortingDirection(): string
@@ -190,24 +172,7 @@ class GuestbookHistory extends Component
 
     /** ==== Computed props with pagination (using Livewire v3 syntax) ==== */
 
-    /**
-     * Kunjungan hari ini yang BELUM keluar, paginated (independent page name)
-     */
-    public function getLatestProperty()
-    {
-        $q = GuestbookModel::where('company_id', $this->companyId())
-            ->whereDate('date', now()->toDateString())
-            ->whereNull('jam_out');
 
-        if ($this->petugasFilter) {
-            $q->where('petugas_penjaga', $this->petugasFilter);
-        }
-
-        // Newest first
-        $q->orderByDesc('created_at');
-
-        return $q->paginate($this->perLatest, ['*'], 'latestPage');
-    }
 
     /**
      * Riwayat kunjungan (sudah keluar), with soft delete toggle, paginated (independent page name)
@@ -426,7 +391,6 @@ class GuestbookHistory extends Component
     {
         $this->petugasFilter = $petugas ?: null;
         $this->resetPage('entriesPage');
-        $this->resetPage('latestPage');
     }
 
     public function clearPetugasFilter(): void
@@ -437,7 +401,6 @@ class GuestbookHistory extends Component
     public function render()
     {
         return view('livewire.pages.receptionist.guestbookhistory', [
-            'latest' => $this->latest,
             'entries' => $this->entries,
             'petugasOptions' => $this->petugasOptions,
         ]);

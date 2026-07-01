@@ -19,7 +19,6 @@ class GuestbookStatus extends Component
 
     // Filters
     public string $q = '';
-    public string $activeTab = 'pending'; // pending | ongoing
     public int $perPage = 9;
 
     // Officer filter (sidebar)
@@ -74,15 +73,6 @@ class GuestbookStatus extends Component
         $this->resetPage();
     }
 
-    public function setTab(string $tab): void
-    {
-        if (!in_array($tab, ['pending', 'ongoing'], true)) {
-            return;
-        }
-        $this->activeTab = $tab;
-        $this->resetPage();
-    }
-
     public function clearPetugasFilter(): void
     {
         $this->petugasFilter = null;
@@ -94,19 +84,14 @@ class GuestbookStatus extends Component
     // -----------------------------------------------------------------------
 
     /**
-     * Entries where QR has been sent but not yet scanned (status = pending).
-     * Also catches legacy rows with no qr_token that still have no jam_out.
+     * All active entries (jam_out is null).
      */
-    public function getPendingEntriesProperty()
+    public function getActiveEntriesProperty()
     {
         $q = GuestbookModel::query()
             ->where('company_id', $this->companyId())
             ->whereNull('jam_out')
-            ->whereNull('deleted_at')
-            ->where(function ($sub) {
-                $sub->where('qr_status', 'pending')
-                    ->orWhereNull('qr_status');
-            });
+            ->whereNull('deleted_at');
 
         if ($this->petugasFilter) {
             $q->where('petugas_penjaga', $this->petugasFilter);
@@ -123,61 +108,18 @@ class GuestbookStatus extends Component
         }
 
         return $q->orderByDesc('created_at')
-                 ->paginate($this->perPage, ['*'], 'pendingPage');
-    }
-
-    /**
-     * Entries where at least one scan has happened (status = ongoing).
-     * Guest is confirmed onsite, no jam_out yet.
-     */
-    public function getOngoingEntriesProperty()
-    {
-        $q = GuestbookModel::query()
-            ->where('company_id', $this->companyId())
-            ->whereNull('jam_out')
-            ->whereNull('deleted_at')
-            ->where('qr_status', 'ongoing');
-
-        if ($this->petugasFilter) {
-            $q->where('petugas_penjaga', $this->petugasFilter);
-        }
-
-        if ($this->q !== '') {
-            $term = '%' . $this->q . '%';
-            $q->where(function ($w) use ($term) {
-                $w->where('name', 'like', $term)
-                    ->orWhere('instansi', 'like', $term)
-                    ->orWhere('keperluan', 'like', $term)
-                    ->orWhere('petugas_penjaga', 'like', $term);
-            });
-        }
-
-        return $q->orderByDesc('created_at')
-                 ->paginate($this->perPage, ['*'], 'ongoingPage');
+                 ->paginate($this->perPage, ['*'], 'activePage');
     }
 
     // -----------------------------------------------------------------------
-    // Counts for tab badges (unpaginated, fast)
+    // Counts for badges (unpaginated, fast)
     // -----------------------------------------------------------------------
 
-    public function getPendingCountProperty(): int
+    public function getActiveCountProperty(): int
     {
         return GuestbookModel::where('company_id', $this->companyId())
             ->whereNull('jam_out')
             ->whereNull('deleted_at')
-            ->where(function ($sub) {
-                $sub->where('qr_status', 'pending')
-                    ->orWhereNull('qr_status');
-            })
-            ->count();
-    }
-
-    public function getOngoingCountProperty(): int
-    {
-        return GuestbookModel::where('company_id', $this->companyId())
-            ->whereNull('jam_out')
-            ->whereNull('deleted_at')
-            ->where('qr_status', 'ongoing')
             ->count();
     }
 
@@ -231,6 +173,14 @@ class GuestbookStatus extends Component
             'qr_status'  => 'completed',
         ]);
 
+        // Also mark all individual QR codes as scanned (manual override)
+        $row->qrCodes()
+            ->where('is_scanned', false)
+            ->update([
+                'is_scanned' => true,
+                'scanned_at' => now(),
+            ]);
+
         $this->dispatch('toast', type: 'success', title: __('app.toast_checkout_title'), message: __('app.toast_checkout_message'), duration: 3000);
         $this->dispatch('$refresh');
     }
@@ -246,6 +196,7 @@ class GuestbookStatus extends Component
         }
 
         try {
+            $row->load('qrCodes');
             \Illuminate\Support\Facades\Mail::to($row->email)
                 ->send(new \App\Mail\GuestbookQrMail($row));
 
@@ -262,10 +213,8 @@ class GuestbookStatus extends Component
     public function render()
     {
         return view('livewire.pages.receptionist.guestbook-status', [
-            'pendingEntries' => $this->pendingEntries,
-            'ongoingEntries' => $this->ongoingEntries,
-            'pendingCount'   => $this->pendingCount,
-            'ongoingCount'   => $this->ongoingCount,
+            'activeEntries' => $this->activeEntries,
+            'activeCount'   => $this->activeCount,
         ]);
     }
 }

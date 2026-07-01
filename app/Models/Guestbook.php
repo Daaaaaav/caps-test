@@ -33,6 +33,7 @@ class Guestbook extends Model
         'qr_token',
         'qr_status',
         'visitor_count',
+        'storage_place',
     ];
 
     // If column `date` is DATE, this is safe. Times are left as string (TIME cast is not native Carbon).
@@ -49,6 +50,28 @@ class Guestbook extends Model
     public function scans(): HasMany
     {
         return $this->hasMany(GuestbookScan::class, 'guestbook_id', 'guestbook_id');
+    }
+
+    /** Individual QR codes (one per visitor in the group) for checkout scanning */
+    public function qrCodes(): HasMany
+    {
+        return $this->hasMany(GuestbookQrCode::class, 'guestbook_id', 'guestbook_id');
+    }
+
+    /** Check if all individual visitor QR codes have been scanned out */
+    public function allQrScanned(): bool
+    {
+        $total = $this->qrCodes()->count();
+        if ($total === 0) {
+            return false;
+        }
+        return $this->qrCodes()->where('is_scanned', true)->count() >= $total;
+    }
+
+    /** Count how many QR codes have been scanned */
+    public function scannedQrCount(): int
+    {
+        return $this->qrCodes()->where('is_scanned', true)->count();
     }
 
     // -----------------------------------------------------------------------

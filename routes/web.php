@@ -48,6 +48,7 @@ use App\Livewire\Pages\Receptionist\RoomApproval;
 use App\Livewire\Pages\Receptionist\BookingHistory;
 use App\Livewire\Pages\Receptionist\GuestbookHistory;
 use App\Livewire\Pages\Receptionist\GuestbookStatus;
+use App\Livewire\Pages\Receptionist\GuestbookCheckout;
 use App\Livewire\Pages\Receptionist\DocPackHistory;
 use App\Livewire\Pages\Receptionist\DocPackStatus;
 use App\Livewire\Pages\Receptionist\DocPackForm;
@@ -216,6 +217,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/receptionist-bookinghistory', BookingHistory::class)->name('receptionist.bookinghistory');
         Route::get('/receptionist-guestbookhistory', GuestbookHistory::class)->name('receptionist.guestbookhistory');
         Route::get('/receptionist-guestbookstatus', GuestbookStatus::class)->name('receptionist.guestbookstatus');
+        Route::get('/receptionist-guestbook-checkout/{guestbookId}', GuestbookCheckout::class)->name('receptionist.guestbook.checkout');
+        Route::post('/api/guestbook/checkout-scan', [GuestbookScanController::class, 'checkoutScan'])->name('guestbook.checkout.scan');
         Route::get('/receptionist-docpackhistory', DocPackHistory::class)->name('receptionist.docpackhistory');
         Route::get('/receptionist-docpackstatus', DocPackStatus::class)->name('receptionist.docpackstatus');
         Route::get('/receptionist-docpackform', DocPackForm::class)->name('receptionist.docpackform');

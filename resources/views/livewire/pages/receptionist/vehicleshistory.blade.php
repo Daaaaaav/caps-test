@@ -271,7 +271,7 @@
                                 
                                 {{-- START: MODIFIED VEHICLE HISTORY CARD DESIGN --}}
                                 <div wire:key="history-{{ $b->vehiclebooking_id }}"
-                                    class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                    class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                     
                                     <div class="flex items-start gap-4">
                                         {{-- 1. Avatar/Initial on the left --}}
@@ -356,7 +356,12 @@
                                         {{-- Actions based on Trashed Status --}}
                                         @if(!$isTrashed)
                                             <button type="button"
-                                                class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition"
+                                                class="px-3 py-2 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none focus:ring-2 focus:ring-[#4E653D]/20 transition shadow-sm"
+                                                wire:click="openEdit({{ $b->vehiclebooking_id }})">
+                                                {{ __('app.edit') }}
+                                            </button>
+                                            <button type="button"
+                                                class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition"
                                                 wire:click="softDelete({{ $b->vehiclebooking_id }})">
                                                 {{ __('app.delete') }}
                                             </button>
@@ -429,6 +434,11 @@
                                             <td class="h-12 px-4 text-right">
                                                 <div class="flex items-center justify-end gap-2">
                                                     @if(!$isTrashed)
+                                                        <button type="button"
+                                                            class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:outline-none transition shadow-sm"
+                                                            wire:click="openEdit({{ $b->vehiclebooking_id }})">
+                                                            {{ __('app.edit') }}
+                                                        </button>
                                                         <button type="button"
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition"
                                                             wire:click="softDelete({{ $b->vehiclebooking_id }})">
@@ -567,4 +577,54 @@
             </div>
         </div>
     </main>
+
+    {{-- ===== EDIT MODAL ===== --}}
+    @if($showEdit)
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showEdit', false)"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                <div class="bg-[#4A2F24] px-6 py-4 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-[#CDDEA7]">{{ __('app.edit') }}</h3>
+                    <button wire:click="$set('showEdit', false)" class="text-[#CDDEA7]/60 hover:text-[#CDDEA7]">
+                        <x-heroicon-o-x-mark class="w-5 h-5"/>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    @php
+                        $mi = 'w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all';
+                        $ml = 'block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1';
+                    @endphp
+                    <div>
+                        <label class="{{ $ml }}">{{ __('app.borrower_label') ?? 'Borrower Name' }} <span class="text-rose-500">*</span></label>
+                        <input type="text" wire:model="edit.borrower_name" class="{{ $mi }}">
+                        @error('edit.borrower_name') <p class="mt-1 text-xs text-rose-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="{{ $ml }}">{{ __('app.purpose') }}</label>
+                        <input type="text" wire:model="edit.purpose" class="{{ $mi }}">
+                    </div>
+                    <div>
+                        <label class="{{ $ml }}">{{ __('app.destination') }}</label>
+                        <input type="text" wire:model="edit.destination" class="{{ $mi }}">
+                    </div>
+                    <div>
+                        <label class="{{ $ml }}">{{ __('app.reason') ?? 'Notes' }}</label>
+                        <textarea wire:model="edit.notes" class="{{ $mi }} py-2.5 h-20 resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="px-6 pb-6 flex justify-end gap-2">
+                    <button wire:click="$set('showEdit', false)"
+                            class="px-4 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button wire:click="saveEdit"
+                            wire:loading.attr="disabled"
+                            class="px-5 py-2 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm">
+                        {{ __('app.save') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

@@ -263,7 +263,7 @@
                                     @endphp
 
                                     <div wire:key="pend-{{ $row->delivery_id }}"
-                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                         
                                         <div class="flex items-start gap-4">
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>
@@ -363,7 +363,7 @@
                                     @endphp
 
                                     <div wire:key="stor-{{ $row->delivery_id }}"
-                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                        class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                         
                                         <div class="flex items-start gap-4">
                                                 <div class="{{ $icoAvatar }} mt-0.5">{{ $avatarChar }}</div>

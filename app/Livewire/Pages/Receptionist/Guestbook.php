@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Guestbook as GuestbookModel;
+use App\Models\GuestbookQrCode;
 use App\Models\Department;
 use App\Models\User;
 use App\Mail\GuestbookQrMail;
@@ -25,6 +26,8 @@ class Guestbook extends Component
     public $phone_number;
     public $instansi;
     public $keperluan;
+    public $visitor_count = 1;
+    public $storage_place;
     
     // Field baru (Nullable / Optional)
     public $department_id;
@@ -97,10 +100,12 @@ class Guestbook extends Component
     {
         return [
             'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['nullable', 'email', 'max:255'],
+            'email'         => ['required', 'email', 'max:255'],
             'phone_number'  => ['nullable', 'string', 'max:50'],
             'instansi'      => ['nullable', 'string', 'max:255'],
             'keperluan'     => ['nullable', 'string', 'max:255'],
+            'visitor_count' => ['required', 'integer', 'min:1', 'max:999'],
+            'storage_place' => ['nullable', 'integer', 'min:1', 'max:100'],
             // Ensures department_id and user_id are nullable
             'department_id' => ['nullable', 'exists:departments,department_id'],
             'user_id'       => ['nullable', 'exists:users,user_id'],
@@ -132,8 +137,9 @@ class Guestbook extends Component
 
         SecurityMonitoringService::logFormSubmit('guestbook', $validatedData);
 
-        // Generate QR token; entry starts as 'pending' until the first scan
+        // Generate master QR token for backward compat
         $qrToken = GuestbookModel::generateQrToken();
+        $visitorCount = (int) $validatedData['visitor_count'];
 
         // Prepare data including auto-filled fields
         $entryData = array_merge($validatedData, [
@@ -144,15 +150,27 @@ class Guestbook extends Component
             'jam_out'           => null,
             'qr_token'          => $qrToken,
             'qr_status'         => 'pending',
-            'visitor_count'     => 0,
+            'visitor_count'     => $visitorCount,
         ]);
 
         // Saves data to the database
         $entry = GuestbookModel::create($entryData);
 
+        // Generate individual QR codes for each visitor
+        $qrTokens = GuestbookQrCode::generateTokenBatch($visitorCount);
+        foreach ($qrTokens as $index => $token) {
+            GuestbookQrCode::create([
+                'guestbook_id'   => $entry->guestbook_id,
+                'qr_token'       => $token,
+                'visitor_number' => $index + 1,
+            ]);
+        }
+
         // Send QR code email if an email address was provided
         if (!empty($validatedData['email'])) {
             try {
+                // Reload with qrCodes for the email
+                $entry->load('qrCodes');
                 Mail::to($validatedData['email'])->send(new GuestbookQrMail($entry));
             } catch (\Throwable $e) {
                 Log::error('GuestbookQrMail failed: ' . $e->getMessage(), ['exception' => $e]);
@@ -168,7 +186,8 @@ class Guestbook extends Component
         }
 
         // Reset form
-        $this->reset(['name', 'email', 'phone_number', 'instansi', 'keperluan', 'department_id', 'user_id']);
+        $this->reset(['name', 'email', 'phone_number', 'instansi', 'keperluan', 'visitor_count', 'department_id', 'user_id', 'storage_place']);
+        $this->visitor_count = 1;
         // Reset user list 
         $this->users_list = [];
 
@@ -177,8 +196,8 @@ class Guestbook extends Component
         $this->dispatch('guestbook-form-reset');
 
         $toastMessage = !empty($validatedData['email'])
-            ? 'Guest ditambah. QR code dikirim ke ' . $validatedData['email'] . '.'
-            : 'Guest ditambah. (Tidak ada email – QR tidak dikirim)';
+            ? 'Guest ditambah (' . $visitorCount . ' pengunjung). QR code dikirim ke ' . $validatedData['email'] . '.'
+            : 'Guest ditambah (' . $visitorCount . ' pengunjung). (Tidak ada email – QR tidak dikirim)';
 
         $this->dispatch('toast', type: 'success', title: 'Ditambah', message: $toastMessage, duration: 4000);
         session()->flash('saved', true);

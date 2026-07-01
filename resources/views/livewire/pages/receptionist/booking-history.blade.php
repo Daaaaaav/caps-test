@@ -303,7 +303,7 @@
 
                                         {{-- START: MODIFIED HISTORY CARD DESIGN (DONE) --}}
                                         <div wire:key="done-{{ $row->bookingroom_id }}-{{ $stateKey }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                             
                                             <div class="flex items-start gap-4">
                                                 {{-- 1. Avatar/Initial on the left --}}
@@ -577,7 +577,7 @@
 
                                         {{-- START: MODIFIED HISTORY CARD DESIGN (REJECTED) --}}
                                         <div wire:key="rej-{{ $row->bookingroom_id }}-{{ $stateKey }}"
-                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:shadow-sm hover:border-gray-300 transition">
+                                             class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 flex flex-col h-full justify-between hover:shadow-sm hover:border-gray-300 transition">
                                             
                                             <div class="flex items-start gap-4">
                                                 {{-- 1. Avatar/Initial on the left --}}

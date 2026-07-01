@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-gray-50">
     @php
-        $card   = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
+        $card   = 'bg-white rounded-2xl border border-gray-200 shadow-sm';
         $head   = 'bg-[#4A2F24]';
         $label  = 'block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5';
         $input  = 'w-full h-10 px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all';
@@ -36,25 +36,14 @@
                         </div>
                     </div>
 
-                    <div class="inline-flex rounded-lg overflow-hidden bg-[#CDDEA7]/10 border border-[#CDDEA7]/20 backdrop-blur-sm shadow-sm">
-                        <a href="{{ route('receptionist.guestbookstatus') }}"
-                           class="px-4 py-2 text-xs font-bold text-[#CDDEA7] hover:bg-[#CDDEA7]/10 inline-flex items-center gap-1.5 transition">
-                            <x-heroicon-o-qr-code class="w-4 h-4"/>
-                            <span>Status Tamu</span>
-                        </a>
-                        <a href="{{ route('receptionist.guestbookhistory') }}"
-                           class="px-4 py-2 text-xs font-bold bg-[#CDDEA7] text-[#4A2F24] hover:bg-[#CDDEA7]/90 inline-flex items-center gap-1.5 transition">
-                            <x-heroicon-o-calendar class="w-4 h-4"/>
-                            <span>{{ __('app.guestbook_history') }}</span>
-                        </a>
-                    </div>
+
                 </div>
             </div>
         </div>
 
         {{-- Form Entri Baru --}}
         <div class="{{ $card }}">
-            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center gap-3">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 rounded-t-2xl flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-[#4E653D]/10 flex items-center justify-center border border-[#4E653D]/20">
                     <x-heroicon-o-plus class="w-4.5 h-4.5 text-[#4E653D]" />
                 </div>
@@ -90,11 +79,20 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">{{ __('app.guest_email') }}</label>
+                        <label class="{{ $label }}">{{ __('app.guest_email') }} <span class="text-rose-500">*</span></label>
                         <input type="email" wire:model.defer="email" placeholder="{{ __('app.guest_email_placeholder') }}" class="{{ $input }}">
                         @error('email') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                         <p class="mt-1 text-[10px] text-gray-400 font-medium leading-tight">
                             {{ __('app.guest_email_hint') }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="{{ $label }}">Jumlah Pengunjung <span class="text-rose-500">*</span></label>
+                        <input type="number" wire:model.defer="visitor_count" min="1" max="999" placeholder="1" class="{{ $input }}">
+                        @error('visitor_count') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-[10px] text-gray-400 font-medium leading-tight">
+                            Jumlah orang dalam rombongan. Setiap pengunjung akan mendapat QR code unik.
                         </p>
                     </div>
 
@@ -116,8 +114,17 @@
                         @error('keperluan') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                     </div>
 
+                    <div>
+                        <label class="{{ $label }}">Tempat Penyimpanan (1-100)</label>
+                        <input type="number" wire:model.defer="storage_place" min="1" max="100" placeholder="Contoh: 12" class="{{ $input }}">
+                        @error('storage_place') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-[10px] text-gray-400 font-medium leading-tight">
+                            Nomor laci atau slot penyimpanan KTP (opsional).
+                        </p>
+                    </div>
+
                     {{-- Departemen yang Dituju --}}
-                    <div class="flex flex-col justify-end">
+                    <div>
                         <label class="{{ $label }}">
                             {{ __('app.target_department_opt') }}
                         </label>
@@ -215,7 +222,7 @@
                     </div>
 
                     {{-- Bertemu dengan --}}
-                    <div class="flex flex-col justify-end">
+                    <div>
                         <label class="{{ $label }}">
                             {{ __('app.meet_with_opt') }}
                         </label>
@@ -317,7 +324,7 @@
                 </div>
 
                 {{-- Submit Button --}}
-                <div class="pt-5 border-t border-gray-200 bg-gray-50/50 -mx-6 -mb-6 p-6 flex items-center justify-end gap-3">
+                <div class="pt-5 border-t border-gray-200 bg-gray-50/50 -mx-6 -mb-6 p-6 rounded-b-2xl flex items-center justify-end gap-3">
                     @if (session('saved'))
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 text-xs font-bold shadow-sm">
                             <x-heroicon-o-check class="w-3.5 h-3.5 font-bold" />
