@@ -235,10 +235,10 @@
                                 </span>
                             </button>
 
-                            <button wire:click="delete({{ $r->delivery_id }})" onclick="return confirm('{{ __('app.delete_package_confirm') }}')"
-                                    wire:loading.attr="disabled" wire:target="delete({{ $r->delivery_id }})" class="{{ $btnRed }}">
-                                <span wire:loading.remove wire:target="delete({{ $r->delivery_id }})">{{ __('app.delete') }}</span>
-                                <span wire:loading wire:target="delete({{ $r->delivery_id }})">{{ __('app.deleting_label') }}</span>
+                            <button wire:click="confirmDelete({{ $r->delivery_id }}, '{{ str_replace('\'', '', $r->package_name ?? '') }}')"
+                                    wire:loading.attr="disabled"
+                                    class="{{ $btnRed }}">
+                                <span>{{ __('app.delete') }}</span>
                             </button>
                         </div>
                     </div>
@@ -338,10 +338,10 @@
                                         </span>
                                     </button>
 
-                                    <button wire:click="delete({{ $e->delivery_id }})" onclick="return confirm('{{ __('app.delete_package_confirm') }}')"
-                                            wire:loading.attr="disabled" wire:target="delete({{ $e->delivery_id }})" class="{{ $btnRed }}">
-                                        <span wire:loading.remove wire:target="delete({{ $e->delivery_id }})">{{ __('app.delete') }}</span>
-                                        <span wire:loading wire:target="delete({{ $e->delivery_id }})">{{ __('app.deleting_label') }}</span>
+                                    <button wire:click="confirmDelete({{ $e->delivery_id }}, '{{ str_replace('\'', '', $e->package_name ?? '') }}')"
+                                            wire:loading.attr="disabled"
+                                            class="{{ $btnRed }}">
+                                        <span>{{ __('app.delete') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -357,4 +357,45 @@
             </div>
         </div>
     </div>
+
+    {{-- DELETE MODAL --}}
+    @if($showDeleteModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="$set('showDeleteModal', false)"></div>
+            <div class="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-200 bg-[#4A2F24] text-[#CDDEA7] flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                            <x-heroicon-o-trash class="w-4 h-4 text-rose-400" />
+                        </div>
+                        <h3 class="font-bold tracking-tight text-base">{{ __('app.delete_verification') ?? 'Delete Verification' }}</h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="$set('showDeleteModal', false)">✕</button>
+                </div>
+                <div class="p-6 text-center bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        {{ $isForceDelete ? __(`app.delete_permanent_confirm`) : __(`app.delete_package_confirm`) }}
+                    </h3>
+                    <p class="text-sm text-gray-500">{{ __('app.are_you_sure_delete') }}</p>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">
+                        {{ $deletingSummary }}
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50">
+                    <button type="button" wire:click="$set('showDeleteModal', false)"
+                        class="h-9 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition inline-flex items-center gap-1.5 text-xs font-semibold">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="button" wire:click="executeDelete" wire:loading.attr="disabled"
+                        class="h-9 px-4 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
+                        <span wire:loading.remove wire:target="executeDelete">{{ __('app.delete') }}</span>
+                        <span wire:loading wire:target="executeDelete" class="flex items-center gap-1.5">
+                            <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-white"/>
+                            {{ __('app.delete') }}...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

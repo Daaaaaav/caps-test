@@ -156,7 +156,7 @@
                             <div class="relative">
                                 <input type="text"
                                        class="{{ $input }} pl-9"
-                                       placeholder="{{ __('app.search') }}�"
+                                       placeholder="{{ __('app.search') }}..."
                                        wire:model.live.debounce.300ms="q">
                                 <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
                             </div>
@@ -356,8 +356,7 @@
                                                         {{ __('app.edit') }}
                                                     </button>
                                                     @if(!$e->deleted_at)
-                                                        <button wire:click="delete({{ $e->guestbook_id }})"
-                                                                wire:confirm="{{ __(`app.delete_entry_confirm`) }}"
+                                                        <button wire:click="confirmDelete({{ $e->guestbook_id }}, '{{ str_replace('\'', '', $e->name) }}', false)"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">{{ __('app.delete') }}</button>
                                                     @else
@@ -366,8 +365,7 @@
                                                                 class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-[#4E653D] border border-emerald-200 hover:bg-emerald-100 focus:outline-none transition">
                                                             {{ __('app.restore') }}
                                                         </button>
-                                                        <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                wire:confirm="{{ __(`app.delete_permanent_confirm`) }}"
+                                                        <button wire:click="confirmDelete({{ $e->guestbook_id }}, '{{ str_replace('\'', '', $e->name) }}', true)"
                                                                 wire:loading.attr="disabled"
                                                                 class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 focus:outline-none transition">{{ __('app.delete') }}</button>
                                                     @endif
@@ -383,14 +381,14 @@
                                         <thead>
                                             <tr class="border-b border-gray-200 bg-gray-50/50">
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.name_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ __(`app.institution_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.purpose_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __(`app.date_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ __(`app.check_in_out_col`) }}</th>
-                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">{{ __(`app.officer_col`) }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.name_col') }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.institution_col') }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.purpose_col') }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.date_col') }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.check_in_out_col') }}</th>
+                                                <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.officer_col') }}</th>
                                                 <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.status') }}</th>
-                                                <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                                                <th class="h-10 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200">
@@ -401,8 +399,12 @@
                                                 @endphp
                                                 <tr wire:key="entry-{{ $e->guestbook_id }}-{{ $stateKey }}"
                                                     class="hover:bg-gray-50/50 transition-colors {{ $e->deleted_at ? 'opacity-60 bg-gray-50/20' : '' }}">
-                                                    <td class="h-12 px-4 text-gray-400 text-xs font-mono">{{ $rowNo }}</td>
-                                                    <td class="h-12 px-4">
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-400 text-xs font-mono">
+                                                        {{ $rowNo }}
+                                                    </td>
+                                                    
+                                                    <td class="h-12 px-4 py-0 ">
                                                         <div class="flex items-center gap-2.5">
                                                             <div class="w-7 h-7 rounded-full bg-[#4E653D] text-white flex items-center justify-center text-xs font-semibold shrink-0">
                                                                 {{ strtoupper(substr($e->name ?? 'G', 0, 1)) }}
@@ -415,38 +417,55 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden md:table-cell truncate max-w-[160px] font-medium">{{ $e->instansi ?? '-' }}</td>
-                                                    <td class="h-12 px-4 text-gray-600 hidden lg:table-cell truncate max-w-[200px] font-medium">{{ $e->keperluan ?? '-' }}</td>
-                                                    <td class="h-12 px-4 text-gray-900 font-medium whitespace-nowrap">{{ fmtDate($e->date) }}</td>
-                                                    <td class="h-12 px-4 text-gray-500 whitespace-nowrap hidden sm:table-cell">
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-600 truncate font-medium">
+                                                        {{ $e->instansi ?? '-' }}
+                                                    </td>
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-600 truncate font-medium">
+                                                        {{ $e->keperluan ?? '-' }}
+                                                    </td>
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-900 font-medium whitespace-nowrap">
+                                                        {{ fmtDate($e->date) }}
+                                                    </td>
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-500 whitespace-nowrap">
                                                         <span class="text-emerald-600 font-semibold">{{ fmtTime($e->jam_in) }}</span>
                                                         <span class="mx-1 text-gray-300">–</span>
                                                         <span class="text-rose-600 font-semibold">{{ fmtTime($e->jam_out) }}</span>
                                                     </td>
-                                                    <td class="h-12 px-4 text-gray-900 hidden lg:table-cell font-semibold">{{ $e->petugas_penjaga }}</td>
-                                                    <td class="h-12 px-4">
-                                                        @if($e->deleted_at)
-                                                            <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
-                                                        @endif
-                                                        {{-- QR status --}}
-                                                        @if($e->qr_token)
-                                                            @php
-                                                                $qrBadgeT = match($e->qr_status ?? 'pending') {
-                                                                    'ongoing'   => 'bg-blue-50 text-blue-700 border-blue-100',
-                                                                    'completed' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                                                    default     => 'bg-amber-50 text-amber-700 border-amber-100',
-                                                                };
-                                                                $qrLabelT = match($e->qr_status ?? 'pending') {
-                                                                    'ongoing'   => 'Berkunjung',
-                                                                    'completed' => 'Selesai',
-                                                                    default     => 'QR: Pending',
-                                                                };
-                                                            @endphp
-                                                            <span class="mt-1 inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadgeT }}">{{ $qrLabelT }}</span>
-                                                            <span class="block text-[10px] text-gray-400 mt-0.5">{{ $e->visitor_count ?? 0 }} org</span>
-                                                        @endif
+                                                    
+                                                    <td class="h-12 px-4 py-0 text-gray-900 font-semibold">
+                                                        {{ $e->petugas_penjaga }}
                                                     </td>
-                                                    <td class="h-12 px-4 text-right">
+                                                    
+                                                    <td class="h-12 px-4 py-0 ">
+                                                        <div class="flex flex-col justify-center">
+                                                            @if($e->deleted_at)
+                                                                <span class="inline-flex items-center text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full font-semibold">{{ strtoupper(__('app.deleted')) }}</span>
+                                                            @endif
+                                                            {{-- QR status --}}
+                                                            @if($e->qr_token)
+                                                                @php
+                                                                    $qrBadgeT = match($e->qr_status ?? 'pending') {
+                                                                        'ongoing'   => 'bg-blue-50 text-blue-700 border-blue-100',
+                                                                        'completed' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                                                        default     => 'bg-amber-50 text-amber-700 border-amber-100',
+                                                                    };
+                                                                    $qrLabelT = match($e->qr_status ?? 'pending') {
+                                                                        'ongoing'   => 'Berkunjung',
+                                                                        'completed' => 'Selesai',
+                                                                        default     => 'QR: Pending',
+                                                                    };
+                                                                @endphp
+                                                                <span class="mt-1 inline-flex items-center text-[10px] border px-2 py-0.5 rounded-full font-semibold {{ $qrBadgeT }}">{{ $qrLabelT }}</span>
+                                                                <span class="block text-[10px] text-gray-400 mt-0.5">{{ $e->visitor_count ?? 0 }} org</span>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td class="h-12 px-4 py-0">
                                                         <div class="flex items-center justify-end gap-1">
                                                             <button wire:click="openEdit({{ $e->guestbook_id }})"
                                                                     wire:loading.attr="disabled"
@@ -456,12 +475,10 @@
                                                                 <x-heroicon-o-pencil-square class="w-4 h-4" />
                                                             </button>
                                                             @if(!$e->deleted_at)
-                                                                <button wire:click="delete({{ $e->guestbook_id }})"
-                                                                        wire:confirm="{{ __(`app.delete_entry_confirm`) }}"
+                                                                <button wire:click="confirmDelete({{ $e->guestbook_id }}, '{{ str_replace('\'', '', $e->name) }}', false)"
                                                                         wire:loading.attr="disabled"
-                                                                        wire:target="delete({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                                                                        title="{{ __(`app.delete`) }}">
+                                                                        title="{{ __('app.delete') }}">
                                                                     <x-heroicon-o-trash class="w-4 h-4" />
                                                                 </button>
                                                             @else
@@ -472,12 +489,10 @@
                                                                         title="{{ __('app.restore') }}">
                                                                     <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                                                                 </button>
-                                                                <button wire:click="destroyForever({{ $e->guestbook_id }})"
-                                                                        wire:confirm="{{ __(`app.delete_permanent_confirm`) }}"
+                                                                <button wire:click="confirmDelete({{ $e->guestbook_id }}, '{{ str_replace('\'', '', $e->name) }}', true)"
                                                                         wire:loading.attr="disabled"
-                                                                        wire:target="destroyForever({{ $e->guestbook_id }})"
                                                                         class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-100 transition-colors"
-                                                                        title="{{ __(`app.delete_permanent`) }}">
+                                                                        title="{{ __('app.delete_permanent') }}">
                                                                     <x-heroicon-o-x-circle class="w-4 h-4" />
                                                                 </button>
                                                             @endif
@@ -549,6 +564,7 @@
                 </section>
             </aside>
         </div>
+    </main>
 
         {{-- EDIT MODAL (Matching premium modal style from booking history) --}}
         @if ($showEdit)
@@ -584,28 +600,28 @@
 
                             {{-- No HP --}}
                             <div>
-                                <label for="edit_phone_number" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.no_hp_label`) }}</label>
+                                <label for="edit_phone_number" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.no_hp_label') }}</label>
                                 <input type="text" id="edit_phone_number" class="{{ $input }}" wire:model="edit.phone_number">
                                 @error('edit.phone_number') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Instansi --}}
                             <div>
-                                <label for="edit_instansi" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.institution_col`) }}</label>
+                                <label for="edit_instansi" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.institution_col') }}</label>
                                 <input type="text" id="edit_instansi" class="{{ $input }}" wire:model="edit.instansi">
                                 @error('edit.instansi') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Keperluan --}}
                             <div>
-                                <label for="edit_keperluan" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.purpose_col`) }} <span class="text-rose-500">*</span></label>
+                                <label for="edit_keperluan" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.purpose_col') }} <span class="text-rose-500">*</span></label>
                                 <textarea id="edit_keperluan" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all resize-none" wire:model="edit.keperluan"></textarea>
                                 @error('edit.keperluan') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Petugas Penjaga --}}
                             <div>
-                                <label for="edit_petugas_penjaga" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.petugas_label`) }} <span class="text-rose-500">*</span></label>
+                                <label for="edit_petugas_penjaga" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.petugas_label') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" id="edit_petugas_penjaga" class="{{ $input }}" wire:model="edit.petugas_penjaga">
                                 @error('edit.petugas_penjaga') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                             </div>
@@ -613,17 +629,17 @@
                             {{-- Date / Jam In / Jam Out --}}
                             <div class="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label for="edit_date" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.date_col`) }} <span class="text-rose-500">*</span></label>
+                                    <label for="edit_date" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.date_col') }} <span class="text-rose-500">*</span></label>
                                     <input type="date" id="edit_date" class="{{ $input }}" wire:model="edit.date">
                                     @error('edit.date') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="edit_jam_in" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_masuk_label`) }} <span class="text-rose-500">*</span></label>
+                                    <label for="edit_jam_in" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.jam_masuk_label') }} <span class="text-rose-500">*</span></label>
                                     <input type="time" id="edit_jam_in" class="{{ $input }}" wire:model="edit.jam_in">
                                     @error('edit.jam_in') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="edit_jam_out" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __(`app.jam_keluar_label`) }}</label>
+                                    <label for="edit_jam_out" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{{ __('app.jam_keluar_label') }}</label>
                                     <input type="time" id="edit_jam_out" class="{{ $input }}" wire:model="edit.jam_out">
                                     @error('edit.jam_out') <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p> @enderror
                                 </div>
@@ -639,14 +655,14 @@
                                         wire:loading.attr="disabled" wire:target="saveEdit">
                                     <span wire:loading.remove wire:target="saveEdit" class="flex items-center gap-1.5">
                                         <x-heroicon-o-check class="w-3.5 h-3.5" />
-                                        {{ __(`app.save_changes`) }}
+                                        {{ __('app.save_changes') }}
                                     </span>
                                     <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
                                         <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <span>{{ __(`app.saving`) }}</span>
+                                        <span>{{ __('app.saving') }}</span>
                                     </span>
                                 </button>
                             </div>
@@ -723,5 +739,45 @@
                 </div>
             </div>
         </div>
-    </main>
+
+        {{-- DELETE MODAL --}}
+        @if($showDeleteModal)
+            <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="$set('showDeleteModal', false)"></div>
+                <div class="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-200 bg-[#4A2F24] text-[#CDDEA7] flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                            <x-heroicon-o-trash class="w-4 h-4 text-rose-400" />
+                        </div>
+                        <h3 class="font-bold tracking-tight text-base">{{ __('app.delete_verification') ?? 'Delete Verification' }}</h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="$set('showDeleteModal', false)">✕</button>
+                </div>
+                <div class="p-6 text-center bg-white">
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">
+                            {{ $isForceDelete ? __('app.delete_permanent_confirm') : __('app.delete_entry_confirm') }}
+                        </h3>
+                        <p class="text-sm text-gray-500">{{ __('app.are_you_sure_delete') }}</p>
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">
+                            {{ $deletingSummary }}
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50">
+                        <button type="button" wire:click="$set('showDeleteModal', false)"
+                            class="h-9 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition inline-flex items-center gap-1.5 text-xs font-semibold">
+                            {{ __('app.cancel') }}
+                        </button>
+                        <button type="button" wire:click="executeDelete" wire:loading.attr="disabled"
+                            class="h-9 px-4 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
+                            <span wire:loading.remove wire:target="executeDelete">{{ __('app.delete') }}</span>
+                            <span wire:loading wire:target="executeDelete" class="flex items-center gap-1.5">
+                                <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-white"/>
+                                {{ __('app.delete') }}...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
 </div>

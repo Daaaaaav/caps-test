@@ -80,8 +80,8 @@
                                             <div class="flex-shrink-0 flex items-center gap-2">
                                                 {{-- ID Chip --}}
                                                 <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-mono">
-                                                    #{{ $id }}
-                                                </span>
+                                                        {{ $loop->iteration }}
+                                                    </span>
                                             </div>
                                         </div>
                                         
@@ -137,6 +137,7 @@
                 @else
                     {{-- Premium Table Layout --}}
                     <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                    <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
@@ -146,27 +147,31 @@
                                     <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                     <th class="px-6 py-3.5">{{ __('app.time') }}</th>
                                     <th class="px-6 py-3.5">{{ __('app.participants') }}</th>
-                                    <th class="px-6 py-3.5 text-right">Status</th>
+                                    <th class="px-6 py-3.5">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse ($pending as $m)
                                     @php $id = $m['id']; @endphp
                                     <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                        <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $id }}</td>
-                                        <td class="px-6 py-4 font-semibold text-gray-900">{{ $m['meeting_title'] }}</td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-semibold text-gray-700">
-                                                {{ $m['room'] }}
-                                            </span>
+                                        <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $loop->iteration }}</td>
+                                        <td class="h-12 px-6 py-4 font-semibold text-gray-900">{{ $m['meeting_title'] }}</td>
+                                        <td class="h-12 px-6 py-0 ">
+                                            <div class="flex justify-end">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-semibold text-gray-700">
+                                                    {{ $m['room'] }}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 font-medium">{{ $m['date'] }}</td>
-                                        <td class="px-6 py-4 font-mono text-xs">{{ $m['time'] }}–{{ $m['time_end'] }}</td>
-                                        <td class="px-6 py-4 font-medium text-gray-800">{{ $m['participants'] }}</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
-                                                {{ __('app.pending') }}
-                                            </span>
+                                        <td class="h-12 px-6 py-4 font-medium">{{ $m['date'] }}</td>
+                                        <td class="h-12 px-6 py-4 font-mono text-xs">{{ $m['time'] }}–{{ $m['time_end'] }}</td>
+                                        <td class="h-12 px-6 py-4 font-medium text-gray-800">{{ $m['participants'] }}</td>
+                                        <td class="h-12 px-6 py-4">
+                                            <div class="flex justify-end">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                                    {{ __('app.pending') }}
+                                                </span>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -222,8 +227,8 @@
                                             <div class="flex-shrink-0 flex items-center gap-2">
                                                 {{-- ID Chip --}}
                                                 <span class="text-[11px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 flex-shrink-0 font-mono">
-                                                    #{{ $id }}
-                                                </span>
+                                                        {{ $loop->iteration }}
+                                                    </span>
                                             </div>
                                         </div>
                                         
@@ -270,6 +275,7 @@
                 @else
                     {{-- Premium Table Layout --}}
                     <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                    <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50/70">
@@ -285,16 +291,18 @@
                                 @forelse ($ongoing as $m)
                                     @php $id = $m['id']; @endphp
                                     <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                        <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $id }}</td>
-                                        <td class="px-6 py-4 font-semibold text-gray-900">{{ $m['meeting_title'] }}</td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-semibold text-gray-700">
-                                                {{ $m['room'] }}
-                                            </span>
+                                        <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $loop->iteration }}</td>
+                                        <td class="h-12 px-6 py-4 font-semibold text-gray-900">{{ $m['meeting_title'] }}</td>
+                                        <td class="h-12 px-6 py-0 ">
+                                            <div class="flex justify-end">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-semibold text-gray-700">
+                                                    {{ $m['room'] }}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 font-medium">{{ $m['date'] }}</td>
-                                        <td class="px-6 py-4 font-mono text-xs">{{ $m['time'] }}–{{ $m['time_end'] }}</td>
-                                        <td class="px-6 py-4 font-medium text-gray-800">{{ $m['participants'] }}</td>
+                                        <td class="h-12 px-6 py-4 font-medium">{{ $m['date'] }}</td>
+                                        <td class="h-12 px-6 py-4 font-mono text-xs">{{ $m['time'] }}–{{ $m['time_end'] }}</td>
+                                        <td class="h-12 px-6 py-4 font-medium text-gray-800">{{ $m['participants'] }}</td>
                                     </tr>
                                 @empty
                                     <tr>

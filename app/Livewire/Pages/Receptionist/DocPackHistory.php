@@ -46,6 +46,10 @@ class DocPackHistory extends Component
     // Edit & Delete (soft)
     public bool $showEdit = false;
     public ?int $editId = null;
+    
+    public ?int $deletingId = null;
+    public string $deletingSummary = '';
+    public bool $showDeleteModal = false;
     public array $edit = [
         'item_name' => null,
         'nama_pengirim' => null,
@@ -237,11 +241,23 @@ class DocPackHistory extends Component
         $this->dispatch('toast', type: 'success', title: 'Saved', message: 'Information successfully saved.', duration: 3000);
     }
 
-    public function softDelete(int $id): void
+    public function confirmDelete(int $id, string $summary): void
     {
-        $row = $this->base()->findOrFail($id);
+        $this->deletingId = $id;
+        $this->deletingSummary = $summary;
+        $this->showDeleteModal = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deletingId) {
+            return;
+        }
+        $row = $this->base()->findOrFail($this->deletingId);
         $row->delete();
         $this->resetPage('donePage');
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
         $this->dispatch('toast', type: 'success', title: 'Deleted', message: 'Information successfully deleted.', duration: 3000);
     }
 

@@ -20,7 +20,7 @@
 
     @livewire('components.partials.navbar')
 
-    <main class="container mx-auto pt-9 pb-4">
+    <main class="w-full pt-9 pb-4 px-4 sm:px-6 lg:px-8">
         {{ $slot }}
     </main>
     

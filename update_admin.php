@@ -1,3 +1,41 @@
+<?php
+
+$layoutPath = __DIR__ . '/resources/views/layouts/admin.blade.php';
+$sidebarPath = __DIR__ . '/resources/views/livewire/components/partials/admin/sidebar.blade.php';
+
+// 1. Update Layout
+if (file_exists($layoutPath)) {
+    $layout = file_get_contents($layoutPath);
+    // Add sidebarEnter and sidebarLeave if they are missing
+    if (strpos($layout, 'sidebarEnter()') === false) {
+        $layout = str_replace(
+            "},",
+            "},
+            sidebarEnter() {
+                if (!this.sidebarLocked && !this.isMobile) {
+                    this.sidebarCollapsed = false;
+                }
+            },
+            sidebarLeave() {
+                if (!this.sidebarLocked && !this.isMobile) {
+                    this.sidebarCollapsed = true;
+                }
+            },",
+            $layout
+        );
+    }
+
+    // Update padding
+    $layout = str_replace(
+        ":style=\"isMobile ? 'padding-left: 0;' : (sidebarLocked ? 'padding-left: 344px;' : 'padding-left: 64px;')\"",
+        ":style=\"isMobile ? 'padding-left: 0;' : (sidebarLocked ? 'padding-left: 280px;' : 'padding-left: 64px;')\"",
+        $layout
+    );
+    file_put_contents($layoutPath, $layout);
+}
+
+// 2. Generate new Sidebar HTML
+$newSidebar = <<<'HTML'
 <div class="sidebar-root">
     {{-- Mobile Backdrop --}}
     <div x-show="mobileMenuOpen" x-transition.opacity class="sidebar-backdrop lg:hidden" @click="mobileMenuOpen = false" x-cloak></div>
@@ -145,3 +183,7 @@
         </div>
     </aside>
 </div>
+HTML;
+file_put_contents($sidebarPath, $newSidebar);
+
+echo "Done\n";

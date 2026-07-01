@@ -30,21 +30,7 @@
 <div class="min-h-screen bg-gray-50" x-data="{ showFilterModal: false }">
     <main class="px-4 sm:px-6 py-6 space-y-6">
 
-        {{-- Flash Messages --}}
-        @if (session('success') || session('error'))
-            <div class="max-w-3xl mx-auto">
-                @if (session('success'))
-                    <div class="mb-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if (session('error'))
-                    <div class="mb-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                        {{ session('error') }}
-                    </div>
-                @endif
-            </div>
-        @endif
+        {{-- Flash Messages (Replaced by Toast) --}}
 
         {{-- HERO --}}
         <div class="relative overflow-hidden rounded-2xl bg-[#4A2F24] text-[#CDDEA7] shadow-2xl">
@@ -362,7 +348,7 @@
                                             </button>
                                             <button type="button"
                                                 class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition"
-                                                wire:click="softDelete({{ $b->vehiclebooking_id }})">
+                                                wire:click="confirmDelete({{ $b->vehiclebooking_id }}, '{{ str_replace('\'', '', $b->purpose ?? __('app.vehicle_book')) }}')">
                                                 {{ __('app.delete') }}
                                             </button>
                                         @else
@@ -388,7 +374,7 @@
                                         <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.purpose') }} / {{ __('app.destination') }}</th>
                                         <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.date') }} & {{ __('app.time') }}</th>
                                         <th class="h-10 px-4 text-left text-xs font-semibold text-gray-500">{{ __('app.status') }}</th>
-                                        <th class="h-10 px-4 text-right text-xs font-semibold text-gray-500">{{ __('app.actions') }}</th>
+                                        <th class="h-10 px-4 text-xs font-semibold text-gray-500">{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -402,22 +388,22 @@
                                                 : ['bg'=>'bg-emerald-100','text'=>'text-emerald-800','label'=>__('app.completed')];
                                         @endphp
                                         <tr wire:key="history-row-{{ $b->vehiclebooking_id }}" class="hover:bg-gray-50/50 transition {{ $isTrashed ? 'opacity-60' : '' }}">
-                                            <td class="h-12 px-4 text-gray-400 text-xs font-mono">#{{ $b->vehiclebooking_id }}</td>
-                                            <td class="h-12 px-4 font-medium">
+                                            <td class="h-12 px-4 py-0 text-gray-400 text-xs font-mono">{{ $loop->iteration }}</td>
+                                            <td class="h-12 px-4 py-0 font-medium">
                                                 <div class="font-medium text-gray-900">{{ $b->borrower_name ?? '—' }}</div>
                                             </td>
-                                            <td class="h-12 px-4 text-gray-600 font-medium">{{ $vehicleName }}</td>
-                                            <td class="h-12 px-4 text-gray-600">
-                                                <div class="max-w-[200px] truncate" title="{{ $b->purpose }}">
+                                            <td class="h-12 px-4 py-0 text-gray-600 font-medium">{{ $vehicleName }}</td>
+                                            <td class="h-12 px-4 py-0 text-gray-600">
+                                                <div class="md:max-w-[200px] truncate" title="{{ $b->purpose }}">
                                                     {{ $b->purpose ? ucfirst($b->purpose) : '—' }}
                                                 </div>
                                             </td>
-                                            <td class="h-12 px-4 whitespace-nowrap text-gray-600">
+                                            <td class="h-12 px-4 py-0 whitespace-nowrap text-gray-600">
                                                 <span class="font-medium text-gray-800">{{ fmtDate($b->start_at) }}</span>
                                                 <span class="text-xs text-gray-400 block">{{ fmtTime($b->start_at) }} – {{ fmtTime($b->end_at) }}</span>
                                             </td>
-                                            <td class="h-12 px-4">
-                                                <div class="flex items-center gap-1.5">
+                                            <td class="h-12 px-4 py-0 ">
+                                                <div class="flex items-center justify-end gap-1.5 flex-wrap">
                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ $statusStyle['bg'] }} {{ $statusStyle['text'] }}">
                                                         {{ $statusStyle['label'] }}
                                                     </span>
@@ -428,10 +414,10 @@
                                                     @endif
                                                 </div>
                                                 @if($isRejected && !empty($b->notes))
-                                                    <span class="block text-[11px] text-rose-600 max-w-[180px] truncate mt-0.5" title="{{ $b->notes }}">{{ __('app.reason') }}: {{ $b->notes }}</span>
+                                                    <span class="block text-[11px] text-rose-600 md:max-w-[180px] truncate mt-0.5" title="{{ $b->notes }}">{{ __('app.reason') }}: {{ $b->notes }}</span>
                                                 @endif
                                             </td>
-                                            <td class="h-12 px-4 text-right">
+                                            <td class="h-12 px-4 py-0">
                                                 <div class="flex items-center justify-end gap-2">
                                                     @if(!$isTrashed)
                                                         <button type="button"
@@ -441,7 +427,7 @@
                                                         </button>
                                                         <button type="button"
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition"
-                                                            wire:click="softDelete({{ $b->vehiclebooking_id }})">
+                                                            wire:click="confirmDelete({{ $b->vehiclebooking_id }}, '{{ str_replace('\'', '', $b->purpose ?? __('app.vehicle_book')) }}')">
                                                             {{ __('app.delete') }}
                                                         </button>
                                                     @else
@@ -521,6 +507,7 @@
                 </section>
             </aside>
         </div>
+    </main>
 
         {{-- MOBILE FILTER MODAL --}}
         <div x-show="showFilterModal" class="fixed inset-0 z-50 md:hidden flex items-end" x-cloak style="display: none;">
@@ -576,7 +563,6 @@
                 </div>
             </div>
         </div>
-    </main>
 
     {{-- ===== EDIT MODAL ===== --}}
     @if($showEdit)
@@ -621,6 +607,47 @@
                             wire:loading.attr="disabled"
                             class="px-5 py-2 text-xs font-semibold rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition shadow-sm">
                         {{ __('app.save') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- DELETE MODAL --}}
+    @if($showDeleteModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="$set('showDeleteModal', false)"></div>
+            <div class="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-200 bg-[#4A2F24] text-[#CDDEA7] flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                            <x-heroicon-o-trash class="w-4 h-4 text-rose-400" />
+                        </div>
+                        <h3 class="font-bold tracking-tight text-base">{{ __('app.delete_verification') ?? 'Delete Verification' }}</h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="$set('showDeleteModal', false)">✕</button>
+                </div>
+                <div class="p-6 text-center bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        {{ $isForceDelete ? __(`app.delete_permanent_confirm`) : __(`app.delete_vehicle_confirm`) ?? 'Hapus Data?' }}
+                    </h3>
+                    <p class="text-sm text-gray-500">{{ __('app.are_you_sure_delete') }}</p>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">
+                        {{ $deletingSummary }}
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50">
+                    <button type="button" wire:click="$set('showDeleteModal', false)"
+                        class="h-9 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition inline-flex items-center gap-1.5 text-xs font-semibold">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="button" wire:click="executeDelete" wire:loading.attr="disabled"
+                        class="h-9 px-4 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
+                        <span wire:loading.remove wire:target="executeDelete">{{ __('app.delete') }}</span>
+                        <span wire:loading wire:target="executeDelete" class="flex items-center gap-1.5">
+                            <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            {{ __('app.delete') }}...
+                        </span>
                     </button>
                 </div>
             </div>

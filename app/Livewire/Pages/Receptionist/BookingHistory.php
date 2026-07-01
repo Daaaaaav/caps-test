@@ -42,6 +42,12 @@ class BookingHistory extends Component
     public string $modalMode = 'create';
     public ?int $editingId   = null;
 
+    // Delete modal state
+    public ?int $deletingId = null;
+    public string $deletingSummary = '';
+    public bool $showDeleteModal = false;
+    public bool $isForceDelete = false;
+
     /** @var array<int,array{id:int,name:string}> */
     public array $rooms = [];
 
@@ -338,7 +344,32 @@ class BookingHistory extends Component
         }
     }
 
-    public function destroy(int $id): void
+    public function confirmDelete(int $id, string $summary, bool $force = false): void
+    {
+        $this->deletingId = $id;
+        $this->deletingSummary = $summary;
+        $this->isForceDelete = $force;
+        $this->showDeleteModal = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deletingId) {
+            return;
+        }
+
+        if ($this->isForceDelete) {
+            $this->forceDestroyAction($this->deletingId);
+        } else {
+            $this->destroyAction($this->deletingId);
+        }
+
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
+        $this->isForceDelete = false;
+    }
+
+    private function destroyAction(int $id): void
     {
         $row = $this->baseQuery()->findOrFail($id);
         $row->delete();
@@ -356,7 +387,7 @@ class BookingHistory extends Component
         $this->fixEmptyPageAfterChange();
     }
 
-    public function forceDestroy(int $id): void
+    private function forceDestroyAction(int $id): void
     {
         $row = $this->baseQuery()->withTrashed()->findOrFail($id);
         $row->forceDelete();

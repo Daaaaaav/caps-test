@@ -403,7 +403,7 @@
                                             <th class="px-6 py-3.5">{{ __('app.purpose') }}</th>
                                             <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                             <th class="px-6 py-3.5">{{ __('app.time') }}</th>
-                                            <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                            <th class="px-6 py-3.5">{{ __('app.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100"
@@ -422,20 +422,20 @@
                                             @endphp
                                             <tr data-booking-id="{{ $b->vehiclebooking_id }}"
                                                 class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                                <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
-                                                <td class="px-6 py-4 font-semibold text-gray-900">
-                                                    <div class="flex items-center gap-2">
+                                                <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $rowNo }}</td>
+                                                <td class="h-12 px-6 py-4 font-semibold text-gray-900">
+                                                    <div class="flex items-center justify-end gap-2">
                                                         <div class="w-7 h-7 bg-[#4E653D]/10 rounded flex items-center justify-center text-[#4E653D] font-bold text-xs shrink-0">
                                                             {{ substr($vehicleName, 0, 2) }}
                                                         </div>
                                                         <span>{{ $vehicleName }}</span>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4">{{ $b->borrower_name ?? '—' }}</td>
-                                                <td class="px-6 py-4 max-w-xs truncate font-medium text-gray-950" title="{{ $b->purpose }}">{{ $b->purpose ?? '—' }}</td>
-                                                <td class="px-6 py-4 font-medium">{{ fmtDate($b->start_at) }}</td>
-                                                <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_at) }}–{{ fmtTime($b->end_at) }}</td>
-                                                <td class="px-6 py-4 text-right">
+                                                <td class="h-12 px-6 py-0 ">{{ $b->borrower_name ?? '—' }}</td>
+                                                <td class="h-12 px-6 py-4 max-w-xs truncate font-medium text-gray-950" title="{{ $b->purpose }}">{{ $b->purpose ?? '—' }}</td>
+                                                <td class="h-12 px-6 py-4 font-medium">{{ fmtDate($b->start_at) }}</td>
+                                                <td class="h-12 px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_at) }}–{{ fmtTime($b->end_at) }}</td>
+                                                <td class="h-12 px-6 py-4">
                                                     <div class="flex items-center justify-end gap-2 font-medium">
                                                         @if($b->status === 'pending')
                                                             <button type="button" wire:click.stop="confirmReject({{ $b->vehiclebooking_id }})"

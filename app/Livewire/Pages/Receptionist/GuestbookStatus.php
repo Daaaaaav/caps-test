@@ -24,6 +24,13 @@ class GuestbookStatus extends Component
     // Officer filter (sidebar)
     public ?string $petugasFilter = null;
 
+    // Additional filters
+    public ?string $filter_date = null;
+    public string $dateMode = 'semua';
+
+    // View mode (card/table)
+    public string $viewMode = 'card';
+
     // Edit modal
     public bool $showEdit = false;
     public ?int $editId = null;
@@ -70,13 +77,28 @@ class GuestbookStatus extends Component
 
     public function updatingQ(): void
     {
-        $this->resetPage();
+        $this->resetPage('activePage');
+    }
+
+    public function updatingFilterDate(): void
+    {
+        $this->resetPage('activePage');
+    }
+
+    public function updatingDateMode(): void
+    {
+        $this->resetPage('activePage');
     }
 
     public function clearPetugasFilter(): void
     {
         $this->petugasFilter = null;
-        $this->resetPage();
+        $this->resetPage('activePage');
+    }
+
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = in_array($mode, ['card', 'table']) ? $mode : 'card';
     }
 
     // -----------------------------------------------------------------------
@@ -107,8 +129,17 @@ class GuestbookStatus extends Component
             });
         }
 
-        return $q->orderByDesc('created_at')
-                 ->paginate($this->perPage, ['*'], 'activePage');
+        if ($this->filter_date) {
+            $q->whereDate('date', $this->filter_date);
+        }
+
+        if ($this->dateMode === 'terlama') {
+            $q->orderBy('created_at', 'asc');
+        } else {
+            $q->orderByDesc('created_at');
+        }
+
+        return $q->paginate($this->perPage, ['*'], 'activePage');
     }
 
     // -----------------------------------------------------------------------

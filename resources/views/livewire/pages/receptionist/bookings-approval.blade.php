@@ -456,7 +456,7 @@
                                                 <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                                 <th class="px-6 py-3.5">{{ __('app.time') }}</th>
                                                 <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
-                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -480,11 +480,11 @@
                                                                         ?? null;
                                                 @endphp
                                                 <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                                    <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $b->bookingroom_id }}</td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $loop->iteration }}</td>
+                                                    <td class="h-12 px-6 py-0 ">
                                                         <div class="font-semibold text-gray-900">{{ $b->meeting_title ?? 'Untitled meeting' }}</div>
                                                     </td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-0 ">
                                                         @if($isOnline)
                                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase border border-emerald-200">
                                                                 {{ $platform ?? 'ONLINE' }}
@@ -495,9 +495,9 @@
                                                             </span>
                                                         @endif
                                                     </td>
-                                                    <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
+                                                    <td class="h-12 px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
+                                                    <td class="h-12 px-6 py-0 ">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
                                                         @endif
@@ -505,10 +505,10 @@
                                                             <div class="text-xs text-gray-500">{{ $requesterDept }}</div>
                                                         @endif
                                                     </td>
-                                                    <td class="px-6 py-4 text-right">
-                                                        <div class="flex flex-col items-end gap-2">
+                                                    <td class="h-12 px-6 py-4">
+                                                        <div class="flex flex-col md:items-end justify-end gap-2">
                                                             @if($needsGoogleConnect || $needsZoomConfig)
-                                                                <div class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 max-w-sm text-right">
+                                                                <div class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 max-w-sm">
                                                                     {{ $needsGoogleConnect ? 'Google belum terhubung. Hubungkan akun Google terlebih dahulu sebelum menyetujui online meeting.' : 'Zoom belum dikonfigurasi. Hubungi admin untuk menyetel ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, dan ZOOM_CLIENT_SECRET.' }}
                                                                 </div>
                                                             @endif
@@ -679,7 +679,7 @@
                                                 <th class="px-6 py-3.5">{{ __('app.date') }}</th>
                                                 <th class="px-6 py-3.5">{{ __('app.time') }}</th>
                                                 <th class="px-6 py-3.5">{{ __('app.requester') }}</th>
-                                                <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                                <th class="px-6 py-3.5">{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
@@ -700,11 +700,11 @@
                                                                         ?? null;
                                                 @endphp
                                                 <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                                    <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $b->bookingroom_id }}</td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $loop->iteration }}</td>
+                                                    <td class="h-12 px-6 py-0 ">
                                                         <div class="font-semibold text-gray-900">{{ $b->meeting_title ?? 'Untitled meeting' }}</div>
                                                     </td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-0 ">
                                                         @if($isOnline)
                                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase border border-emerald-200">
                                                                 {{ $platform ?? 'ONLINE' }}
@@ -715,9 +715,9 @@
                                                             </span>
                                                         @endif
                                                     </td>
-                                                    <td class="px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
-                                                    <td class="px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
-                                                    <td class="px-6 py-4">
+                                                    <td class="h-12 px-6 py-4 font-medium">{{ fmtDate($b->date) }}</td>
+                                                    <td class="h-12 px-6 py-4 font-mono text-xs">{{ fmtTime($b->start_time) }} &ndash; {{ fmtTime($b->end_time) }}</td>
+                                                    <td class="h-12 px-6 py-0 ">
                                                         @if($requesterName)
                                                             <div class="font-semibold text-gray-800">{{ $requesterName }}</div>
                                                         @endif
@@ -725,7 +725,7 @@
                                                             <div class="text-xs text-gray-500">{{ $requesterDept }}</div>
                                                         @endif
                                                     </td>
-                                                    <td class="px-6 py-4 text-right">
+                                                    <td class="h-12 px-6 py-4">
                                                         <div class="flex items-center justify-end gap-2">
                                                             <button type="button"
                                                                 wire:click="openDetailModal({{ $b->bookingroom_id }})"

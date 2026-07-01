@@ -45,6 +45,12 @@ class GuestbookHistory extends Component
     // Edit modal state
     public bool $showEdit = false;
     public ?int $editId = null;
+    
+    // Delete modal state
+    public ?int $deletingId = null;
+    public string $deletingSummary = '';
+    public bool $showDeleteModal = false;
+    public bool $isForceDelete = false;
 
 
 
@@ -298,8 +304,33 @@ class GuestbookHistory extends Component
         $this->dispatch('$refresh');
     }
 
+    public function confirmDelete(int $id, string $summary, bool $force = false): void
+    {
+        $this->deletingId = $id;
+        $this->deletingSummary = $summary;
+        $this->isForceDelete = $force;
+        $this->showDeleteModal = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deletingId) {
+            return;
+        }
+
+        if ($this->isForceDelete) {
+            $this->destroyForeverAction($this->deletingId);
+        } else {
+            $this->deleteAction($this->deletingId);
+        }
+
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
+        $this->isForceDelete = false;
+    }
+
     /** SOFT DELETE */
-    public function delete(int $id): void
+    private function deleteAction(int $id): void
     {
         $row = $this->findOwnedOrFail($id);
         $row->delete();
@@ -343,7 +374,7 @@ class GuestbookHistory extends Component
         }
     }
 
-    public function destroyForever(int $id): void
+    private function destroyForeverAction(int $id): void
     {
         $row = GuestbookModel::onlyTrashed()
             ->where('company_id', $this->companyId())

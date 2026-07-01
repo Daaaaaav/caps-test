@@ -48,6 +48,12 @@ class Vehicleshistory extends Component
     // Edit Modal State
     public bool $showEdit = false;
     public ?int $editId = null;
+    
+    // Delete Modal State
+    public ?int $deletingId = null;
+    public string $deletingSummary = '';
+    public bool $showDeleteModal = false;
+    public bool $isForceDelete = false;
     public array $edit = [
         'borrower_name' => '',
         'purpose'       => '',
@@ -82,10 +88,31 @@ class Vehicleshistory extends Component
         }
     }
 
+    public function confirmDelete(int $id, string $summary, bool $force = false): void
+    {
+        $this->deletingId = $id;
+        $this->deletingSummary = $summary;
+        $this->isForceDelete = $force;
+        $this->showDeleteModal = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deletingId) {
+            return;
+        }
+
+        $this->softDeleteAction($this->deletingId);
+
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
+        $this->isForceDelete = false;
+    }
+
     /**
      * Soft delete untuk status 'completed' (Done) dan 'rejected'.
      */
-    public function softDelete(int $vehiclebookingId): void
+    private function softDeleteAction(int $vehiclebookingId): void
     {
         $user = Auth::user();
         $companyId = (int) ($user?->company_id ?? 0);
@@ -95,20 +122,20 @@ class Vehicleshistory extends Component
             ->first();
 
         if (!$booking) {
-            session()->flash('error', 'Data tidak ditemukan.');
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Data tidak ditemukan.', duration: 3000);
             return;
         }
 
         if (!in_array($booking->status, ['completed', 'rejected'], true)) {
-            session()->flash('error', 'Hanya data Completed (Done) atau Rejected yang bisa dihapus.');
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Hanya data Completed (Done) atau Rejected yang bisa dihapus.', duration: 3000);
             return;
         }
 
         if (method_exists($booking, 'delete')) {
             $booking->delete();
-            session()->flash('success', "Data #{$vehiclebookingId} berhasil dihapus (soft delete).");
+            $this->dispatch('toast', type: 'success', title: 'Dihapus', message: "Data #{$vehiclebookingId} berhasil dihapus.", duration: 3000);
         } else {
-            session()->flash('error', 'Model belum mendukung soft delete.');
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Model belum mendukung soft delete.', duration: 3000);
         }
 
         $this->resetPage();
@@ -128,15 +155,15 @@ class Vehicleshistory extends Component
             ->first();
 
         if (!$booking) {
-            session()->flash('error', 'Data tidak ditemukan untuk di-restore.');
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Data tidak ditemukan untuk di-restore.', duration: 3000);
             return;
         }
 
         if (method_exists($booking, 'restore') && $booking->trashed()) {
             $booking->restore();
-            session()->flash('success', "Data #{$vehiclebookingId} berhasil direstore.");
+            $this->dispatch('toast', type: 'success', title: 'Dipulihkan', message: "Data #{$vehiclebookingId} berhasil direstore.", duration: 3000);
         } else {
-            session()->flash('error', 'Data tidak dalam kondisi terhapus atau model belum mendukung restore.');
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Data tidak dalam kondisi terhapus atau model belum mendukung restore.', duration: 3000);
         }
 
         $this->resetPage();
@@ -190,7 +217,7 @@ class Vehicleshistory extends Component
                 'destination'   => $this->edit['destination'],
                 'notes'         => $this->edit['notes'],
             ]);
-            session()->flash('success', "Data #{$this->editId} berhasil diperbarui.");
+            $this->dispatch('toast', type: 'success', title: 'Disimpan', message: "Data #{$this->editId} berhasil diperbarui.", duration: 3000);
         }
 
         $this->showEdit = false;

@@ -329,9 +329,8 @@
                                                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] focus:ring-2 focus:ring-[#4E653D]/20 focus:outline-none transition shadow-sm">
                                                 {{ __('app.edit') }}
                                             </button>
-                                            <button type="button" wire:click="softDelete({{ $row->delivery_id }})"
+                                            <button type="button" wire:click="confirmDelete({{ $row->delivery_id }}, '{{ str_replace('\'', '', $row->item_name) }}')"
                                                 wire:loading.attr="disabled"
-                                                wire:confirm="{{ __('app.are_you_sure_delete') }}"
                                                 class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 focus:outline-none transition">
                                                 {{ __('app.delete') }}
                                             </button>
@@ -360,7 +359,7 @@
                                         <th class="px-6 py-3.5">{{ __('app.receiver') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.completed_at') }}</th>
                                         <th class="px-6 py-3.5">{{ __('app.officer') }}</th>
-                                        <th class="px-6 py-3.5 text-right">{{ __('app.actions') }}</th>
+                                        <th class="px-6 py-3.5">{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -379,45 +378,40 @@
                                             }
                                         @endphp
                                         <tr class="hover:bg-gray-50/50 transition text-sm text-gray-700">
-                                            <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-400">#{{ $rowNo }}</td>
-                                            <td class="px-6 py-4">
-                                                <div class="flex items-center gap-3">
+                                            <td class="h-12 px-6 py-4 font-mono text-xs font-semibold text-gray-400">{{ $rowNo }}</td>
+                                            <td class="h-12 px-6 py-0 ">
+                                                <div class="flex items-center justify-end gap-3">
                                                     <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-[#4E653D] flex items-center justify-center text-white text-xs font-semibold">
-                                                        @if($row->image)
-                                                            <button type="button"
-                                                                x-data
-                                                                @click="$dispatch('open-lightbox', { src: '{{ route('delivery.image', basename($row->image)) }}' })"
-                                                                class="w-full h-full block focus:outline-none">
-                                                                <img src="{{ route('delivery.image', basename($row->image)) }}" class="w-full h-full object-cover" alt="Bukti foto">
-                                                            </button>
-                                                        @else
-                                                            {{ strtoupper(substr($row->item_name ?? 'D', 0, 1)) }}
-                                                        @endif
+                                                        {{ strtoupper(substr($row->item_name ?? 'D', 0, 1)) }}
                                                     </div>
                                                     <div class="font-semibold text-gray-900">{{ $row->item_name }}</div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <span class="text-[10px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 font-medium uppercase">
-                                                    {{ __('app.type_' . $row->type) }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if($row->deleted_at)
-                                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 border border-gray-300">
-                                                        {{ __('app.deleted') }}
+                                            <td class="h-12 px-6 py-0 ">
+                                                <div class="flex justify-end">
+                                                    <span class="text-[10px] px-2 py-0.5 rounded-full border border-gray-300 text-gray-700 bg-gray-50 font-medium uppercase">
+                                                        {{ __('app.type_' . $row->type) }}
                                                     </span>
-                                                @else
-                                                    <span class="text-[10px] px-2 py-0.5 rounded-full {{ $statusBg }}">
-                                                        {{ $statusLabel }}
-                                                    </span>
-                                                @endif
+                                                </div>
                                             </td>
-                                            <td class="px-6 py-4">{{ $row->nama_pengirim ?? '—' }}</td>
-                                            <td class="px-6 py-4">{{ $row->nama_penerima ?? '—' }}</td>
-                                            <td class="px-6 py-4 font-medium">{{ fmtDate($completionDate) }} · {{ fmtTime($completionDate) }}</td>
-                                            <td class="px-6 py-4 text-xs text-gray-500 font-medium">{{ $row->receptionist?->full_name ?? '—' }}</td>
-                                            <td class="px-6 py-4 text-right">
+                                            <td class="h-12 px-6 py-0 ">
+                                                <div class="flex justify-end">
+                                                    @if($row->deleted_at)
+                                                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 border border-gray-300">
+                                                            {{ __('app.deleted') }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-[10px] px-2 py-0.5 rounded-full {{ $statusBg }}">
+                                                            {{ $statusLabel }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="h-12 px-6 py-0 ">{{ $row->nama_pengirim ?? '—' }}</td>
+                                            <td class="h-12 px-6 py-0 ">{{ $row->nama_penerima ?? '—' }}</td>
+                                            <td class="h-12 px-6 py-4 font-medium">{{ fmtDate($completionDate) }} · {{ fmtTime($completionDate) }}</td>
+                                            <td class="h-12 px-6 py-4 text-xs text-gray-500 font-medium">{{ $row->receptionist?->full_name ?? '—' }}</td>
+                                            <td class="h-12 px-6 py-4">
                                                 <div class="flex items-center justify-end gap-2 font-medium">
                                                     @if($row->deleted_at)
                                                         <button type="button" wire:click="restore({{ $row->delivery_id }})"
@@ -429,8 +423,7 @@
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#4E653D] text-white hover:bg-[#354C2B] transition">
                                                             {{ __('app.edit') }}
                                                         </button>
-                                                        <button type="button" wire:click="softDelete({{ $row->delivery_id }})"
-                                                            wire:confirm="{{ __('app.are_you_sure_delete') }}"
+                                                        <button type="button" wire:click="confirmDelete({{ $row->delivery_id }}, '{{ str_replace('\'', '', $row->item_name) }}')"
                                                             class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
                                                             {{ __('app.delete') }}
                                                         </button>
@@ -677,4 +670,43 @@
         </button>
         <img :src="src" alt="Bukti foto" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain">
     </div>
+
+    {{-- DELETE MODAL --}}
+    @if($showDeleteModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" wire:click="$set('showDeleteModal', false)"></div>
+            <div class="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-200 bg-[#4A2F24] text-[#CDDEA7] flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                            <x-heroicon-o-trash class="w-4 h-4 text-rose-400" />
+                        </div>
+                        <h3 class="font-bold tracking-tight text-base">{{ __('app.delete_verification') ?? 'Delete Verification' }}</h3>
+                    </div>
+                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#CDDEA7] hover:text-white hover:bg-white/10 transition" wire:click="$set('showDeleteModal', false)">✕</button>
+                </div>
+                <div class="p-6 text-center bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">{{ __('app.are_you_sure_delete') }}</h3>
+                    <p class="text-sm text-gray-500">{{ __('app.are_you_sure_delete') }}</p>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">
+                        {{ $deletingSummary }}
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 bg-gray-50">
+                    <button type="button" wire:click="$set('showDeleteModal', false)"
+                        class="h-9 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition inline-flex items-center gap-1.5 text-xs font-semibold">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="button" wire:click="executeDelete" wire:loading.attr="disabled"
+                        class="h-9 px-4 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-sm inline-flex items-center gap-1.5 disabled:opacity-60">
+                        <span wire:loading.remove wire:target="executeDelete">{{ __('app.delete') }}</span>
+                        <span wire:loading wire:target="executeDelete" class="flex items-center gap-1.5">
+                            <x-heroicon-o-arrow-path class="animate-spin h-3.5 w-3.5 text-white"/>
+                            {{ __('app.delete') }}...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
