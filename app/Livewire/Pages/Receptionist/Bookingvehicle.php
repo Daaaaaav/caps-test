@@ -515,6 +515,8 @@ class Bookingvehicle extends Component
             $users = collect();
         }
 
+        $companyId = (int) (Auth::user()?->company_id ?? 0);
+
         return view('livewire.pages.receptionist.bookingvehicle', [
             'departments' => $departments,
             'users'       => $users,
@@ -522,10 +524,21 @@ class Bookingvehicle extends Component
             'hasVehicles' => $this->hasVehicles,
             // Fresh query every render so newly-added/activated vehicles appear in
             // the Fleet Availability sidebar without a full page reload.
-            'vehiclesForDirectory' => Vehicle::where('company_id', (int) (Auth::user()?->company_id ?? 0))
+            'vehiclesForDirectory' => Vehicle::where('company_id', $companyId)
                 ->where('is_active', 1)
                 ->orderBy('name', 'asc')
                 ->get(['vehicle_id', 'name', 'plate_number']),
+            // Manager priority vehicle bookings for the sidebar quick-status panel.
+            'priorityVehicleBookings' => \App\Models\PriorityVehicleBooking::with(['vehicle', 'manager'])
+                ->forCompany($companyId)
+                ->whereIn('status', [
+                    \App\Models\PriorityVehicleBooking::STATUS_PENDING_RECEIPT,
+                    \App\Models\PriorityVehicleBooking::STATUS_PENDING_CANCELLATION,
+                    \App\Models\PriorityVehicleBooking::STATUS_APPROVED,
+                ])
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get(),
         ]);
     }
 }

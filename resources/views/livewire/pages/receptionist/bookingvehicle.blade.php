@@ -699,6 +699,73 @@
 
             {{-- RIGHT: SIDEBAR (DESKTOP) --}}
             <aside class="hidden lg:flex lg:flex-col lg:col-span-1 gap-4">
+
+                {{-- Manager Priority Vehicle Bookings Widget --}}
+                @if(isset($priorityVehicleBookings) && $priorityVehicleBookings->isNotEmpty())
+                <div class="bg-card rounded-2xl border border-amber-300 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3.5 border-b border-amber-200 bg-amber-50 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-800">Priority Bookings</h3>
+                            <p class="text-[11px] text-amber-600 mt-0.5">Manager-submitted vehicle requests</p>
+                        </div>
+                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-amber-500 text-white shrink-0">
+                            {{ $priorityVehicleBookings->count() }}
+                        </span>
+                    </div>
+                    <div class="p-3 space-y-2">
+                        @foreach($priorityVehicleBookings as $pvb)
+                            @php
+                                $pvbStatusBadge = match($pvb->status) {
+                                    'approved'            => 'bg-emerald-100 text-emerald-700',
+                                    'pending_receipt'     => 'bg-amber-100 text-amber-700',
+                                    'pending_cancellation'=> 'bg-orange-100 text-orange-700',
+                                    default               => 'bg-gray-100 text-gray-600',
+                                };
+                            @endphp
+                            <div wire:key="sidebar-pvb-{{ $pvb->id }}"
+                                 class="flex items-start gap-2.5 p-2.5 rounded-xl border border-amber-100 bg-amber-50/40 hover:bg-amber-50 hover:border-amber-200 transition group">
+                                <div class="w-7 h-7 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0 space-y-0.5">
+                                    <p class="text-xs font-semibold text-gray-900 truncate leading-tight">
+                                        {{ $pvb->vehicle?->name ?? '—' }}
+                                        @if($pvb->vehicle?->plate_number)
+                                            <span class="font-normal text-gray-500">({{ $pvb->vehicle->plate_number }})</span>
+                                        @endif
+                                    </p>
+                                    <p class="text-[11px] text-gray-500 truncate">{{ $pvb->borrower_name }}</p>
+                                    <p class="text-[11px] text-gray-500">
+                                        {{ $pvb->start_at?->format('d M Y H:i') }} — {{ $pvb->end_at?->format('H:i') }}
+                                    </p>
+                                    <p class="text-[11px] text-amber-600 font-medium truncate">By: {{ $pvb->manager?->full_name ?? '—' }}</p>
+                                    @if($pvb->status === 'pending_cancellation')
+                                        <p class="text-[10px] text-orange-600 flex items-center gap-1 mt-0.5">
+                                            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                            Conflicts #{{ $pvb->cancels_booking_id }}
+                                        </p>
+                                    @endif
+                                    <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 {{ $pvbStatusBadge }}">
+                                        {{ $pvb->statusLabel() }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <a href="{{ route('receptionist.vehiclestatus') }}"
+                           class="flex items-center justify-center gap-1.5 w-full mt-1 px-3 py-2 rounded-lg text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-200 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            View All in Vehicle Status
+                        </a>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Available Vehicles Widget --}}
                 <div class="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                     <div class="px-4 py-3.5 border-b border-border bg-muted/30 flex items-center justify-between">
