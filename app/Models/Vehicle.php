@@ -23,9 +23,11 @@ class Vehicle extends Model
         'year',
         'notes',
         'is_active',
+        'requires_advance_booking',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'requires_advance_booking' => 'boolean',
     ];
 }

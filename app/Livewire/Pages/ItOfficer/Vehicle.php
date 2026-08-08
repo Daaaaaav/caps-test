@@ -193,6 +193,26 @@ class Vehicle extends Component
         }
     }
 
+    public function toggleAdvanceBooking(int $id): void
+    {
+        try {
+            $vehicle = VehicleModel::where('company_id', $this->company_id)->findOrFail($id);
+            $newValue = ! $vehicle->requires_advance_booking;
+            $vehicle->update(['requires_advance_booking' => $newValue]);
+
+            $state = $newValue ? 'enabled' : 'disabled';
+            $this->dispatch(
+                'toast',
+                type: 'success',
+                title: 'Setting Updated',
+                message: "Advance booking validation {$state} for \"{$vehicle->name}\".",
+                duration: 3000
+            );
+        } catch (\Exception $e) {
+            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Failed to update setting: ' . $e->getMessage(), duration: 4000);
+        }
+    }
+
     public function render()
     {
         $rows = VehicleModel::query()

@@ -177,16 +177,23 @@ class Bookingvehicle extends Component
             return;
         }
 
-        $minAdvanceDate = now($this->tz)->addMinutes(30);
-        if ($startAt->lessThan($minAdvanceDate)) {
-            $this->dispatch(
-                'toast',
-                type: 'error',
-                title: 'Invalid Booking Time',
-                message: 'Bookings must be made at least 1 hour in advance.',
-                duration: 7000
-            );
-            return;
+        // Check vehicle's advance booking requirement setting
+        $selectedVehicle = \App\Models\Vehicle::select('vehicle_id', 'requires_advance_booking')
+            ->find((int) $this->vehicle_id);
+        $requiresAdvanceBooking = $selectedVehicle?->requires_advance_booking ?? true;
+
+        if ($requiresAdvanceBooking) {
+            $minAdvanceDate = now($this->tz)->addMinutes(30);
+            if ($startAt->lessThan($minAdvanceDate)) {
+                $this->dispatch(
+                    'toast',
+                    type: 'error',
+                    title: 'Invalid Booking Time',
+                    message: 'Bookings must be made at least 30 minutes in advance.',
+                    duration: 7000
+                );
+                return;
+            }
         }
         if ($this->purpose_type === 'lainnya' && $this->purpose_type_other) {
             $this->purpose .= ' (Lainnya: '.$this->purpose_type_other.')';

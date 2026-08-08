@@ -59,6 +59,7 @@
                             <th class="px-6 py-3 text-left">Plate Number</th>
                             <th class="px-6 py-3 text-left">Year</th>
                             <th class="px-6 py-3 text-left">Status</th>
+                            <th class="px-6 py-3 text-left">30 Min Booking Validation</th>
                             <th class="px-6 py-3 text-left">Actions</th>
                         </tr>
                     </thead>
@@ -109,6 +110,23 @@
                                     </span>
                                 </td>
 
+                                {{-- ADVANCE BOOKING VALIDATION TOGGLE --}}
+                                <td class="px-6 py-4">
+                                    @php $enabled = $vehicle->requires_advance_booking ?? true; @endphp
+                                    <button
+                                        wire:click="toggleAdvanceBooking({{ $vehicle->vehicle_id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="toggleAdvanceBooking({{ $vehicle->vehicle_id }})"
+                                        title="{{ $enabled ? 'Click to disable 30-minute advance booking requirement' : 'Click to enable 30-minute advance booking requirement' }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all
+                                            {{ $enabled
+                                                ? 'bg-[#4E653D] text-white hover:bg-[#354C2B]'
+                                                : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200' }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $enabled ? 'bg-white' : 'bg-gray-400' }}"></span>
+                                        {{ $enabled ? 'Enabled' : 'Disabled' }}
+                                    </button>
+                                </td>
+
                                 {{-- ACTIONS --}}
                                 <td class="px-6 py-4">
                                     <div class="flex gap-2">
@@ -126,7 +144,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
+                                <td colspan="8" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center gap-2 text-[#9aaa8a]">
                                         <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-width="1.5" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
