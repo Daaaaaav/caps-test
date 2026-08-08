@@ -1,4 +1,16 @@
-<div class="min-h-screen bg-background">
+<div class="min-h-screen bg-background" x-data="{
+    open(type) {
+        const routes = {
+            'room': '{{ route('manager.room') }}',
+            'vehicle': '{{ route('manager.vehicle') }}',
+            'docpack': '{{ route('manager.delivery') }}',
+            'visitor': '{{ route('manager.guestbook') }}'
+        };
+        if (routes[type]) {
+            window.location.href = routes[type];
+        }
+    }
+}">
     <main class="px-4 sm:px-6 py-6 space-y-6">
 
         <x-page-header title="{{ __('app.manager_analytics') }}" subtitle="{{ __('app.interactive_insights') }} {{ $selectedYear }}">
